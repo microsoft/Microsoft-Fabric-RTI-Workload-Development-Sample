@@ -1,0 +1,89 @@
+{
+    "name": "Product",
+    "displayName": "Workload_Display_Name",
+    "fullDisplayName": "Workload_Full_Display_Name",
+    "description": "Workload_Description",
+    "favicon": "assets/images/briefcase.png",
+    "icon": {
+    "name": "assets/images/briefcase.png"
+    },
+    "homePage": {
+      "learningMaterials": [
+        {
+          "title": "Learning_Material_1_Title",
+          "introduction": "Learning_Material_1_Introduction",
+          "description": "Learning_Material_1_Description",
+          "image": "assets/images/learningMaterial.png",
+          "link": "https://aka.ms/Fabricdeveloperdocumentation"
+        }
+      ],
+      "newSection": {
+        "customActions": [
+            {
+                "title": "NewSection_Custom_Action_Title",
+                "icon": {
+                  "name": "assets/images/briefcase.png"
+                },
+                "onClick": {
+                  "action": "open.createSampleWorkloadFrontendOnly"
+                }
+            }
+        ]},
+        "recommendedItemTypes": [
+          "SampleWorkloadItem"
+        ]
+    },
+    "createExperience": {
+      "description": "CreateHub_Workload_Description",
+      "cards": [
+        {
+          "title": "CreateHub_Card_1_Title",
+          "description": "CreateHub_Card_1_Description",
+          "icon": {
+            "name": "assets/images/dial.png"
+          },
+          "icon_small": {
+            "name": "assets/images/dial.png"
+          },
+          "onClick": {
+            "action": "open.createSampleWorkload"
+          },
+          "availableIn": [
+            "home",
+            "create-hub",
+            "workspace-plus-new",
+            "workspace-plus-new-teams"
+          ],
+          "itemType": "SampleWorkloadItem"
+        }
+      ]
+    },
+    "productDetail": {
+      "publisher": "Contoso",
+      "slogan": "Workload_Hub_Workload_Slogan",
+      "description": "Workload_Hub_Workload_Description",
+      "image": {
+        "mediaType": 0,
+        "source": "assets/images/BannerMedium.png"
+      },
+      "slideMedia": [
+        {
+          "mediaType": 0,
+          "source": "assets/images/SampleWorkload1.png"
+        },
+        {
+          "mediaType": 0,
+          "source": "assets/images/SampleWorkload2.png"
+        }
+      ],
+        "supportLink": {
+          "documentation": {"url": "https://example.com/documentation"},
+          "certification": {"url": "https://example.com/certification"},
+          "help": {"url": "https://example.com/help"},
+          "privacy": {"url": "https://example.com/privacy"},
+          "terms": {"url": "https://example.com/terms"},
+          "license": {"url": "https://example.com/license"}
+      }
+    },
+    "compatibleItemTypes" : ["Lakehouse"]
+}
