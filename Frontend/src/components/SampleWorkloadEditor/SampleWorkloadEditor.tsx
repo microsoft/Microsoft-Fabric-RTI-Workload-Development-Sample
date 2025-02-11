@@ -3,22 +3,18 @@ import { useLocation, useParams } from "react-router-dom";
 import { Stack } from "@fluentui/react";
 import {
   Button,
-  Checkbox,
   Combobox,
   Divider,
   Field,
   Input,
   Label,
   Option,
-  Radio,
-  RadioGroup,
   SelectTabData,
   Switch,
   Tab,
   TabList,
   TabValue,
   Tooltip,
-  useId,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -28,7 +24,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { initializeIcons } from "@fluentui/font-icons-mdl2";
 import {
-  Save24Regular,
   AlertOn24Regular,
   PanelRightExpand20Regular,
   Database16Regular,
@@ -72,7 +67,6 @@ import {
   WorkloadItem,
 } from "../../models/SampleWorkloadModel";
 import "./../../styles.scss";
-import { LakehouseExplorerComponent } from "../SampleWorkloadLakehouseExplorer/SampleWorkloadLakehouseExplorer";
 import { ItemMetadataNotFound} from "../../models/WorkloadExceptionsModel";
 
 export function SampleWorkloadEditor(props: PageProps) {
@@ -82,7 +76,7 @@ export function SampleWorkloadEditor(props: PageProps) {
   const { workloadClient } = props;
   const pageContext = useParams<ContextProps>();
   const { pathname } = useLocation();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
 
   // initializing usage of FluentUI icons
   initializeIcons();
@@ -131,24 +125,18 @@ export function SampleWorkloadEditor(props: PageProps) {
   const [supportedOperators, setSupportedOperators] = useState<string[]>([]);
   const [hasLoadedSupportedOperators, setHasLoadedSupportedOperators] = useState(false);
   
-  const [lang, setLang] = useState<string>('en-US');
+  const [, setLang] = useState<string>('en-US');
   const [itemEditorErrorMessage, setItemEditorErrorMessage] = useState<string>("");
   document.body.dir = i18n.dir();
 
   const msgboxButtonCountOptions = ["0", "1", "2", "3"];
   const INT32_MIN = -2147483648;
   const INT32_MAX = 2147483647;
-  const radioName = useId("radio");
-  const labelId = useId("label");
-  const inputId = useId("input");
 
 
   const [selectedTab, setSelectedTab] = useState<TabValue>("home");
   const [selectedApiTab, setSelectedApiTab] =
     useState<TabValue>("apiNotification");
-
-
-
 
   useEffect(() => {
     callLanguageGet(workloadClient).then((lang) => setLang(lang));
@@ -1021,75 +1009,13 @@ export function SampleWorkloadEditor(props: PageProps) {
             )}
           </span>
         )}
-        {selectedTab == "fluentui" && (
-          <span>
-            {/* List of common UI Components */}
-            {<div className={i18n.dir()}>
-              <MessageBar>
-                <MessageBarBody>
-                  <MessageBarTitle>
-                    {(lang != 'en-US') ? t("Language_Changed_Title") :
-                      t("Default_Language_Title")}
-                  </MessageBarTitle>
-                  {t("Language_Changed_Message")} {lang}
-                </MessageBarBody>
-              </MessageBar>
-            </div>}
-            <Divider alignContent="start" className="margin-top">Components</Divider>
-            <div className="section">
-              {/* Label and Input */}
-              <Stack
-                horizontal
-                tokens={{ childrenGap: 10 }}
-                style={{ padding: "10px" }}
-              >
-                <Label htmlFor={inputId}>Sample input</Label>
-                <Input id={inputId} size="small" placeholder="hint" />
-              </Stack>
-              {/* Buttons */}
-              <Stack
-                horizontal
-                tokens={{ childrenGap: 10 }}
-                style={{ padding: "10px" }}
-              >
-                <Button icon={<Save24Regular />} appearance="primary">
-                  Primary
-                </Button>
-                <Button icon={<Save24Regular />} appearance="secondary">
-                  Default
-                </Button>
-                <Button icon={<Save24Regular />} appearance="outline">
-                  Outline
-                </Button>
-                <Button icon={<Save24Regular />} appearance="subtle">
-                  Subtle
-                </Button>
-              </Stack>
-              {/* Checkbox, Switch and Radio */}
-              <Checkbox title="my title" label="Checkbox sample" />
-              <Switch label="Switch sample" />
-              <Label id={labelId}>Radio group</Label>
-              <RadioGroup aria-labelledby={labelId} defaultValue="option1">
-                <Radio name={radioName} value="option1" label="Option 1" />
-                <Radio name={radioName} value="option2" label="Option 2" />
-                <Radio name={radioName} value="option3" label="Option 3" />
-              </RadioGroup>
-            </div>
-            <Divider alignContent="start">
-              Example of Lakehouse Explorer
-            </Divider>
-            <div className="section">
-              <LakehouseExplorerComponent workloadClient={workloadClient} />
-            </div>
-          </span>
-        )}
       </Stack>
     </Stack>
   );
 }
 
 // A sample Page for showcasing workloadClient.navigation Navigate/OnNavigate/OnBeforeNavigateAway/OnAfterNavigateAway amd page.Open
-export function SamplePage({ workloadClient, history }: PageProps) {
+export function SamplePage({ workloadClient }: PageProps) {
   const pageContext = useParams<ContextProps>();
   const itemObjectId = pageContext.itemObjectId;
   return (
