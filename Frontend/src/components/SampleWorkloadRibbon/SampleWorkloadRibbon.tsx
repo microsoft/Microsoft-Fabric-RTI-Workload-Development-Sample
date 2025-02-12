@@ -145,11 +145,10 @@ export function Ribbon(props: RibbonProps) {
       <TabList defaultSelectedValue="home" onTabSelect={onTabSelect}>
         <Tab value="home" data-testid="home-tab-btn">Home</Tab>
         <Tab value="jobs" data-testid="jobs-tab-btn">Jobs</Tab>
-        <Tab value="api" data-testid="api-tab-btn">API Playground</Tab>
       </TabList>
 
       <div className="toolbarContainer">
-        {["home", "api"].includes(selectedValue as string) && <HomeTabToolbar {...props} />}
+        {["home"].includes(selectedValue as string) && <HomeTabToolbar {...props} />}
         {selectedValue === "jobs" && <ItemTabToolbar {...props} />}
       </div>
 
