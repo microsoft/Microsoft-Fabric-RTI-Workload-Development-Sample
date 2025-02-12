@@ -8,15 +8,13 @@ import {
 } from '@ms-fabric/workload-client';
 
 import * as Controller from './controller/SampleWorkloadController';
-import { ItemActionContext, ItemJobActionContext } from './models/SampleWorkloadModel';
+import { ItemJobActionContext } from './models/SampleWorkloadModel';
 import { getJobDetailsPane } from './utils';
 
 export async function initialize(params: InitParams) {
 
     const workloadClient = createWorkloadClient();
     const sampleWorkloadName = process.env.WORKLOAD_NAME;
-    const sampleItemType = sampleWorkloadName + ".SampleWorkloadItem";
-    const calculateAsText = sampleItemType + ".CalculateAsText";
 
     workloadClient.action.onAction(async function ({ action, data }) {
         switch (action) {
@@ -57,15 +55,6 @@ export async function initialize(params: InitParams) {
                     'Action executed via API',
                     NotificationType.Success,
                     NotificationToastDuration.Medium,
-                    workloadClient);
-
-            case 'run.calculate.job':
-                const { item } = data as ItemActionContext;
-                return await Controller.callRunItemJob(
-                    item.objectId,
-                    calculateAsText,
-                    JSON.stringify({ metadata: 'JobMetadata' }),
-                    true /* showNotification */,
                     workloadClient);
 
             case 'item.job.retry':

@@ -17,31 +17,9 @@
       },
       {
         "name": "recentruns"
-      },
-      {
-        "name": "SampleItemCustomAction",
-        "displayName": "Context_Menu_1_Display_Name",
-        "icon": {
-          "name": "assets/images/execute.png"
-        },
-        "handler": {
-          "action": "run.calculate.job"
-        },
-        "tooltip": "Context_Menu_1_Tooltip"
       }
     ],
     "quickActionItems": [
-      {
-        "name": "SampleItemCustomAction",
-        "displayName": "Quick_Action_1_Display_Name",
-        "icon": {
-          "name": "assets/images/execute.png"
-        },
-        "handler": {
-          "action": "run.calculate.job"
-        },
-        "tooltip": "Quick_Action_1_Tooltip"
-      }
     ],
     "supportedInMonitoringHub": true,
     "supportedInDatahubL1": true,
