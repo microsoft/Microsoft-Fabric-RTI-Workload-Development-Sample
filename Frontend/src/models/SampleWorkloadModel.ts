@@ -28,7 +28,7 @@ export interface GenericItem extends ItemReference {
 
 // Represents a workload item with extended metadata.
 export interface WorkloadItem<T> extends GenericItem {
-    extendedMetdata?: T;
+    extendedMetadata?: T;
 }
 
 // Represents the core metadata for Item1 stored within the system's storage.
@@ -60,7 +60,7 @@ export interface ItemPayload {
     item1Metadata?: Item1ClientMetadata;
 }
 
-// Represents the generic action context recieved from fabric host
+// Represents the generic action context received from fabric host
 export interface ItemActionContext {
     item: ItemLikeV2;
 }

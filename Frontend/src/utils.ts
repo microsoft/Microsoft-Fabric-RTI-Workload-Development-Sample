@@ -18,7 +18,7 @@ export function convertGetItemResultToWorkloadItem<T>(item: GetItemResult): Work
         type: item.itemType,
         displayName: item.displayName,
         description: item.description,
-        extendedMetdata: payload,
+        extendedMetadata: payload,
         createdBy: item.createdByUser.name,
         createdDate: item.createdDate,
         lastModifiedBy: item.modifiedByUser.name,

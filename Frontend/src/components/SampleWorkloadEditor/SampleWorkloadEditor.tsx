@@ -103,7 +103,7 @@ export function SampleWorkloadEditor(props: PageProps) {
 
         // load extendedMetadata
         const item1Metadata: Item1ClientMetadata =
-          item.extendedMetdata.item1Metadata;
+          item.extendedMetadata.item1Metadata;
         setOperand1(item1Metadata?.operand1);
         setOperand2(item1Metadata?.operand2);
 
