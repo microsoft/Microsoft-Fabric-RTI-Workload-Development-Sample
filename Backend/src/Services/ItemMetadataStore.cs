@@ -52,16 +52,7 @@ namespace Fabric.Rti.workload.Backend.Services
             await StoreFile(itemMetadataDirectoryPath, CommonItemMetadataFilename, commonMetadata);
             await StoreFile(itemMetadataDirectoryPath, TypeSpecificMetadataFilename, typeSpecificMetadata);
         }
-
-        public async Task UpsertJobCancel(Guid tenantObjectId, Guid itemObjectId, string jobType, Guid jobInstanceId, ItemJobMetadata itemJobMetadata)
-        {
-            var itemMetadataDirectoryPath = GetSubDirectoryFullPath(_baseDirectory, $"{tenantObjectId}\\{itemObjectId}");
-            Directory.CreateDirectory(itemMetadataDirectoryPath);
-
-            var jobCancelRequestFilename = $"{jobInstanceId}.jobcancel.json";
-            await StoreFile(itemMetadataDirectoryPath, jobCancelRequestFilename, itemJobMetadata);
-        }
-
+        
         public async Task<ItemMetadata<TItemMetadata>> Load<TItemMetadata>(Guid tenantObjectId, Guid itemObjectId)
         {
             var itemMetadataDirectoryPath = GetSubDirectoryFullPath(_baseDirectory, $"{tenantObjectId}\\{itemObjectId}");
@@ -131,14 +122,6 @@ namespace Fabric.Rti.workload.Backend.Services
             }
 
             return subDirectoryFullPath;
-        }
-
-        public bool JobCancelRequestExists(Guid tenantObjectId, Guid itemObjectId, Guid jobInstanceId)
-        {
-            var itemDirectoryPath = GetSubDirectoryFullPath(_baseDirectory, $"{tenantObjectId}\\{itemObjectId}");
-            var jobCancelRequestFilename = $"{jobInstanceId}.jobcancel.json";
-            var jobCancelRequestFilePath = Path.Combine(itemDirectoryPath, jobCancelRequestFilename);
-            return File.Exists(jobCancelRequestFilePath);
         }
     }
 }

@@ -32,7 +32,6 @@ namespace Fabric.Rti.workload.Backend.Controllers
         /// <summary>
         /// Resolves the service endpoint for requests originating from Microsoft Fabric based on resolution context.
         /// </summary>
-        /// <param name="request">The request body for endpoint resolution.</param>
         /// <returns>An EndpointResolutionResponse with the resolved URL and additional metadata.</returns>
         public async Task<EndpointResolutionResponse> ResolveAsync(EndpointResolutionRequest body)
         {

@@ -32,11 +32,5 @@ namespace Fabric.Rti.workload.Backend.Items
         Task Update(UpdateItemRequest updateItemRequest);
 
         Task Delete();
-
-        Task ExecuteJob(string jobType, Guid jobInstanceId, JobInvokeType invokeType, CreateItemJobInstancePayload creationPayload);
-
-        Task<ItemJobInstanceState> GetJobState(string jobType, Guid jobInstanceId);
-
-        Task CancelJob(string jobType, Guid jobInstanceId);
     }
 }

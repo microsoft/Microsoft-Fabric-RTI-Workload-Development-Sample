@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts;
-using Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload;
 using Fabric.Rti.workload.Backend.Exceptions;
 using Fabric.Rti.workload.Backend.Services;
 using Fabric.Rti.workload.Backend.Utils;
@@ -80,98 +79,7 @@ namespace Fabric.Rti.workload.Backend.Items
                 Item1Metadata = typeSpecificMetadata.ToClientMetadata(lakehouseItem)
             };
         }
-
-        public override async Task ExecuteJob(string jobType, Guid jobInstanceId, JobInvokeType invokeType, CreateItemJobInstancePayload creationPayload)
-        {
-            var token = await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, OneLakeScopes);
-
-            var op1 = _metadata.Operand1;
-            var op2 = _metadata.Operand2;
-            var calculationOperator = _metadata.Operator;
-
-            var result = CalculateResult(op1, op2, calculationOperator);
-
-            // Simulate long running job
-            if (string.Equals(jobType, Item1JobType.LongRunningCalculateAsText, StringComparison.OrdinalIgnoreCase))
-            {
-                await Task.Delay(TimeSpan.FromSeconds(60 * 8));
-            }
-
-            // Write result to Lakehouse if job is not cancelled
-            if (!_itemMetadataStore.JobCancelRequestExists(TenantObjectId, ItemObjectId, jobInstanceId)) {
-                var filePath = GetLakehouseFilePath(jobType, jobInstanceId);
-                await _lakeHouseClientService.WriteToLakehouseFile(token, filePath, result);
-            }
-        }
-
-        public override async Task<ItemJobInstanceState> GetJobState(string jobType, Guid jobInstanceId)
-        {
-            var token = await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, OneLakeScopes);
-
-            var filePath = GetLakehouseFilePath(jobType, jobInstanceId);
-            var fileExists = await _lakeHouseClientService.CheckIfFileExists(token, filePath);
-
-            if (_itemMetadataStore.JobCancelRequestExists(TenantObjectId, ItemObjectId, jobInstanceId))
-            {
-                return new ItemJobInstanceState { Status = JobInstanceStatus.Cancelled };
-            }
-
-            return new ItemJobInstanceState
-            {
-                Status = fileExists ? JobInstanceStatus.Completed : JobInstanceStatus.InProgress,
-            };
-        }
-
-        private string GetLakehouseFilePath(string jobType, Guid jobInstanceId)
-        {
-            var typeToFileName = new Dictionary<string, string>
-            {
-                { Item1JobType.ScheduledJob, $"CalculationResult_{jobInstanceId}.txt" },
-                { Item1JobType.CalculateAsText, $"CalculationResult_{jobInstanceId}.txt" },
-                { Item1JobType.LongRunningCalculateAsText, $"CalculationResult_{jobInstanceId}.txt" },
-                { Item1JobType.CalculateAsParquet, $"CalculationResult_{jobInstanceId}.parquet" }
-            };
-            typeToFileName.TryGetValue(jobType, out var fileName);
-
-            if (fileName != null)
-            {
-                return $"{_metadata.Lakehouse.WorkspaceId}/{_metadata.Lakehouse.Id}/Files/{fileName}";
-            }
-            throw new NotSupportedException("Workload job type is not supported");
-        }
-
-        private string CalculateResult(int op1, int op2, Item1Operator calculationOperator)
-        {
-            switch (calculationOperator)
-            {
-                case Item1Operator.Add:
-                    return FormatResult(op1, op2, calculationOperator, op1 + op2);
-                case Item1Operator.Subtract:
-                    return FormatResult(op1, op2, calculationOperator, op1 - op2);
-                case Item1Operator.Multiply:
-                    return FormatResult(op1, op2, calculationOperator, op1 * op2);
-                case Item1Operator.Divide:
-                    if (op2 != 0)
-                    {
-                        return FormatResult(op1, op2, calculationOperator, op1 / op2);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Cannot divide by zero.");
-                    }
-                case Item1Operator.Random:
-                    var rand = new Random().Next(op1, op2);
-                    return FormatResult(op1, op2, calculationOperator, rand);
-                default:
-                    throw new ArgumentException($"Unsupported operator: {calculationOperator}");
-            }
-        }
-
-        private string FormatResult(int op1, int op2, Item1Operator calculationOperator, int result)
-        {
-            return $"op1 = {op1}, op2 = {op2}, operator = {calculationOperator}, result = {result}";
-        }
-
+        
         public Item1Operator Operator => Metadata.Operator;
 
         private Item1Metadata Metadata => Ensure.NotNull(_metadata, "The item object must be initialized before use");
