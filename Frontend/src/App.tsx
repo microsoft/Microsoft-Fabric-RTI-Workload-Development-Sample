@@ -8,7 +8,6 @@ import {
   SampleWorkloadEditor,
   SamplePage,
 } from "./components/SampleWorkloadEditor/SampleWorkloadEditor";
-import { Panel } from "./components/SampleWorkloadPanel/SampleWorkloadPanel";
 import { SaveAsDialog } from "./components/SampleWorkloadCreateDialog/SampleWorkloadCreateDialog";
 import CustomItemSettings from "./components/CustomItemSettings/CustomItemSettings";
 import CustomAbout from "./components/CustomItemSettings/CustomAbout";
@@ -62,14 +61,6 @@ export function App({ history, workloadClient }: AppProps) {
             workloadClient={workloadClient}
             isImmediateSave={true}
             data-testid="sample-workload-create-dialog"
-          />
-        </Route>
-
-        {/* Routing to a sample Panel  */}
-        <Route path="/panel">
-          <Panel
-            workloadClient={workloadClient}
-            data-testid="sample-workload-panel"
           />
         </Route>
 
