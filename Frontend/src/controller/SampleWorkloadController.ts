@@ -688,11 +688,6 @@ export async function callSettingsGet(workloadClient: WorkloadClientAPI): Promis
     return await workloadClient.settings.get();
 }
 
-export async function callLanguageGet(workloadClient: WorkloadClientAPI): Promise<string> {
-    const settings = await callSettingsGet(workloadClient);
-    return settings.currentLanguageLocale;
-}
-
 export function settingsToView(settings: WorkloadSettings): string {
     return [`Instance ID: ${settings.instanceId}`, `Host Origin: ${settings.workloadHostOrigin}`, `Current Language Locale: ${settings.currentLanguageLocale}`, `API URI: ${settings.apiUri}`].join('\r\n');
 }

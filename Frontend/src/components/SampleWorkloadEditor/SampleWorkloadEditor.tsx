@@ -21,7 +21,6 @@ import {
   callNavigationBeforeNavigateAway,
   callNavigationAfterNavigateAway,
   callThemeOnChange,
-  callLanguageGet,
   callSettingsOnChange,
   callItemGet,
   callItemUpdate,
@@ -54,15 +53,12 @@ export function SampleWorkloadEditor(props: PageProps) {
   const [operand2, setOperand2] = useState<number>(0);
   const [isDirty, setDirty] = useState<boolean>(false);
   
-  const [, setLang] = useState<string>('en-US');
   const [itemEditorErrorMessage, setItemEditorErrorMessage] = useState<string>("");
   document.body.dir = i18n.dir();
 
   const [selectedTab, setSelectedTab] = useState<TabValue>("home");
 
   useEffect(() => {
-    callLanguageGet(workloadClient).then((lang) => setLang(lang));
-
     // Controller callbacks registrations:
     // register Blocking in Navigate.BeforeNavigateAway (for a forbidden url)
     callNavigationBeforeNavigateAway(workloadClient);
