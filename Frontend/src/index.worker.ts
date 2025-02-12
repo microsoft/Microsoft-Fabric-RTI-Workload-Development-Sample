@@ -75,31 +75,6 @@ export async function initialize(params: InitParams) {
                 const hostUrl = (await Controller.callSettingsGet(workloadClient)).workloadHostOrigin;
                 return getJobDetailsPane(jobDetailsContext, hostUrl);
 
-            case 'getItemSettings': {
-                return [
-                    {
-                        name: 'about',
-                        displayName: 'About',
-                        workloadSettingLocation: {
-                            workloadName: sampleWorkloadName,
-                            route: 'custom-about',
-                        },
-                        workloadIframeHeight: '1000px'
-                    },
-                    {
-                        name: 'itemCustomSettings',
-                        displayName: 'Item custom settings',
-                        icon: {
-                            name: 'apps_20_regular',
-                        },
-                        workloadSettingLocation: {
-                            workloadName: sampleWorkloadName,
-                            route: 'custom-item-settings',
-                        },
-                        workloadIframeHeight: '1000px'
-                    }
-                ];
-            }
             default:
                 throw new Error('Unknown action received');
         }

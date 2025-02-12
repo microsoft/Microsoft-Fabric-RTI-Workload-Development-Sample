@@ -9,8 +9,6 @@ import {
   SamplePage,
 } from "./components/SampleWorkloadEditor/SampleWorkloadEditor";
 import { SaveAsDialog } from "./components/SampleWorkloadCreateDialog/SampleWorkloadCreateDialog";
-import CustomItemSettings from "./components/CustomItemSettings/CustomItemSettings";
-import CustomAbout from "./components/CustomItemSettings/CustomAbout";
 
 /*
     Add your Item Editor in the Route section of the App function below
@@ -73,13 +71,6 @@ export function App({ history, workloadClient }: AppProps) {
           />
         </Route>
 
-        {/* Routing to Custom Item Settings */}
-        <Route path="/custom-item-settings">
-          <CustomItemSettings data-testid="custom-about" />
-        </Route>
-        <Route path="/custom-about">
-          <CustomAbout />
-        </Route>
       </Switch>
     </Router>
   );
