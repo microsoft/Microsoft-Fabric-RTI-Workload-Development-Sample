@@ -27,12 +27,10 @@ namespace Fabric.Rti.workload.Backend.Services
         private const string TypeSpecificMetadataFilename = "item.metadata.json";
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> semaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
 
-        private static readonly JsonConverter<Item1Operator> Item1OperatorConverter = new UnknownAsDefaultEnumConverter<Item1Operator>();
         private static readonly JsonSerializerOptions ContentSerializationOptions = new JsonSerializerOptions
         { 
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true,
-            Converters = { Item1OperatorConverter },
+            WriteIndented = true
         };
 
         private readonly ILogger<ItemMetadataStore> _logger;

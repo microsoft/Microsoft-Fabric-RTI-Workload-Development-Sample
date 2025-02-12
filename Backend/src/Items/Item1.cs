@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts;
@@ -20,9 +19,6 @@ namespace Fabric.Rti.workload.Backend.Items
 {
     public class Item1 : ItemBase<Item1, Item1Metadata, Item1ClientMetadata>, IItem1
     {
-        public static readonly IList<string> SupportedOperators = Enum.GetNames(typeof(Item1Operator))
-            .Where(name => name != nameof(Item1Operator.Undefined)).ToList();
-
         private static readonly IList<string> OneLakeScopes = new[] { $"{EnvironmentConstants.OneLakeResourceId}/.default" };
 
         private static readonly IList<string> FabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/Lakehouse.Read.All" };
@@ -75,8 +71,6 @@ namespace Fabric.Rti.workload.Backend.Items
             };
         }
         
-        public Item1Operator Operator => Metadata.Operator;
-
         private Item1Metadata Metadata => Ensure.NotNull(_metadata, "The item object must be initialized before use");
 
         private void ValidateOperandsBeforeDouble(int operand1, int operand2)

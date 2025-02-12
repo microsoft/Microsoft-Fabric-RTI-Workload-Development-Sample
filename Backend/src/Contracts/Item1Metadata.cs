@@ -4,21 +4,10 @@
 
 namespace Fabric.Rti.workload.Backend.Contracts
 {
-    public enum Item1Operator
-    {
-        Undefined = 0,
-        Add = 1,
-        Subtract = 2,
-        Multiply = 3,
-        Divide = 4,
-        Random = 5,
-    }
-
     public abstract class Item1MetadataBase<TLakehouse>
     {
         public int Operand1 { get; set; }
         public int Operand2 { get; set; }
-        public Item1Operator Operator { get; set; }
         public TLakehouse Lakehouse { get; set; }
     }
 
@@ -35,18 +24,16 @@ namespace Fabric.Rti.workload.Backend.Contracts
             {
                 Lakehouse = Lakehouse,
                 Operand1 = Operand1,
-                Operand2 = Operand2,
-                Operator = Operator,
+                Operand2 = Operand2
             };
         }
 
         public Item1ClientMetadata ToClientMetadata(FabricItem lakehouse)
         {
-            return new Item1ClientMetadata()
+            return new Item1ClientMetadata
             {
                 Operand1 = Operand1,
                 Operand2 = Operand2,
-                Operator = Operator,
                 Lakehouse = lakehouse
             };
         }

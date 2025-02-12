@@ -3,8 +3,6 @@
 // </copyright>
 
 using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Contracts;
 using Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload;
@@ -19,19 +17,13 @@ using UpdateItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Worklo
 namespace Fabric.Rti.workload.Backend.Items
 {
     /// <summary>
-    /// This is a naive implentation of an item intended for demonstrating concepts of Fabric workload extensibility.
+    /// This is a naive implementation of an item intended for demonstrating concepts of Fabric workload extensibility.
     /// It does not handle many important aspects like concurrency control, resource management and more.
     /// </summary>
     public abstract class ItemBase<TItem, TItemMetadata, TItemClientMetadata> : IItem
         where TItem : ItemBase<TItem, TItemMetadata, TItemClientMetadata>
         where TItemMetadata : class
     {
-        protected static readonly JsonSerializerOptions ClientSerializationOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter() },
-        };
-
         private readonly IItemMetadataStore _itemMetadataStore;
 
         public Guid TenantObjectId { get; private set; }
@@ -158,7 +150,7 @@ namespace Fabric.Rti.workload.Backend.Items
 
         private Task AllocateAndFreeResources()
         {
-            // >>> Get lists of required and already allocated reasource and free/allocate as needed <<<
+            // >>> Get lists of required and already allocated resource and free/allocate as needed <<<
             return Task.CompletedTask;
         }
 
