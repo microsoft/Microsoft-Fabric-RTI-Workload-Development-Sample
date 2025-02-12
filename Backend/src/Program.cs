@@ -67,7 +67,6 @@ namespace Fabric.Rti.workload.Backend
 
                         // Access to Fabric Lakehouse
                         services.AddSingleton<IHttpClientService, HttpClientService>();
-                        services.AddSingleton<ILakehouseClientService, LakehouseClientService>();
 
                         //// add more dependencies as needed
 

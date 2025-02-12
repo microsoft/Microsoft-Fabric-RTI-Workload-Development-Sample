@@ -26,9 +26,7 @@ namespace Fabric.Rti.workload.Backend.Items
         private static readonly IList<string> OneLakeScopes = new[] { $"{EnvironmentConstants.OneLakeResourceId}/.default" };
 
         private static readonly IList<string> FabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/Lakehouse.Read.All" };
-
-        private readonly ILakehouseClientService _lakeHouseClientService;
-
+        
         private readonly IAuthenticationService _authenticationService;
 
         private readonly IItemMetadataStore _itemMetadataStore;
@@ -38,12 +36,10 @@ namespace Fabric.Rti.workload.Backend.Items
         public Item1(
             ILogger<Item1> logger,
             IItemMetadataStore itemMetadataStore,
-            ILakehouseClientService lakeHouseClientService,
             IAuthenticationService authenticationService,
             AuthorizationContext authorizationContext)
             : base(logger, itemMetadataStore, authorizationContext)
         {
-            _lakeHouseClientService = lakeHouseClientService;
             _authenticationService = authenticationService;
             _itemMetadataStore = itemMetadataStore;
         }
@@ -65,8 +61,7 @@ namespace Fabric.Rti.workload.Backend.Items
             {
                 try
                 {
-                    var token = await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, FabricScopes);
-                    lakehouseItem = await _lakeHouseClientService.GetFabricLakehouse(token, typeSpecificMetadata.Lakehouse.WorkspaceId, typeSpecificMetadata.Lakehouse.Id);
+                   // var token = await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, FabricScopes);
                 }
                 catch (Exception ex)
                 {
