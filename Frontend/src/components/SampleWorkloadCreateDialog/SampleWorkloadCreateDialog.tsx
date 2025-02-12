@@ -14,7 +14,7 @@ export function SaveAsDialog({ workloadClient, isImmediateSave }: SaveAsDialogPr
     const sampleWorkloadName = process.env.WORKLOAD_NAME;
     // The type of the item in fabric is {workloadName}/{itemName}
     const sampleItemType = sampleWorkloadName + ".SampleWorkloadItem";
-    const sampleItemDisplayName = "Sample Workload Item";
+    const sampleItemDisplayName = "RTI Sample Workload Item";
     const sampleItemEditorPath = "/sample-workload-editor";
     const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
