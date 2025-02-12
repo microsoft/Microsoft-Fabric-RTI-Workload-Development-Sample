@@ -35,7 +35,7 @@ import {
   WorkloadItem,
 } from "../../models/SampleWorkloadModel";
 import "./../../styles.scss";
-import { ItemMetadataNotFound} from "../../models/WorkloadExceptionsModel";
+import { ItemMetadataNotFound } from "../../models/WorkloadExceptionsModel";
 
 export function SampleWorkloadEditor(props: PageProps) {
   const { workloadClient } = props;
@@ -52,7 +52,7 @@ export function SampleWorkloadEditor(props: PageProps) {
   const [operand1, setOperand1] = useState<number>(0);
   const [operand2, setOperand2] = useState<number>(0);
   const [isDirty, setDirty] = useState<boolean>(false);
-  
+
   const [itemEditorErrorMessage, setItemEditorErrorMessage] = useState<string>("");
   document.body.dir = i18n.dir();
 
@@ -74,7 +74,7 @@ export function SampleWorkloadEditor(props: PageProps) {
   }, []);
 
   useEffect(() => {
-      loadDataFromUrl(pageContext, pathname);
+    loadDataFromUrl(pageContext, pathname);
   }, [pageContext, pathname]);
 
   async function afterNavigateCallBack(_event: AfterNavigateAwayData): Promise<void> {
@@ -106,7 +106,7 @@ export function SampleWorkloadEditor(props: PageProps) {
           item.extendedMetdata.item1Metadata;
         setOperand1(item1Metadata?.operand1);
         setOperand2(item1Metadata?.operand2);
-                
+
         setItemEditorErrorMessage("");
       } catch (error) {
         clearItemData();

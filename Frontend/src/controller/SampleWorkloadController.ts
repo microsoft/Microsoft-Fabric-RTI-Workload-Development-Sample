@@ -298,10 +298,10 @@ export async function callDialogOpenMsgBox(
             title,
             content,
             link: link ? {
-                    url: link,
-                    label: link
-                }
-            : undefined,
+                url: link,
+                label: link
+            }
+                : undefined,
             actionButtons
         }
     });
@@ -472,7 +472,7 @@ export async function callItemUpdate<T>(
     } else {
         console.log(`Sending an update for item ${objectId} without updating the payload`);
     }
- 
+
     try {
         return await workloadClient.itemCrud.updateItem({
             objectId,
@@ -775,12 +775,12 @@ async function handleException(
     // If the error is a FabricExternalWorkloadError and we could parse it, check if we can handle it.
     if (exception.error?.message?.code === FabricExternalWorkloadError && parsedException) {
         const errorHandled = await handleWorkloadError(parsedException, workloadClient);
-        if (!isRetry && errorHandled ) {
+        if (!isRetry && errorHandled) {
             // error handled, retry the action
             return await action(...actionArgs, workloadClient, true /*isRetry*/);
         }
-    } 
-    
+    }
+
     // error could not be handled, show the error dialog
     const message = parsedException?.Message || "Unknown error occurred";
     const errorCode = parsedException?.ErrorCode ?? exception.error?.message?.code;
@@ -803,13 +803,13 @@ async function handleWorkloadError(parsedException: WorkloadErrorDetails, worklo
                 let authenticationUIRequiredException: AuthenticationUIRequiredException = {
                     ClaimsForConditionalAccessPolicy: parsedException.MoreDetails?.[0].AdditionalParameters?.find(ap => ap.Name == "claimsForCondtionalAccessPolicy")?.Value,
                     ErrorMessage: parsedException.Message,
-                    ScopesToConsent:  parsedException?.MoreDetails?.[0].AdditionalParameters?.find(ap => ap.Name == "additionalScopesToConsent")?.Value?.split(", ")
+                    ScopesToConsent: parsedException?.MoreDetails?.[0].AdditionalParameters?.find(ap => ap.Name == "additionalScopesToConsent")?.Value?.split(", ")
                 };
                 if (authenticationUIRequiredException?.ErrorMessage?.includes("AADSTS65001")) { // consent
-                    await workloadClient.auth.acquireAccessToken({additionalScopesToConsent: authenticationUIRequiredException.ScopesToConsent});
+                    await workloadClient.auth.acquireAccessToken({ additionalScopesToConsent: authenticationUIRequiredException.ScopesToConsent });
                     return true;
                 } else { // conditional access policy
-                    await workloadClient.auth.acquireAccessToken({claimsForConditionalAccessPolicy: authenticationUIRequiredException.ClaimsForConditionalAccessPolicy});
+                    await workloadClient.auth.acquireAccessToken({ claimsForConditionalAccessPolicy: authenticationUIRequiredException.ClaimsForConditionalAccessPolicy });
                     return true;
                 }
             }
