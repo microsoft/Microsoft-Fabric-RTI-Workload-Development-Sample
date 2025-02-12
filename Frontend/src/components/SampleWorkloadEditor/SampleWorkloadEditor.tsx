@@ -3,12 +3,8 @@ import { useLocation, useParams } from "react-router-dom";
 import { Stack } from "@fluentui/react";
 import {
   Button,
-  Combobox,
   Divider,
-  Field,
-  Input,
   Label,
-  Option,
   TabValue,
   MessageBar,
   MessageBarBody,
@@ -18,9 +14,6 @@ import {
 
 import { useTranslation } from "react-i18next";
 import { initializeIcons } from "@fluentui/font-icons-mdl2";
-import {
-  TriangleRight20Regular,
-} from "@fluentui/react-icons";
 import { AfterNavigateAwayData } from "@ms-fabric/workload-client";
 import { ContextProps, PageProps } from "src/App";
 import {
@@ -32,15 +25,12 @@ import {
   callSettingsOnChange,
   callItemGet,
   callItemUpdate,
-  callItemDelete,
-  callGetItem1SupportedOperators,
-  callItem1DoubleResult
+  callItemDelete
 } from "../../controller/SampleWorkloadController";
 import { Ribbon } from "../SampleWorkloadRibbon/SampleWorkloadRibbon";
 import { convertGetItemResultToWorkloadItem } from "../../utils";
 import {
   Item1ClientMetadata,
-  GenericItem,
   ItemPayload,
   UpdateItemPayload,
   WorkloadItem,
@@ -49,7 +39,6 @@ import "./../../styles.scss";
 import { ItemMetadataNotFound} from "../../models/WorkloadExceptionsModel";
 
 export function SampleWorkloadEditor(props: PageProps) {
-  const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
   const { workloadClient } = props;
   const pageContext = useParams<ContextProps>();
   const { pathname } = useLocation();
@@ -59,28 +48,15 @@ export function SampleWorkloadEditor(props: PageProps) {
   initializeIcons();
 
   // React state for WorkloadClient APIs
-  const [operand1ValidationMessage, setOperand1ValidationMessage] =
-    useState<string>("");
-  const [operand2ValidationMessage, setOperand2ValidationMessage] =
-    useState<string>("");
-  const [selectedLakehouse, setSelectedLakehouse] =
-    useState<GenericItem>(undefined);
   const [sampleItem, setSampleItem] =
     useState<WorkloadItem<ItemPayload>>(undefined);
   const [operand1, setOperand1] = useState<number>(0);
   const [operand2, setOperand2] = useState<number>(0);
-  const [operator, setOperator] = useState<string | null>(null);
   const [isDirty, setDirty] = useState<boolean>(false);
-  const [supportedOperators, setSupportedOperators] = useState<string[]>([]);
-  const [hasLoadedSupportedOperators, setHasLoadedSupportedOperators] = useState(false);
   
   const [, setLang] = useState<string>('en-US');
   const [itemEditorErrorMessage, setItemEditorErrorMessage] = useState<string>("");
   document.body.dir = i18n.dir();
-
-  const INT32_MIN = -2147483648;
-  const INT32_MAX = 2147483647;
-
 
   const [selectedTab, setSelectedTab] = useState<TabValue>("home");
 
@@ -101,84 +77,17 @@ export function SampleWorkloadEditor(props: PageProps) {
     callSettingsOnChange(workloadClient, i18n.changeLanguage);
   }, []);
 
-  
-  // Effect to load supported operators once on component mount
   useEffect(() => {
-    loadSupportedOperators();
-  }, []); 
-
-  useEffect(() => {
-    if (hasLoadedSupportedOperators) {
       loadDataFromUrl(pageContext, pathname);
-    }
-  }, [hasLoadedSupportedOperators, pageContext, pathname]);
-
-
-  async function loadSupportedOperators(): Promise<void> {
-    try {
-      const operators = await callGetItem1SupportedOperators(sampleWorkloadBEUrl, workloadClient);
-      setSupportedOperators(operators);
-      setHasLoadedSupportedOperators(true);
-    } catch (error) {
-      console.error(`Error loading supported operators: ${error}`);
-      setHasLoadedSupportedOperators(false);
-    }
-  }
+  }, [pageContext, pathname]);
 
   async function afterNavigateCallBack(_event: AfterNavigateAwayData): Promise<void> {
     //clears the data after navigation
-    setSelectedLakehouse(undefined);
     setSampleItem(undefined);
     return;
   }
 
   // callback functions called by UI controls below
-
-  async function onOperand1InputChanged(value: number) {
-    setOperand1ValidationMessage("");
-    setOperand1(value);
-    setDirty(true);
-  }
-
-  async function onOperand2InputChanged(value: number) {
-    setOperand2ValidationMessage("");
-    setOperand2(value);
-    setDirty(true);
-  }
-
-  function onOperatorInputChanged(value: string | null) {
-    setOperator(value);
-    setDirty(true);
-  }
-
-  function validateOperandsBeforeDouble() {
-    var valid = true;
-    if (operand1 < INT32_MIN/2 || operand1 > INT32_MAX/2) {
-      setOperand1ValidationMessage("Operand 1 may lead to overflow if doubled");
-      valid = false;
-    }
-    if (operand2 < INT32_MIN/2 || operand2 > INT32_MAX/2) {
-      setOperand2ValidationMessage("Operand 2 may lead to overflow if doubled");
-      valid = false;
-    }
-    return valid;
-  }
-
-  async function onDoubleButtonClick() {
-    if (sampleItem && validateOperandsBeforeDouble()) {
-      const result = await callItem1DoubleResult(
-        sampleWorkloadBEUrl,
-        workloadClient,
-        sampleItem.workspaceId,
-        sampleItem.id
-      );
-      if (result) {
-        // Update both operands
-        setOperand1(result.Operand1);
-        setOperand2(result.Operand2);
-      }
-    }
-  }
 
   async function loadDataFromUrl(
     pageContext: ContextProps,
@@ -199,14 +108,9 @@ export function SampleWorkloadEditor(props: PageProps) {
         // load extendedMetadata
         const item1Metadata: Item1ClientMetadata =
           item.extendedMetdata.item1Metadata;
-        setSelectedLakehouse(item1Metadata?.lakehouse);
         setOperand1(item1Metadata?.operand1);
         setOperand2(item1Metadata?.operand2);
-        
-        const loadedOperator = item1Metadata?.operator;
-        const isValidOperator = loadedOperator && supportedOperators.includes(loadedOperator);
-        setOperator(isValidOperator ? loadedOperator : null);
-        
+                
         setItemEditorErrorMessage("");
       } catch (error) {
         clearItemData();
@@ -226,8 +130,6 @@ export function SampleWorkloadEditor(props: PageProps) {
     }
   }
 
-
-
   function clearItemData() {
     setSampleItem(undefined);
   }
@@ -236,10 +138,9 @@ export function SampleWorkloadEditor(props: PageProps) {
     // call ItemUpdate with the current payload contents
     let payload: UpdateItemPayload = {
       item1Metadata: {
-        lakehouse: selectedLakehouse,
+        lakehouse: null,
         operand1: operand1,
-        operand2: operand2,
-        operator: operator,
+        operand2: operand2
       },
     };
 
@@ -265,22 +166,15 @@ export function SampleWorkloadEditor(props: PageProps) {
     return sampleItem?.id || params.itemObjectId;
   }
 
-  function isDisabledDoubleResultButton(): boolean {
-    return isDirty || operator == "0" || sampleItem == undefined;
-  }
-
   // HTML page contents
   return (
     <Stack className="editor" data-testid="sample-workload-editor-inner">
       <Ribbon
         {...props}
-        isLakeHouseSelected={selectedLakehouse != undefined}
         //  disable save when in Frontend-only
         isSaveButtonEnabled={
           sampleItem?.id !== undefined &&
-          selectedLakehouse != undefined &&
-          isDirty &&
-          !!operator
+          isDirty
         }
         saveItemCallback={SaveItem}
         isDeleteEnabled={sampleItem?.id !== undefined}
@@ -326,101 +220,6 @@ export function SampleWorkloadEditor(props: PageProps) {
                   {sampleItem && (
                     <Label>Item Description: {sampleItem?.description}</Label>
                   )}
-                </div>
-                <Divider alignContent="start">Selected Lakehouse Details</Divider>
-                <div className="section">
-                  <Stack horizontal>
-                    <Field
-                      label="Lakehouse"
-                      orientation="horizontal"
-                      className="field"
-                    >
-                      <Input
-                        size="small"
-                        placeholder="Lakehouse Name"
-                        style={{ marginLeft: "10px" }}
-                        value={
-                          selectedLakehouse ? selectedLakehouse.displayName : ""
-                        }
-                      />
-                    </Field>
-                  </Stack>
-                  <Field
-                    label="Lakehouse ID"
-                    orientation="horizontal"
-                    className="field"
-                  >
-                    <Input
-                      size="small"
-                      placeholder="Lakehouse ID"
-                      value={selectedLakehouse ? selectedLakehouse.id : ""}
-                      data-testid="lakehouse-id-input"
-                    />
-                  </Field>
-                </div>
-                <Divider alignContent="start">Calculation definition</Divider>
-                <div className="section">
-                  <Field
-                    label="Operand 1"
-                    validationMessage={operand1ValidationMessage}
-                    orientation="horizontal"
-                    className="field"
-                  >
-                    <Input
-                      size="small"
-                      type="number"
-                      placeholder="Value of the 1st operand"
-                      value={operand1.toString()}
-                      onChange={(e) =>
-                        onOperand1InputChanged(parseInt(e.target.value))
-                      }
-                      data-testid="operand1-input"
-                    />
-                  </Field>
-                  <Field
-                    label="Operand 2"
-                    validationMessage={operand2ValidationMessage}
-                    orientation="horizontal"
-                    className="field"
-                  >
-                    <Input
-                      size="small"
-                      type="number"
-                      placeholder="value of the 2nd operand"
-                      value={operand2.toString()}
-                      onChange={(e) =>
-                        onOperand2InputChanged(parseInt(e.target.value))
-                      }
-                      data-testid="operand2-input"
-                    />
-                  </Field>
-                  <Field
-                    label="Operator"
-                    orientation="horizontal"
-                    className="field"
-                  >
-                    <Combobox
-                      key={pageContext.itemObjectId}
-                      data-testid="operator-combobox"
-                      placeholder="Operator"
-                      value={operator ?? ''}
-                      onOptionSelect={(_, opt) =>
-                        onOperatorInputChanged(opt.optionValue)
-                      }
-                    >
-                      {supportedOperators.map((option) => (
-                        <Option key={option} data-testid={option} value={option}>{option}</Option>
-                      ))}
-                    </Combobox>
-                  </Field>
-                  <Button
-                    appearance="primary"
-                    icon={<TriangleRight20Regular />}
-                    disabled={isDisabledDoubleResultButton()}
-                    onClick={() => onDoubleButtonClick()}
-                  >
-                    Double the operands
-                  </Button>
                 </div>
               </div>
             )}
