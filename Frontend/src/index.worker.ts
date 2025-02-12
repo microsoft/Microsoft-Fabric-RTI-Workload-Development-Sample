@@ -8,8 +8,6 @@ import {
 } from '@ms-fabric/workload-client';
 
 import * as Controller from './controller/SampleWorkloadController';
-import { ItemJobActionContext } from './models/SampleWorkloadModel';
-import { getJobDetailsPane } from './utils';
 
 export async function initialize(params: InitParams) {
 
@@ -56,24 +54,6 @@ export async function initialize(params: InitParams) {
                     NotificationType.Success,
                     NotificationToastDuration.Medium,
                     workloadClient);
-
-            case 'item.job.retry':
-                const retryJobContext = data as ItemJobActionContext;
-                return await Controller.callRunItemJob(
-                    retryJobContext.itemObjectId,
-                    retryJobContext.itemJobType,
-                    JSON.stringify({ metadata: 'JobMetadata' }),
-                    true /* showNotification */,
-                    workloadClient);
-
-            case 'item.job.cancel':
-                const cancelJobDetails = data as ItemJobActionContext;
-                return await Controller.callCancelItemJob(cancelJobDetails.itemObjectId, cancelJobDetails.itemJobInstanceId, true, workloadClient);
-
-            case 'item.job.detail':
-                const jobDetailsContext = data as ItemJobActionContext;
-                const hostUrl = (await Controller.callSettingsGet(workloadClient)).workloadHostOrigin;
-                return getJobDetailsPane(jobDetailsContext, hostUrl);
 
             default:
                 throw new Error('Unknown action received');
