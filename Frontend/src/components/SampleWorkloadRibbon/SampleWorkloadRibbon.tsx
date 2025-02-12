@@ -12,23 +12,15 @@ import {
   Chat24Regular,
   Edit24Regular,
   Share24Regular,
-  Database24Regular,
   Delete24Regular,
 } from "@fluentui/react-icons";
 import { Stack } from '@fluentui/react';
 
 import { PageProps } from 'src/App';
-import { callDatahubOpen, callDialogOpenMsgBox } from '../../controller/SampleWorkloadController';
+import { callDialogOpenMsgBox } from '../../controller/SampleWorkloadController';
 import './../../styles.scss';
-import { ItemTabToolbar } from "./ItemTabToolbar";
 
 const HomeTabToolbar = (props: RibbonProps) => {
-
-  async function onDatahubClicked() {
-    // todo: use the selected datahub item object id
-
-    await callDatahubOpen(['Lakehouse'], "Select a Lakehouse to use for Sample Workload", true, props.workloadClient);
-  }
 
   async function onSaveAsClicked() {
     // your code to save as here
@@ -70,15 +62,6 @@ const HomeTabToolbar = (props: RibbonProps) => {
           aria-label="Save"
           data-testid="item-editor-save-btn"
           icon={<Save24Regular />} onClick={onSaveAsClicked} />
-      </Tooltip>
-
-      <Tooltip
-        content="Select Datahub Lakehouse"
-        relationship="label">
-        <ToolbarButton
-          aria-label="Save"
-          data-testid="item-editor-datahub-btn"  
-          icon={<Database24Regular />} onClick={() => onDatahubClicked()} />
       </Tooltip>
 
       <Tooltip
@@ -144,12 +127,10 @@ export function Ribbon(props: RibbonProps) {
       <CollabButtons {...props} />
       <TabList defaultSelectedValue="home" onTabSelect={onTabSelect}>
         <Tab value="home" data-testid="home-tab-btn">Home</Tab>
-        <Tab value="jobs" data-testid="jobs-tab-btn">Jobs</Tab>
       </TabList>
 
       <div className="toolbarContainer">
         {["home"].includes(selectedValue as string) && <HomeTabToolbar {...props} />}
-        {selectedValue === "jobs" && <ItemTabToolbar {...props} />}
       </div>
 
     </div>

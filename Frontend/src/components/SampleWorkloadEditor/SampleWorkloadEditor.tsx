@@ -19,8 +19,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { initializeIcons } from "@fluentui/font-icons-mdl2";
 import {
-  PanelRightExpand20Regular,
-  Database16Regular,
   TriangleRight20Regular,
 } from "@fluentui/react-icons";
 import { AfterNavigateAwayData } from "@ms-fabric/workload-client";
@@ -32,7 +30,6 @@ import {
   callThemeOnChange,
   callLanguageGet,
   callSettingsOnChange,
-  callDatahubOpen,
   callItemGet,
   callItemUpdate,
   callItemDelete,
@@ -136,30 +133,6 @@ export function SampleWorkloadEditor(props: PageProps) {
   }
 
   // callback functions called by UI controls below
-
-
-
-
-
-
-
-  async function onCallNavigate(path: string) {
-    await callNavigationNavigate("workload", path, workloadClient);
-  }
-
-
-  async function onCallDatahubLakehouse() {
-    const result = await callDatahubOpen(
-      ["Lakehouse"],
-      "Select a Lakehouse to use for Sample Workload",
-      false,
-      workloadClient
-    );
-    if (result) {
-      setSelectedLakehouse(result);
-      setDirty(true);
-    }
-  }
 
   async function onOperand1InputChanged(value: number) {
     setOperand1ValidationMessage("");
@@ -318,7 +291,7 @@ export function SampleWorkloadEditor(props: PageProps) {
       />
 
       <Stack className="main">
-        {["jobs", "home"].includes(selectedTab as string) && (
+        {["home"].includes(selectedTab as string) && (
           <span>
             <h2>Sample Item Editor</h2>
             {/* Crud item API usage example */}
@@ -371,13 +344,6 @@ export function SampleWorkloadEditor(props: PageProps) {
                         }
                       />
                     </Field>
-                    <Button
-                      style={{ width: "24px", height: "24px" }}
-                      icon={<Database16Regular />}
-                      appearance="primary"
-                      onClick={() => onCallDatahubLakehouse()}
-                      data-testid="item-editor-lakehouse-btn"
-                    />
                   </Stack>
                   <Field
                     label="Lakehouse ID"
@@ -454,16 +420,6 @@ export function SampleWorkloadEditor(props: PageProps) {
                     onClick={() => onDoubleButtonClick()}
                   >
                     Double the operands
-                  </Button>
-                </div>
-                <Divider alignContent="start">Authentication</Divider>
-                <div className="section">
-                  <Button
-                    appearance="primary"
-                    icon={<PanelRightExpand20Regular />}
-                    onClick={() => onCallNavigate(`/Authentication/${sampleItem.id}`)}
-                  >
-                    Navigate to Authentication Page
                   </Button>
                 </div>
               </div>

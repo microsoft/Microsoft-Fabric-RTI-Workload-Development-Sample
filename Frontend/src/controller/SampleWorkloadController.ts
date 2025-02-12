@@ -11,8 +11,6 @@ import {
     CloseMode,
     CreateItemParams,
     CreateItemResult,
-    DatahubSelectorDialogConfig,
-    DatahubSelectorDialogResult,
     DialogType,
     WorkloadAction,
     WorkloadClientAPI,
@@ -28,7 +26,6 @@ import {
     RunItemJobParams,
     ThemeConfiguration,
     Tokens,
-    ExtendedItemTypeV2,
     WorkloadErrorDetails,
     ErrorKind,
     UpdateItemResult,
@@ -275,51 +272,6 @@ export async function callDialogOpen(
             hasCloseButton
         }
     });
-}
-
-// --- Datahub API
-
-/**
- * Calls the 'datahub.openDialog' function from the WorkloadClientAPI to open a OneLake data hub dialog to select Lakehouse item(s).
- *
- * @param {string} dialogDescription - The sub-title of the datahub dialog
- * @param {boolean} multiSelectionEnabled - Whether the datahub dialog supports multi selection of datahub items
- * @param {WorkloadClientAPI} workloadClient - An instance of the WorkloadClientAPI.
- */
-export async function callDatahubOpen(
-    supportedTypes: ExtendedItemTypeV2[],
-    dialogDescription: string,
-    multiSelectionEnabled: boolean,
-    workloadClient: WorkloadClientAPI,
-    workspaceNavigationEnabled: boolean = true): Promise<GenericItem> {
-
-    const datahubConfig: DatahubSelectorDialogConfig = {
-        supportedTypes: supportedTypes,
-        multiSelectionEnabled: multiSelectionEnabled,
-        dialogDescription: dialogDescription,
-        workspaceNavigationEnabled: workspaceNavigationEnabled,
-        // not in use in the regular selector, but required to be non-empty for validation
-        hostDetails: {
-            experience: 'sample experience 3rd party', // Change this to reflect your team's process, e.g., "Build notebook" 
-            scenario: 'sample scenario 3rd party', // Adjust this to the specific action, e.g., "Select Lakehouse" 
-        }
-    };
-
-    const result: DatahubSelectorDialogResult = await workloadClient.datahub.openDialog(datahubConfig);
-    if (!result.selectedDatahubItem) {
-        return null;
-    }
-
-    const selectedItem = result.selectedDatahubItem[0];
-    const { itemObjectId, workspaceObjectId } = selectedItem;
-    const { displayName, description } = selectedItem.datahubItemUI;
-    return {
-        id: itemObjectId,
-        workspaceId: workspaceObjectId,
-        type: selectedItem.datahubItemUI.itemType,
-        displayName,
-        description
-    };
 }
 
 /**
