@@ -51,7 +51,7 @@ $Item1ReadWriteAllGuid = (New-Guid).ToString()
 $FabricLakehouseReadAllGuid = (New-Guid).ToString()
 $FabricLakehouseReadWriteAllGuid = (New-Guid).ToString()
 $KQLDatabaseReadWriteAllGuid = (New-Guid).ToString()
-$FabricEventhouseReadAllGuid = (New-Guid).ToString()
+$FabricEventhouseReadWriteAllGuid = (New-Guid).ToString()
 
 ## Generate URI
 
@@ -135,10 +135,10 @@ $application = @{
                 type = "User"
             },
             @{
-                adminConsentDisplayName = "FabricEventhouse.Read.All"
-                adminConsentDescription = "FabricEventhouse.Read.All"
-                value = "FabricEventhouse.Read.All"
-                id = $FabricEventhouseReadAllGuid
+                adminConsentDisplayName = "FabricEventhouse.ReadWrite.All"
+                adminConsentDescription = "FabricEventhouse.ReadWrite.All"
+                value = "FabricEventhouse.ReadWrite.All"
+                id = $FabricEventhouseReadWriteAllGuid
                 isEnabled = $true
                 type = "User"
             }
@@ -147,7 +147,7 @@ $application = @{
             @{
                 appId = "871c010f-5e61-4fb1-83ac-98610a7e9110"
                 delegatedPermissionIds = @(
-                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid, $KQLDatabaseReadWriteAllGuid, $FabricEventhouseReadAllGuid
+                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid, $KQLDatabaseReadWriteAllGuid, $FabricEventhouseReadWriteAllGuid
                 )
             },
              @{
@@ -224,7 +224,7 @@ $application = @{
                         type = "Scope"
                     },
                     @{
-                        id = "cd1718e4-3e09-4381-a6e1-183e245f8613" # Eventhouse.Read.All
+                        id = "b13393d0-9253-4ca8-be5a-be145f337ea3" # Eventhouse.ReadWrite.All
                         type = "Scope"
                     },
                     @{
