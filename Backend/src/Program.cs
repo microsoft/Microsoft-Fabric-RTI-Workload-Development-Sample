@@ -64,6 +64,9 @@ namespace Fabric.Rti.workload.Backend
                         // Implementation of Fabric Workload REST API
                         services.AddSingleton<IItemLifecycleController, ItemLifecycleControllerImpl>();
                         services.AddSingleton<IEndpointResolutionController, EndpointResolutionControllerImpl>();
+                        
+                        // Fabric API client
+                        services.AddSingleton<IFabricApiClient, FabricApiClient>();
 
                         // Access to Fabric Lakehouse
                         services.AddSingleton<IHttpClientService, HttpClientService>();

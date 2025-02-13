@@ -18,9 +18,7 @@ namespace Fabric.Rti.workload.Backend.Constants
         public const string FabricClientForWorkloadsAppId = "d2450708-699c-41e3-8077-b0c8341509aa";
 
         public const string OneLakeResourceId = "https://storage.azure.com";
-
-        public const string SqlBackendResourceId = "https://database.windows.net/";
-
+        
         public const string AadInstanceUrl = "https://login.microsoftonline.com";
 
         public const string FabricApiBaseUrl = "https://api.fabric.microsoft.com";
