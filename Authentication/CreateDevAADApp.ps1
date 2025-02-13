@@ -10,13 +10,7 @@ function PostAADRequest {
         [string]$body
     )
 
-    # Use Azure CLI's @<file> to avoid issues with different shells / OSs.
-    # see https://learn.microsoft.com/en-us/cli/azure/use-azure-cli-successfully-troubleshooting#error-failed-to-parse-string-as-json
-    $tempFile = [System.IO.Path]::GetTempFileName()
-    $body | Out-File -FilePath $tempFile
-    $azrestResult = az rest --method POST --url $url --headers "Content-Type=application/json" --body "@$tempFile"
-    Remove-Item $tempFile
-    return $azrestResult
+    return az rest --method POST --url $url --body $body --headers "Content-Type=application/json"
 }
 
 function PrintInfo {
@@ -153,7 +147,7 @@ $application = @{
             @{
                 appId = "871c010f-5e61-4fb1-83ac-98610a7e9110"
                 delegatedPermissionIds = @(
-                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid 
+                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid, $KQLDatabaseReadWriteAllGuid, $FabricEventhouseReadAllGuid
                 )
             },
              @{
@@ -176,6 +170,15 @@ $application = @{
                 resourceAccess = @(
                     @{
                         id = "03e0da56-190b-40ad-a80c-ea378c433f7f" # user_impersonation
+                        type = "Scope"
+                    }
+                )
+            },
+            @{
+                resourceAppId = "2746ea77-4702-4b45-80ca-3c97e680e8b7" # Azure Data Explorer
+                resourceAccess = @(
+                    @{
+                        id = "00d678f0-da44-4b12-a6d6-c98bcfd1c5fe" # user_impersonation
                         type = "Scope"
                     }
                 )
@@ -234,7 +237,7 @@ $application = @{
 }
 
 # Convert to valid json format (escape the '"')
-$applicationJson = ( $application | ConvertTo-Json -Compress -Depth 10)
+$applicationJson = ( $application | ConvertTo-Json -Compress -Depth 10) -replace '"','\"'
 
 # Create application
 $result = PostAADRequest -url https://graph.microsoft.com/v1.0/applications -body $applicationJson
@@ -267,7 +270,7 @@ $passwordCreds = @{
 }
 
 # Convert to valid json format (escape the '"')
-$passwordCredsJson = ( $passwordCreds | ConvertTo-Json -Compress -Depth 10)
+$passwordCredsJson = ( $passwordCreds | ConvertTo-Json -Compress -Depth 10) -replace '"','\"'
 
 $addPasswordResult = PostAADRequest -url ("https://graph.microsoft.com/v1.0/applications/" + $applicationObjectId + "/addPassword") -body $passwordCredsJson
 $addPasswordObject = ($addPasswordResult | ConvertFrom-Json)
