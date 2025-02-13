@@ -4,12 +4,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts;
+using Fabric.Rti.workload.Backend.Contracts.RtiContracts;
 using Fabric.Rti.workload.Backend.Exceptions;
 using Fabric.Rti.workload.Backend.Services;
 using Fabric.Rti.workload.Backend.Utils;
+using Kusto.Data.Common;
 using Microsoft.Extensions.Logging;
 using CreateItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.CreateItemPayload;
 using ItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.ItemPayload;
@@ -17,15 +20,15 @@ using UpdateItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Worklo
 
 namespace Fabric.Rti.workload.Backend.Items
 {
-    public class Item1 : ItemBase<Item1, Item1Metadata, Item1ClientMetadata>, IItem1
+    public class Item1 : ItemBase<Item1, Item1Metadata, Item1ClientMetadata>
     {
-        private static readonly IList<string> OneLakeScopes = new[] { $"{EnvironmentConstants.OneLakeResourceId}/.default" };
-
         private static readonly IList<string> FabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/Lakehouse.Read.All" };
-        
+
         private readonly IAuthenticationService _authenticationService;
 
-        private readonly IItemMetadataStore _itemMetadataStore;
+        private readonly IFabricApiClient _fabricApiClient;
+        
+        private readonly IKustoClientService _kustoClientService;
 
         private Item1Metadata _metadata;
 
@@ -33,78 +36,29 @@ namespace Fabric.Rti.workload.Backend.Items
             ILogger<Item1> logger,
             IItemMetadataStore itemMetadataStore,
             IAuthenticationService authenticationService,
+            IFabricApiClient fabricApiClient,
+            IKustoClientService kustoClientService,
             AuthorizationContext authorizationContext)
             : base(logger, itemMetadataStore, authorizationContext)
         {
             _authenticationService = authenticationService;
-            _itemMetadataStore = itemMetadataStore;
+            _fabricApiClient = fabricApiClient;
+            _kustoClientService = kustoClientService;
         }
 
         public override string ItemType => WorkloadConstants.ItemTypes.Item1;
 
-        public ItemReference Lakehouse => Metadata.Lakehouse;
-
-        public int Operand1 => Metadata.Operand1;
-
-        public int Operand2 => Metadata.Operand2;
-
-        public override async Task<ItemPayload> GetItemPayload()
+        public override Task<ItemPayload> GetItemPayload()
         {
             var typeSpecificMetadata = GetTypeSpecificMetadata();
 
-            FabricItem lakehouseItem = null;
-            if (typeSpecificMetadata.Lakehouse.Id != Guid.Empty)
+            return Task.FromResult(new ItemPayload
             {
-                try
-                {
-                   // var token = await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, FabricScopes);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError($"Failed to retrieve FabricLakehouse for lakehouse: {typeSpecificMetadata.Lakehouse.Id} in workspace: {typeSpecificMetadata.Lakehouse.WorkspaceId}. Error: {ex.Message}");
-                }
-            }
-
-            return new ItemPayload
-            {
-                Item1Metadata = typeSpecificMetadata.ToClientMetadata(lakehouseItem)
-            };
+                Item1Metadata = typeSpecificMetadata.ToClientMetadata()
+            });
         }
-        
+
         private Item1Metadata Metadata => Ensure.NotNull(_metadata, "The item object must be initialized before use");
-
-        private void ValidateOperandsBeforeDouble(int operand1, int operand2)
-        {
-            var invalidOperands = new List<string>();
-            if (operand1 > int.MaxValue / 2 || operand1 < int.MinValue / 2)
-            {
-                invalidOperands.Add("Operand1");
-            }
-            if (operand2 > int.MaxValue / 2 || operand2 < int.MinValue / 2)
-            {
-                invalidOperands.Add("Operand2");
-            }
-            if (!invalidOperands.IsNullOrEmpty())
-            {
-                string joinedInvalidOperands = string.Join(", ", invalidOperands);
-                throw new DoubledOperandsOverflowException(new List<string> { joinedInvalidOperands });
-            }
-        }
-
-        public async Task<(int Operand1, int Operand2)> Double()
-        {
-            var metadata = Metadata.Clone();
-
-            ValidateOperandsBeforeDouble(metadata.Operand1, metadata.Operand2);
-            metadata.Operand1 *= 2;
-            metadata.Operand2 *= 2;
-
-            _metadata = metadata;
-
-            await SaveChanges();
-
-            return (metadata.Operand1, metadata.Operand2);
-        }
 
         protected override void SetDefinition(CreateItemPayload payload)
         {
@@ -118,12 +72,6 @@ namespace Fabric.Rti.workload.Backend.Items
             if (payload.Item1Metadata == null)
             {
                 throw new InvalidItemPayloadException(ItemType, ItemObjectId);
-            }
-
-            if (payload.Item1Metadata.Lakehouse == null)
-            {
-                throw new InvalidItemPayloadException(ItemType, ItemObjectId)
-                    .WithDetail(ErrorCodes.ItemPayload.MissingLakehouseReference, "Missing Lakehouse reference");
             }
 
             _metadata = payload.Item1Metadata.Clone();
@@ -142,12 +90,6 @@ namespace Fabric.Rti.workload.Backend.Items
                 throw new InvalidItemPayloadException(ItemType, ItemObjectId);
             }
 
-            if (payload.Item1Metadata.Lakehouse == null)
-            {
-                throw new InvalidItemPayloadException(ItemType, ItemObjectId)
-                    .WithDetail(ErrorCodes.ItemPayload.MissingLakehouseReference, "Missing Lakehouse reference");
-            }
-
             SetTypeSpecificMetadata(payload.Item1Metadata);
         }
 
@@ -159,6 +101,91 @@ namespace Fabric.Rti.workload.Backend.Items
         protected override Item1Metadata GetTypeSpecificMetadata()
         {
             return Metadata.Clone();
+        }
+
+        protected override async Task CreateAdditionalResourcesAsync()
+        {
+            var metadata = Metadata.Clone();
+            var fabricToken = await GetFabricTokenAsync();
+
+            try
+            {
+                var eventhouseDisplayName = $"{DisplayName}_Eventhouse";
+                var kqlDatabaseDisplayName = $"{DisplayName}_KQLDatabase";
+                var eventhouseItem = await _fabricApiClient.CreateEventhouse(WorkspaceObjectId, eventhouseDisplayName, fabricToken);
+                eventhouseItem = await _fabricApiClient.GetEventhouse(WorkspaceObjectId, eventhouseItem.Id.Value, fabricToken);
+
+                var defaultKqlDatabaseId = eventhouseItem.Properties.DatabasesItemIds.FirstOrDefault();
+                await _fabricApiClient.UpdateKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, kqlDatabaseDisplayName, fabricToken);
+                var kqlDatabaseItem = await _fabricApiClient.GetKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, fabricToken);
+
+                metadata.EventhouseItemId = eventhouseItem.Id;
+                metadata.EventhouseDisplayName = eventhouseItem.DisplayName;
+                metadata.KqlDatabaseItemId = kqlDatabaseItem.Id;
+                metadata.KqlDatabaseDisplayName = kqlDatabaseItem.DisplayName;
+                metadata.KqlDatabaseQueryUrl = kqlDatabaseItem.Properties.QueryServiceUri;
+                metadata.KqlDatabaseIngestionUrl = kqlDatabaseItem.Properties.IngestionServiceUri;
+
+                _metadata = metadata;
+
+                // fire and forget, prepare initial data on kusto side
+                _ = PrepareKqlDatabaseData(metadata.KqlDatabaseQueryUrl, metadata.KqlDatabaseItemId.ToString());
+                Logger.LogInformation($"CreateAdditionalResources: successfully create Eventhouse {eventhouseItem.Id} with default KQL database {defaultKqlDatabaseId}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Failed to create additional resources for item: {DisplayName} in workspace: {WorkspaceObjectId}. Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task PrepareKqlDatabaseData(string kqlDatabaseQueryUrl, string kqlDatabaseItemId)
+        {
+            try
+            {
+                Logger.LogInformation($"PrepareKqlDatabaseData: getting kusto data plane token for kql query url: {kqlDatabaseQueryUrl}");
+                var kustoDataPlaneToken = await GetKustoDataPlaneTokenAsync(kqlDatabaseQueryUrl);
+                var kustoClientRequestProperties = new ClientRequestProperties
+                {
+                    AuthorizationScheme = "Bearer",
+                    SecurityToken = kustoDataPlaneToken
+                };
+
+                Logger.LogInformation($"PrepareKqlDatabaseData: creating table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
+                var tableCreateCommand = CslCommandGenerator.GenerateTableCreateCommand(RtiConstants.KustoIotDataTableName, typeof(KustoIotDataTableRecord), forceNormalizeColumnName: false);
+                await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, tableCreateCommand, kustoClientRequestProperties, default);
+
+                Logger.LogInformation($"PrepareKqlDatabaseData: ingesting initial data to table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
+                var records = KustoIotDataTableRecordExtensions.GenerateRandomRecords(3);
+                var csvData = string.Join(Environment.NewLine, records.Select(r => r.ToCsvFormat()));
+                var ingestCommand = CslCommandGenerator.GenerateTableIngestPushCommand(RtiConstants.KustoIotDataTableName, compressed: false, csvData);
+                await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestCommand, kustoClientRequestProperties, default);
+                
+                Logger.LogInformation($"PrepareKqlDatabaseData: successfully prepared kql database data for database id {kqlDatabaseItemId}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Failed preparing kql database data for database id {kqlDatabaseItemId}. Error: {ex.Message}");
+            }
+        }
+
+        private async Task<string> GetFabricTokenAsync()
+        {
+            try
+            {
+                return await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, FabricScopes);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed to acquire token for Fabric API. Error: {e.Message}");
+                throw;
+            }
+        }
+
+        private async Task<string> GetKustoDataPlaneTokenAsync(string kqlDatabaseQueryUrl)
+        {
+            var scopes = new[] { $"{kqlDatabaseQueryUrl}/.default" };
+            return await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, scopes);
         }
     }
 }

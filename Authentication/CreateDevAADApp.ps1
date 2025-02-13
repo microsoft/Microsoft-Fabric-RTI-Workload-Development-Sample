@@ -10,13 +10,7 @@ function PostAADRequest {
         [string]$body
     )
 
-    # Use Azure CLI's @<file> to avoid issues with different shells / OSs.
-    # see https://learn.microsoft.com/en-us/cli/azure/use-azure-cli-successfully-troubleshooting#error-failed-to-parse-string-as-json
-    $tempFile = [System.IO.Path]::GetTempFileName()
-    $body | Out-File -FilePath $tempFile
-    $azrestResult = az rest --method POST --url $url --headers "Content-Type=application/json" --body "@$tempFile"
-    Remove-Item $tempFile
-    return $azrestResult
+    return az rest --method POST --url $url --body $body --headers "Content-Type=application/json"
 }
 
 function PrintInfo {
@@ -56,6 +50,8 @@ $Item1ReadAllGuid = (New-Guid).ToString()
 $Item1ReadWriteAllGuid = (New-Guid).ToString()
 $FabricLakehouseReadAllGuid = (New-Guid).ToString()
 $FabricLakehouseReadWriteAllGuid = (New-Guid).ToString()
+$KQLDatabaseReadWriteAllGuid = (New-Guid).ToString()
+$FabricEventhouseReadWriteAllGuid = (New-Guid).ToString()
 
 ## Generate URI
 
@@ -96,7 +92,7 @@ $application = @{
                 value = "FabricWorkloadControl"
                 id = $FabricWorkloadControlGuid
                 isEnabled = $true
-                type = "Admin"
+                type = "User"
             },
             @{
                 adminConsentDisplayName = "Item1.Read.All"
@@ -104,7 +100,7 @@ $application = @{
                 value = "Item1.Read.All"
                 id = $Item1ReadAllGuid
                 isEnabled = $true
-                type = "Admin"
+                type = "User"
             },
             @{
                 adminConsentDisplayName = "Item1.ReadWrite.All"
@@ -112,7 +108,7 @@ $application = @{
                 value = "Item1.ReadWrite.All"
                 id = $Item1ReadWriteAllGuid
                 isEnabled = $true
-                type = "Admin"
+                type = "User"
             },
             @{
                 adminConsentDisplayName = "FabricLakehouse.Read.All"
@@ -120,7 +116,7 @@ $application = @{
                 value = "FabricLakehouse.Read.All"
                 id = $FabricLakehouseReadAllGuid
                 isEnabled = $true
-                type = "Admin"
+                type = "User"
             },
             @{
                 adminConsentDisplayName = "FabricLakehouse.ReadWrite.All"
@@ -128,14 +124,30 @@ $application = @{
                 value = "FabricLakehouse.ReadWrite.All"
                 id = $FabricLakehouseReadWriteAllGuid
                 isEnabled = $true
-                type = "Admin"
+                type = "User"
+            },
+            @{
+                adminConsentDisplayName = "KQLDatabase.ReadWrite.All"
+                adminConsentDescription = "KQLDatabase.ReadWrite.All"
+                value = "KQLDatabase.ReadWrite.All"
+                id = $KQLDatabaseReadWriteAllGuid
+                isEnabled = $true
+                type = "User"
+            },
+            @{
+                adminConsentDisplayName = "FabricEventhouse.ReadWrite.All"
+                adminConsentDescription = "FabricEventhouse.ReadWrite.All"
+                value = "FabricEventhouse.ReadWrite.All"
+                id = $FabricEventhouseReadWriteAllGuid
+                isEnabled = $true
+                type = "User"
             }
         )
         preAuthorizedApplications = @( # Preauthorize
             @{
                 appId = "871c010f-5e61-4fb1-83ac-98610a7e9110"
                 delegatedPermissionIds = @(
-                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid 
+                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid, $KQLDatabaseReadWriteAllGuid, $FabricEventhouseReadWriteAllGuid
                 )
             },
              @{
@@ -158,6 +170,15 @@ $application = @{
                 resourceAccess = @(
                     @{
                         id = "03e0da56-190b-40ad-a80c-ea378c433f7f" # user_impersonation
+                        type = "Scope"
+                    }
+                )
+            },
+            @{
+                resourceAppId = "2746ea77-4702-4b45-80ca-3c97e680e8b7" # Azure Data Explorer
+                resourceAccess = @(
+                    @{
+                        id = "00d678f0-da44-4b12-a6d6-c98bcfd1c5fe" # user_impersonation
                         type = "Scope"
                     }
                 )
@@ -201,6 +222,14 @@ $application = @{
                     @{
                         id = "13060bfd-9305-4ec6-8388-8916580f4fa9" # Lakehouse.Read.All
                         type = "Scope"
+                    },
+                    @{
+                        id = "b13393d0-9253-4ca8-be5a-be145f337ea3" # Eventhouse.ReadWrite.All
+                        type = "Scope"
+                    },
+                    @{
+                        id = "726667b1-01a6-4be4-b04c-e95eae4023a8" # KQLDatabase.ReadWrite.All
+                        type = "Scope"
                     }
                 )
             }
@@ -208,7 +237,7 @@ $application = @{
 }
 
 # Convert to valid json format (escape the '"')
-$applicationJson = ( $application | ConvertTo-Json -Compress -Depth 10)
+$applicationJson = ( $application | ConvertTo-Json -Compress -Depth 10) -replace '"','\"'
 
 # Create application
 $result = PostAADRequest -url https://graph.microsoft.com/v1.0/applications -body $applicationJson
@@ -241,7 +270,7 @@ $passwordCreds = @{
 }
 
 # Convert to valid json format (escape the '"')
-$passwordCredsJson = ( $passwordCreds | ConvertTo-Json -Compress -Depth 10)
+$passwordCredsJson = ( $passwordCreds | ConvertTo-Json -Compress -Depth 10) -replace '"','\"'
 
 $addPasswordResult = PostAADRequest -url ("https://graph.microsoft.com/v1.0/applications/" + $applicationObjectId + "/addPassword") -body $passwordCredsJson
 $addPasswordObject = ($addPasswordResult | ConvertFrom-Json)

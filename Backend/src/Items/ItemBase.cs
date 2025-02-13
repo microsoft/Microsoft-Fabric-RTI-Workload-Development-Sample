@@ -92,8 +92,9 @@ namespace Fabric.Rti.workload.Backend.Items
 
             SetDefinition(createItemRequest.CreationPayload);
 
+            await CreateAdditionalResourcesAsync();
             await Store();
-            await AllocateAndFreeResources();
+            await FreeResources();
             await UpdateFabric();
         }
 
@@ -105,7 +106,7 @@ namespace Fabric.Rti.workload.Backend.Items
             UpdateDefinition(updateItemRequest.UpdatePayload);
 
             await Store();
-            await AllocateAndFreeResources();
+            await FreeResources();
             await UpdateFabric();
         }
 
@@ -127,8 +128,13 @@ namespace Fabric.Rti.workload.Backend.Items
         protected async Task SaveChanges()
         {
             await Store();
-            await AllocateAndFreeResources();
+            await FreeResources();
             await UpdateFabric();
+        }
+        
+        protected virtual Task CreateAdditionalResourcesAsync()
+        {
+            return Task.CompletedTask;
         }
 
         private async Task Store()
@@ -147,8 +153,8 @@ namespace Fabric.Rti.workload.Backend.Items
 
             await _itemMetadataStore.Upsert(TenantObjectId, ItemObjectId, commonMetadata, typeSpecificMetadata);
         }
-
-        private Task AllocateAndFreeResources()
+        
+        private Task FreeResources()
         {
             // >>> Get lists of required and already allocated resource and free/allocate as needed <<<
             return Task.CompletedTask;

@@ -8,6 +8,8 @@ using Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload;
 using Fabric.Rti.workload.Backend.Controllers;
 using Fabric.Rti.workload.Backend.Services;
 using Fabric.Rti.workload.Backend.Utils;
+using Kusto.Data.Common;
+using Kusto.Data.Net.Client;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -64,9 +66,16 @@ namespace Fabric.Rti.workload.Backend
                         // Implementation of Fabric Workload REST API
                         services.AddSingleton<IItemLifecycleController, ItemLifecycleControllerImpl>();
                         services.AddSingleton<IEndpointResolutionController, EndpointResolutionControllerImpl>();
+                        
+                        // Fabric API client
+                        services.AddSingleton<IFabricApiClient, FabricApiClient>();
 
                         // Access to Fabric Lakehouse
                         services.AddSingleton<IHttpClientService, HttpClientService>();
+                        
+                        // kusto client services
+                        services.AddSingleton(KustoClientFactory.CreateKustoStatelessClient());
+                        services.AddSingleton<IKustoClientService, KustoClientService>();
 
                         //// add more dependencies as needed
 

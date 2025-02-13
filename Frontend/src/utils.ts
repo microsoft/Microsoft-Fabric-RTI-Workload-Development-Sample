@@ -5,6 +5,7 @@ export function convertGetItemResultToWorkloadItem<T>(item: GetItemResult): Work
     let payload: T;
     if (item.workloadPayload) {
         try {
+            console.log(`Parsing payload for item ${item.objectId} payload ${item.workloadPayload}`);
             payload = JSON.parse(item.workloadPayload);
             console.log(`Parsed payload of item ${item.objectId} is ${payload}`);
         } catch (payloadParseError) {
