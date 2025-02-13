@@ -21,7 +21,7 @@ namespace Fabric.Rti.workload.Backend.Items
     public class Item1 : ItemBase<Item1, Item1Metadata, Item1ClientMetadata>
     {
         private static readonly IList<string> FabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/Lakehouse.Read.All" };
-        
+
         private readonly IAuthenticationService _authenticationService;
 
         private readonly IFabricApiClient _fabricApiClient;
@@ -41,19 +41,19 @@ namespace Fabric.Rti.workload.Backend.Items
         }
 
         public override string ItemType => WorkloadConstants.ItemTypes.Item1;
-        
+
         public override Task<ItemPayload> GetItemPayload()
         {
             var typeSpecificMetadata = GetTypeSpecificMetadata();
-            
+
             return Task.FromResult(new ItemPayload
             {
                 Item1Metadata = typeSpecificMetadata.ToClientMetadata()
             });
         }
-        
+
         private Item1Metadata Metadata => Ensure.NotNull(_metadata, "The item object must be initialized before use");
-        
+
         protected override void SetDefinition(CreateItemPayload payload)
         {
             if (payload == null)
@@ -67,7 +67,7 @@ namespace Fabric.Rti.workload.Backend.Items
             {
                 throw new InvalidItemPayloadException(ItemType, ItemObjectId);
             }
-            
+
             _metadata = payload.Item1Metadata.Clone();
         }
 
@@ -83,7 +83,7 @@ namespace Fabric.Rti.workload.Backend.Items
             {
                 throw new InvalidItemPayloadException(ItemType, ItemObjectId);
             }
-            
+
             SetTypeSpecificMetadata(payload.Item1Metadata);
         }
 
@@ -101,7 +101,7 @@ namespace Fabric.Rti.workload.Backend.Items
         {
             var metadata = Metadata.Clone();
             var fabricToken = await GetFabricTokenAsync();
- 
+
             try
             {
                 var eventhouseDisplayName = $"{DisplayName}_Eventhouse";
@@ -118,9 +118,10 @@ namespace Fabric.Rti.workload.Backend.Items
                 metadata.KqlDatabaseItemId = kqlDatabaseItem.Id;
                 metadata.KqlDatabaseDisplayName = kqlDatabaseItem.DisplayName;
                 metadata.KqlDatabaseQueryUrl = kqlDatabaseItem.Properties.QueryServiceUri;
+                metadata.KqlDatabaseIngestionUrl = kqlDatabaseItem.Properties.IngestionServiceUri;
 
                 _metadata = metadata;
-            
+
                 // TODO PrepareKqlDatabaseData
                 // fire and forget, prepare initial data on kusto side
                 //_ = PrepareKqlDatabaseData(kqlDatabaseItem);
@@ -132,7 +133,7 @@ namespace Fabric.Rti.workload.Backend.Items
                 throw;
             }
         }
-        
+
         private async Task<string> GetFabricTokenAsync()
         {
             try

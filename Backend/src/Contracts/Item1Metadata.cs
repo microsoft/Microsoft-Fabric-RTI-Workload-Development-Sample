@@ -9,14 +9,16 @@ namespace Fabric.Rti.workload.Backend.Contracts
     public abstract class Item1MetadataBase
     {
         public Guid? EventhouseItemId { get; set; }
-    
+
         public string EventhouseDisplayName { get; set; }
-    
+
         public Guid? KqlDatabaseItemId { get; set; }
-    
+
         public string KqlDatabaseDisplayName { get; set; }
-    
+
         public string KqlDatabaseQueryUrl { get; set; }
+
+        public string KqlDatabaseIngestionUrl { get; set; }
     }
 
     /// <summary>
@@ -34,7 +36,8 @@ namespace Fabric.Rti.workload.Backend.Contracts
                 EventhouseDisplayName = EventhouseDisplayName,
                 KqlDatabaseItemId = KqlDatabaseItemId,
                 KqlDatabaseDisplayName = KqlDatabaseDisplayName,
-                KqlDatabaseQueryUrl = KqlDatabaseQueryUrl
+                KqlDatabaseQueryUrl = KqlDatabaseQueryUrl,
+                KqlDatabaseIngestionUrl = KqlDatabaseIngestionUrl
             };
         }
 
@@ -46,7 +49,8 @@ namespace Fabric.Rti.workload.Backend.Contracts
                 EventhouseDisplayName = EventhouseDisplayName,
                 KqlDatabaseItemId = KqlDatabaseItemId,
                 KqlDatabaseDisplayName = KqlDatabaseDisplayName,
-                KqlDatabaseQueryUrl = KqlDatabaseQueryUrl
+                KqlDatabaseQueryUrl = KqlDatabaseQueryUrl,
+                KqlDatabaseIngestionUrl = KqlDatabaseIngestionUrl
             };
         }
     }
