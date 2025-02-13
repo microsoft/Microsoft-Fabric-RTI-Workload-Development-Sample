@@ -17,17 +17,20 @@ namespace Fabric.Rti.workload.Backend.Services
         private readonly IItemMetadataStore _itemMetadataStore;
         private readonly IAuthenticationService _authenticationService;
         private readonly IFabricApiClient _fabricApiClient;
+        private readonly IKustoClientService _kustoClientService;
 
         public ItemFactory(
             IServiceProvider serviceProvider,
             IItemMetadataStore itemMetadataStore,
             IAuthenticationService authenticationService,
-            IFabricApiClient fabricApiClient)
+            IFabricApiClient fabricApiClient,
+            IKustoClientService kustoClientService)
         {
             _serviceProvider = serviceProvider;
             _itemMetadataStore = itemMetadataStore;
             _authenticationService = authenticationService;
             _fabricApiClient = fabricApiClient;
+            _kustoClientService = kustoClientService;
         }
 
         public IItem CreateItem(string itemType, AuthorizationContext authorizationContext)
@@ -35,7 +38,7 @@ namespace Fabric.Rti.workload.Backend.Services
             switch (itemType)
             {
                 case WorkloadConstants.ItemTypes.Item1:
-                    return new Item1(_serviceProvider.GetService<ILogger<Item1>>(), _itemMetadataStore, _authenticationService, _fabricApiClient, authorizationContext);
+                    return new Item1(_serviceProvider.GetService<ILogger<Item1>>(), _itemMetadataStore, _authenticationService, _fabricApiClient, _kustoClientService, authorizationContext);
 
                 default:
                     throw new NotSupportedException($"Items of type {itemType} are not supported");

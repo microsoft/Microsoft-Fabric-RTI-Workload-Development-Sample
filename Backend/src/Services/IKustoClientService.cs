@@ -5,6 +5,10 @@ using Kusto.Data.Common;
 
 namespace Fabric.Rti.workload.Backend.Services;
 
+/// <summary>
+/// Interface for the Kusto Client Service implementing the Kusto REST API.
+/// https://learn.microsoft.com/en-us/kusto/api/rest/?view=microsoft-fabric
+/// </summary>
 public interface IKustoClientService
 {
     /// <summary>

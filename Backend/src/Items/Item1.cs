@@ -8,9 +8,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts;
+using Fabric.Rti.workload.Backend.Contracts.RtiContracts;
 using Fabric.Rti.workload.Backend.Exceptions;
 using Fabric.Rti.workload.Backend.Services;
 using Fabric.Rti.workload.Backend.Utils;
+using Kusto.Data.Common;
 using Microsoft.Extensions.Logging;
 using CreateItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.CreateItemPayload;
 using ItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.ItemPayload;
@@ -25,6 +27,8 @@ namespace Fabric.Rti.workload.Backend.Items
         private readonly IAuthenticationService _authenticationService;
 
         private readonly IFabricApiClient _fabricApiClient;
+        
+        private readonly IKustoClientService _kustoClientService;
 
         private Item1Metadata _metadata;
 
@@ -33,11 +37,13 @@ namespace Fabric.Rti.workload.Backend.Items
             IItemMetadataStore itemMetadataStore,
             IAuthenticationService authenticationService,
             IFabricApiClient fabricApiClient,
+            IKustoClientService kustoClientService,
             AuthorizationContext authorizationContext)
             : base(logger, itemMetadataStore, authorizationContext)
         {
             _authenticationService = authenticationService;
             _fabricApiClient = fabricApiClient;
+            _kustoClientService = kustoClientService;
         }
 
         public override string ItemType => WorkloadConstants.ItemTypes.Item1;
@@ -122,15 +128,44 @@ namespace Fabric.Rti.workload.Backend.Items
 
                 _metadata = metadata;
 
-                // TODO PrepareKqlDatabaseData
                 // fire and forget, prepare initial data on kusto side
-                //_ = PrepareKqlDatabaseData(kqlDatabaseItem);
+                _ = PrepareKqlDatabaseData(metadata.KqlDatabaseQueryUrl, metadata.KqlDatabaseItemId.ToString());
                 Logger.LogInformation($"CreateAdditionalResources: successfully create Eventhouse {eventhouseItem.Id} with default KQL database {defaultKqlDatabaseId}");
             }
             catch (Exception ex)
             {
                 Logger.LogError($"Failed to create additional resources for item: {DisplayName} in workspace: {WorkspaceObjectId}. Error: {ex.Message}");
                 throw;
+            }
+        }
+
+        private async Task PrepareKqlDatabaseData(string kqlDatabaseQueryUrl, string kqlDatabaseItemId)
+        {
+            try
+            {
+                Logger.LogInformation($"PrepareKqlDatabaseData: getting kusto data plane token for kql query url: {kqlDatabaseQueryUrl}");
+                var kustoDataPlaneToken = await GetKustoDataPlaneTokenAsync(kqlDatabaseQueryUrl);
+                var kustoClientRequestProperties = new ClientRequestProperties
+                {
+                    AuthorizationScheme = "Bearer",
+                    SecurityToken = kustoDataPlaneToken
+                };
+
+                Logger.LogInformation($"PrepareKqlDatabaseData: creating table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
+                var tableCreateCommand = CslCommandGenerator.GenerateTableCreateCommand(RtiConstants.KustoIotDataTableName, typeof(KustoIotDataTableRecord), forceNormalizeColumnName: false);
+                await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, tableCreateCommand, kustoClientRequestProperties, default);
+
+                Logger.LogInformation($"PrepareKqlDatabaseData: ingesting initial data to table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
+                var records = KustoIotDataTableRecordExtensions.GenerateRandomRecords(3);
+                var csvData = string.Join(Environment.NewLine, records.Select(r => r.ToCsvFormat()));
+                var ingestCommand = CslCommandGenerator.GenerateTableIngestPushCommand(RtiConstants.KustoIotDataTableName, compressed: false, csvData);
+                await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestCommand, kustoClientRequestProperties, default);
+                
+                Logger.LogInformation($"PrepareKqlDatabaseData: successfully prepared kql database data for database id {kqlDatabaseItemId}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Failed preparing kql database data for database id {kqlDatabaseItemId}. Error: {ex.Message}");
             }
         }
 
@@ -145,6 +180,12 @@ namespace Fabric.Rti.workload.Backend.Items
                 Logger.LogError($"Failed to acquire token for Fabric API. Error: {e.Message}");
                 throw;
             }
+        }
+
+        private async Task<string> GetKustoDataPlaneTokenAsync(string kqlDatabaseQueryUrl)
+        {
+            var scopes = new[] { $"{kqlDatabaseQueryUrl}/.default" };
+            return await _authenticationService.GetAccessTokenOnBehalfOf(AuthorizationContext, scopes);
         }
     }
 }
