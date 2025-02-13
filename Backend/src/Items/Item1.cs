@@ -105,10 +105,12 @@ namespace Fabric.Rti.workload.Backend.Items
             try
             {
                 var eventhouseDisplayName = $"{DisplayName}_Eventhouse";
+                var kqlDatabaseDisplayName = $"{DisplayName}_KQLDatabase";
                 var eventhouseItem = await _fabricApiClient.CreateEventhouse(WorkspaceObjectId, eventhouseDisplayName, fabricToken);
                 eventhouseItem = await _fabricApiClient.GetEventhouse(WorkspaceObjectId, eventhouseItem.Id.Value, fabricToken);
 
                 var defaultKqlDatabaseId = eventhouseItem.Properties.DatabasesItemIds.FirstOrDefault();
+                await _fabricApiClient.UpdateKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, kqlDatabaseDisplayName, fabricToken);
                 var kqlDatabaseItem = await _fabricApiClient.GetKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, fabricToken);
 
                 metadata.EventhouseItemId = eventhouseItem.Id;

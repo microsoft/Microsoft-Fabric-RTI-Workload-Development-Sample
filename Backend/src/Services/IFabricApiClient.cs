@@ -12,4 +12,6 @@ public interface IFabricApiClient
     public Task<Eventhouse> GetEventhouse(Guid workspaceId, Guid eventhouseId, string token);
 
     public Task<KQLDatabase> GetKqlDatabase(Guid workspaceId, Guid kqlDatabaseId, string token);
+
+    public Task<KQLDatabase> UpdateKqlDatabase(Guid workspaceId, Guid kqlDatabaseId, string newDisplayName, string token);
 }
