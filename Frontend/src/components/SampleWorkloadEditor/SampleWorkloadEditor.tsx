@@ -210,47 +210,47 @@ export function SampleWorkloadEditor(props: PageProps) {
             {!itemEditorErrorMessage && (
               <div>
                 <Divider alignContent="start">
-                  {sampleItem ? "" : "New "}Item Details
+                  <b>Item Details</b>
                 </Divider>
                 <div className="section" data-testid='item-editor-metadata' >
                   {sampleItem && (
-                    <Label>WorkspaceId Id: {sampleItem?.workspaceId}</Label>
+                    <Label><b>WorkspaceId Id:</b> {sampleItem?.workspaceId}</Label>
                   )}
-                  {sampleItem && <Label>Item Id: {sampleItem?.id}</Label>}
+                  {sampleItem && <Label><b>Item Id:</b> {sampleItem?.id}</Label>}
                   {sampleItem && (
-                    <Label>Item Display Name: {sampleItem?.displayName}</Label>
+                    <Label><b>Item Display Name:</b> {sampleItem?.displayName}</Label>
                   )}
                   {sampleItem && (
-                    <Label>Item Description: {sampleItem?.description}</Label>
+                    <Label><b>Item Description:</b> {sampleItem?.description}</Label>
                   )}
                 </div>
                 <Divider alignContent="start">
-                  {sampleItem ? "" : "New "}Item Metadata
+                  <b>Item Metadata</b>
                 </Divider>
                 <div className="section" data-testid='item-metadata' >
                   {
                     sampleItem && (
-                      <Label>Eventhouse display Name: {eventhouseDisplayName}</Label>
+                      <Label><b>Eventhouse display Name:</b> {eventhouseDisplayName}</Label>
                     )}
                   {
                     sampleItem && (
-                      <Label>Eventhouse item id: {eventhouseItemId}</Label>
+                      <Label><b>Eventhouse item id:</b> {eventhouseItemId}</Label>
                     )}
                   {
                     sampleItem && (
-                      <Label>Kql database display Name: {kqlDatabaseDisplayName}</Label>
+                      <Label><b>Kql database display Name:</b> {kqlDatabaseDisplayName}</Label>
                     )}
                   {
                     sampleItem && (
-                      <Label>KQL database item id: {kqlDatabaseItemId}</Label>
+                      <Label><b>KQL database item id:</b> {kqlDatabaseItemId}</Label>
                     )}
                   {
                     sampleItem && (
-                      <Label>KQL database query url: {kqlDatabaseQueryUrl}</Label>
+                      <Label><b>KQL database query url:</b> {kqlDatabaseQueryUrl}</Label>
                     )}
                   {
                     sampleItem && (
-                      <Label>KQL database ingestion url: {kqlDatabaseIngestionUrl}</Label>
+                      <Label><b>KQL database ingestion url:</b> {kqlDatabaseIngestionUrl}</Label>
                     )}
                 </div>
               </div>
