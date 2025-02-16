@@ -49,8 +49,13 @@ export function SampleWorkloadEditor(props: PageProps) {
   // React state for WorkloadClient APIs
   const [sampleItem, setSampleItem] =
     useState<WorkloadItem<ItemPayload>>(undefined);
-  const [operand1, setOperand1] = useState<number>(0);
-  const [operand2, setOperand2] = useState<number>(0);
+  const [eventhouseItemId, setEventhouseItemId] = useState<string>("");
+  const [eventhouseDisplayName, setEventhouseDisplayName] = useState<string>("");
+  const [kqlDatabaseItemId, setKqlDatabaseItemId] = useState<string>("");
+  const [kqlDatabaseDisplayName, setKqlDatabaseDisplayName] = useState<string>("");
+  const [kqlDatabaseQueryUrl, setKqlDatabaseQueryUrl] = useState<string>("");
+  const [kqlDatabaseIngestionUrl, setKqlDatabaseIngestionUrl] = useState<string>("");
+
   const [isDirty, setDirty] = useState<boolean>(false);
 
   const [itemEditorErrorMessage, setItemEditorErrorMessage] = useState<string>("");
@@ -104,8 +109,12 @@ export function SampleWorkloadEditor(props: PageProps) {
         // load extendedMetadata
         const item1Metadata: Item1ClientMetadata =
           item.extendedMetadata.item1Metadata;
-        setOperand1(item1Metadata?.operand1);
-        setOperand2(item1Metadata?.operand2);
+        setEventhouseItemId(item1Metadata?.eventhouseItemId);
+        setEventhouseDisplayName(item1Metadata?.eventhouseDisplayName);
+        setKqlDatabaseItemId(item1Metadata?.kqlDatabaseItemId);
+        setKqlDatabaseDisplayName(item1Metadata?.kqlDatabaseDisplayName);
+        setKqlDatabaseQueryUrl(item1Metadata?.kqlDatabaseQueryUrl);
+        setKqlDatabaseIngestionUrl(item1Metadata?.kqlDatabaseIngestionUrl);
 
         setItemEditorErrorMessage("");
       } catch (error) {
@@ -132,12 +141,10 @@ export function SampleWorkloadEditor(props: PageProps) {
 
   async function SaveItem() {
     // call ItemUpdate with the current payload contents
+    // TODO implement update logic if needed
     let payload: UpdateItemPayload = {
       item1Metadata: {
-        lakehouse: null,
-        operand1: operand1,
-        operand2: operand2
-      },
+      }
     };
 
     await callItemUpdate(sampleItem.id, payload, workloadClient);
@@ -183,7 +190,7 @@ export function SampleWorkloadEditor(props: PageProps) {
       <Stack className="main">
         {["home"].includes(selectedTab as string) && (
           <span>
-            <h2>Sample Item Editor</h2>
+            <h2>RTI Sample Item</h2>
             {/* Crud item API usage example */}
             {itemEditorErrorMessage && (
               <MessageBar intent="error">
@@ -203,19 +210,48 @@ export function SampleWorkloadEditor(props: PageProps) {
             {!itemEditorErrorMessage && (
               <div>
                 <Divider alignContent="start">
-                  {sampleItem ? "" : "New "}Item Details
+                  <b>Item Details</b>
                 </Divider>
                 <div className="section" data-testid='item-editor-metadata' >
                   {sampleItem && (
-                    <Label>WorkspaceId Id: {sampleItem?.workspaceId}</Label>
+                    <Label><b>WorkspaceId Id:</b> {sampleItem?.workspaceId}</Label>
                   )}
-                  {sampleItem && <Label>Item Id: {sampleItem?.id}</Label>}
+                  {sampleItem && <Label><b>Item Id:</b> {sampleItem?.id}</Label>}
                   {sampleItem && (
-                    <Label>Item Display Name: {sampleItem?.displayName}</Label>
+                    <Label><b>Item Display Name:</b> {sampleItem?.displayName}</Label>
                   )}
                   {sampleItem && (
-                    <Label>Item Description: {sampleItem?.description}</Label>
+                    <Label><b>Item Description:</b> {sampleItem?.description}</Label>
                   )}
+                </div>
+                <Divider alignContent="start">
+                  <b>Related RTI Items</b>
+                </Divider>
+                <div className="section" data-testid='item-metadata' >
+                  {
+                    sampleItem && (
+                      <Label><b>Eventhouse display Name:</b> {eventhouseDisplayName}</Label>
+                    )}
+                  {
+                    sampleItem && (
+                      <Label><b>Eventhouse item id:</b> {eventhouseItemId}</Label>
+                    )}
+                  {
+                    sampleItem && (
+                      <Label><b>Kql database display Name:</b> {kqlDatabaseDisplayName}</Label>
+                    )}
+                  {
+                    sampleItem && (
+                      <Label><b>KQL database item id:</b> {kqlDatabaseItemId}</Label>
+                    )}
+                  {
+                    sampleItem && (
+                      <Label><b>KQL database query url:</b> {kqlDatabaseQueryUrl}</Label>
+                    )}
+                  {
+                    sampleItem && (
+                      <Label><b>KQL database ingestion url:</b> {kqlDatabaseIngestionUrl}</Label>
+                    )}
                 </div>
               </div>
             )}

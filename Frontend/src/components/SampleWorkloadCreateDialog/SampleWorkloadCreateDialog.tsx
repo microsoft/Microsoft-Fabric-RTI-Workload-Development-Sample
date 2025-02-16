@@ -16,7 +16,6 @@ export function SaveAsDialog({ workloadClient, isImmediateSave }: SaveAsDialogPr
     const sampleItemType = sampleWorkloadName + ".SampleWorkloadItem";
     const sampleItemDisplayName = "RTI Sample Workload Item";
     const sampleItemEditorPath = "/sample-workload-editor";
-    const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
     const [displayName, setDisplayName] = useState<string>("");
     const [description, setDescription] = useState<string>("");
@@ -70,7 +69,7 @@ export function SaveAsDialog({ workloadClient, isImmediateSave }: SaveAsDialogPr
         try {
             const createItemPayload: CreateItemPayload = {
                  item1Metadata: {
-                     lakehouse: { id: EMPTY_GUID, workspaceId: EMPTY_GUID } 
+                    //TODO if needed pass payload for item creation
                 }
             };
 

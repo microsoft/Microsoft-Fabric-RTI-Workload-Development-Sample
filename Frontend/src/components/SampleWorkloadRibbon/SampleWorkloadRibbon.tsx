@@ -46,9 +46,7 @@ const HomeTabToolbar = (props: RibbonProps) => {
   function getSaveButtonTooltipText(): string {
     return !props.isDeleteEnabled
       ? 'Save is not supported in Frontend-only'
-      : (!props.isLakeHouseSelected
-        ? 'Select a Lakehouse'
-        : 'Save');
+      : 'Saving RTI item not supported yet'
   }
 
   return (
@@ -104,7 +102,6 @@ const CollabButtons = (props: RibbonProps) => {
 
 export interface RibbonProps extends PageProps {
   saveItemCallback: () => Promise<void>;
-  isLakeHouseSelected?: boolean;
   isSaveButtonEnabled?: boolean;
   isDeleteEnabled?: boolean;
   deleteItemCallback: () => void;

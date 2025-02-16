@@ -33,16 +33,16 @@ export interface WorkloadItem<T> extends GenericItem {
 
 // Represents the core metadata for Item1 stored within the system's storage.
 export interface Item1Metadata {
-    operand1?: number;
-    operand2?: number;
-    operator?: string;
-    lakehouse: ItemReference;
+    eventhouseItemId?: string;
+    eventhouseDisplayName?: string;
+    kqlDatabaseItemId?: string;
+    kqlDatabaseDisplayName?: string;
+    kqlDatabaseQueryUrl?: string;
+    kqlDatabaseIngestionUrl?: string;
 }
 
-// Represents extended metadata for item1, including additional information
-// about the associated lakehouse, tailored for client-side usage.
+// Represents extended metadata for item1,tailored for client-side usage.
 export interface Item1ClientMetadata extends Item1Metadata {
-    lakehouse: GenericItem;
 }
 
 // Represents the item-specific payload passed with the  CreateItem request
