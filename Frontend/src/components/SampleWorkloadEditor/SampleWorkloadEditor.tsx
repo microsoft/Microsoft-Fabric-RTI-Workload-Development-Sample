@@ -225,7 +225,7 @@ export function SampleWorkloadEditor(props: PageProps) {
                   )}
                 </div>
                 <Divider alignContent="start">
-                  <b>Item Metadata</b>
+                  <b>Related RTI Items</b>
                 </Divider>
                 <div className="section" data-testid='item-metadata' >
                   {
