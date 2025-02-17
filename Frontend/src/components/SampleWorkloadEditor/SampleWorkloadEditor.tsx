@@ -262,7 +262,7 @@ export function SampleWorkloadEditor(props: PageProps) {
           selectedTab == "kustoExplorer" && (
             <span>
               <div className="section">
-                <KustoExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+                <KustoExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
               </div>
             </span>
           )

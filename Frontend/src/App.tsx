@@ -31,6 +31,7 @@ export interface ContextProps {
 
 export interface KustoExplorerProps extends PageProps {
   kqlDatabaseDisplayName: string;
+  kqlDatabaseItemId: string,
   kqlDatabaseQueryUrl: string;
 }
 
