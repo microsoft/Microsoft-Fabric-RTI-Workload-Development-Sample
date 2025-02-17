@@ -29,6 +29,11 @@ export interface ContextProps {
   workspaceObjectId?: string;
 }
 
+export interface KustoExplorerProps extends PageProps {
+  kqlDatabaseDisplayName: string;
+  kqlDatabaseQueryUrl: string;
+}
+
 export function App({ history, workloadClient }: AppProps) {
   return (
     <Router history={history}>

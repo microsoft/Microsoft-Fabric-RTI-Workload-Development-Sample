@@ -233,6 +233,16 @@
     display: flex;
     flex-direction: column;
 
+    .label-key {
+        color: #707070;
+        margin-right: 8px; 
+    }
+    
+    .label-value {
+        font-weight: normal;
+        color: #242424; 
+    }
+
     .section {
         display: flex;
         flex-direction: column;
@@ -252,7 +262,10 @@
 
     .button-group {
         display: flex;
-        gap: 30px;
+        justify-content: space-between;
+        width: 100%;
+        padding: 5px 0; 
+        box-sizing: border-box;
     }
 
     .run-query-button {
@@ -262,6 +275,7 @@
         padding: 10px 20px;
         border-radius: 5px;
         cursor: pointer;
+        align-self: flex-start;
     }
 
     .cancel-query-button {
@@ -271,6 +285,7 @@
         padding: 10px 20px;
         border-radius: 5px;
         cursor: pointer;
+        align-self: flex-end;
     }
 
     .result-table {
