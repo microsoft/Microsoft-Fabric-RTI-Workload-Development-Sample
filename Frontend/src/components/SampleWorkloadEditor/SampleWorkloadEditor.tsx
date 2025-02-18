@@ -36,6 +36,7 @@ import {
 } from "../../models/SampleWorkloadModel";
 import "./../../styles.scss";
 import { ItemMetadataNotFound } from "../../models/WorkloadExceptionsModel";
+import { KustoExplorerComponent } from "../SampleWorkloadKustoExplorer/SampleWorkloadKustoExplorer";
 
 export function SampleWorkloadEditor(props: PageProps) {
   const { workloadClient } = props;
@@ -257,6 +258,15 @@ export function SampleWorkloadEditor(props: PageProps) {
             )}
           </span>
         )}
+        {
+          selectedTab == "kustoExplorer" && (
+            <span>
+              <div className="section">
+                <KustoExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+              </div>
+            </span>
+          )
+        }
       </Stack>
     </Stack>
   );
