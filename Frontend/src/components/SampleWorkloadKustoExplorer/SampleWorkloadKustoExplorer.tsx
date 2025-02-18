@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { KustoExplorerProps } from "../../App";
 import { Stack } from "@fluentui/react";
 import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KustoExplorerController";
+import { KustoQueryResultComponent } from "./kustoQueryResult";
 
 export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoExplorerProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
-    const [queryResult, setQueryResult] = useState<string>("");
+    const [queryResult, setQueryResult] = useState<object[]>();
     const [queryToExecute, setQueryToExecute] = useState<string>("");
-
 
     const onRunQueryButtonClick = async () => {
         const trimmedQuery = queryToExecute.trimStart();
@@ -32,13 +32,18 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
         }
 
         if (result) {
-            setQueryResult(JSON.stringify(result));
+            setQueryResult(result);
         }
     };
 
     const cancelQuery = () => {
-        setQueryResult('');
+        setQueryResult(null);
     };
+
+    //TODO add logic for enable/disable query button
+    //TODO add logic for enable/disable cancel button
+    //TODO add add spinner for query running in background
+    //TODO render result table
 
     return (
         <>
@@ -64,7 +69,7 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                         <button className='cancel-query-button' onClick={cancelQuery}>Cancel Query</button>
                     </div>
                     <div className='result-table'>
-                        {queryResult}
+                        {queryResult && (<KustoQueryResultComponent rawQueryResult={queryResult} />)}
                     </div>
                 </div>
             </Stack>
