@@ -283,6 +283,18 @@
         cursor: pointer;
         align-self: flex-end;
     }
+
+    .run-query-explore-results {
+        height: 300px;
+        width: 700px;
+        border-radius: 8px;
+        border: 1px solid #000000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
 }
 
 .kusto-query-result-table {
@@ -322,14 +334,5 @@
 
     tr:hover {
         background-color: #f1f1f1;
-    }
-
-    .run-query-explore-results {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        height: 100vh;
     }
 }

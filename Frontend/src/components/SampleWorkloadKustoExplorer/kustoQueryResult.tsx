@@ -1,5 +1,4 @@
 import React from "react";
-import { Image } from "@fluentui/react-components";
 
 interface Column {
     ColumnName: string;
@@ -29,31 +28,26 @@ export function KustoQueryResultComponent({ rawQueryResult }: KustoQueryResultPr
 
     return (
         <div className="kusto-query-result-table">
-            {resultTable ? (
-                <table className="styled-table">
-                    <thead>
-                        <tr>
-                            {resultTable.Columns.map((column) => (
-                                <th key={column.ColumnName}>{column.ColumnName}</th>
+
+            <table className="styled-table">
+                <thead>
+                    <tr>
+                        {resultTable.Columns.map((column) => (
+                            <th key={column.ColumnName}>{column.ColumnName}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {resultTable.Rows.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                            {row.map((cell, cellIndex) => (
+                                <td key={cellIndex}>{cell}</td>
                             ))}
                         </tr>
-                    </thead>
-                    <tbody>
-                        {resultTable.Rows.map((row, rowIndex) => (
-                            <tr key={rowIndex}>
-                                {row.map((cell, cellIndex) => (
-                                    <td key={cellIndex}>{cell}</td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            ) : (
-                <div className="run-query-explore-results">
-                    <Image src="../../../internalAssets/Loupe.svg" />
-                    <h2>Run a query and explore the results here</h2>
-                </div>
-            )}
+                    ))}
+                </tbody>
+            </table>
+
         </div>
     );
 }

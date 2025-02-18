@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { Image } from "@fluentui/react-components";
 import { KustoExplorerProps } from "../../App";
 import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KustoExplorerController";
 import { KustoQueryResultComponent } from "./kustoQueryResult";
+import { Spinner, SpinnerSize } from "@fluentui/react";
 
 export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoExplorerProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
@@ -47,6 +49,7 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
     };
 
     function cancelQuery() {
+        //TODO add logic for enable/disable cancel button
         setQueryResult(null);
     };
 
@@ -54,14 +57,11 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
         if (queryToExecute == null || queryToExecute.trim() == "") {
             return true;
         }
-        if(isQueryInProgress){
+        if (isQueryInProgress) {
             return true;
         }
         return false;
     }
-
-    //TODO add logic for enable/disable cancel button
-    //TODO add add spinner for query running in background
 
     return (
         <div className='kusto-explorer'>
@@ -87,7 +87,27 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                 >Run Query</button>
                 <button className='cancel-query-button' onClick={cancelQuery}>Cancel Query</button>
             </div>
-            <KustoQueryResultComponent rawQueryResult={queryResult} />
+            {
+                isQueryInProgress ?
+                    (
+                        <div className="run-query-explore-results">
+                            <Spinner label="Query in progress" size={SpinnerSize.large}/>
+                        </div>
+                    )
+                    :
+                    (
+                        queryResult ?
+                            (
+                                <KustoQueryResultComponent rawQueryResult={queryResult} />
+                            ) :
+                            (
+                                <div className="run-query-explore-results">
+                                    <Image src="../../../internalAssets/Loupe.svg" />
+                                    <h2>Run a query and explore the results here</h2>
+                                </div>
+                            )
+                    )
+            }
         </div>
     );
 }
