@@ -7,39 +7,59 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [queryResult, setQueryResult] = useState<object[]>();
     const [queryToExecute, setQueryToExecute] = useState<string>("");
+    const [isQueryInProgress, setIsQueryInProgress] = useState<boolean>(false);
 
-    const onRunQueryButtonClick = async () => {
+    async function onRunQueryButtonClick() {
         const trimmedQuery = queryToExecute.trimStart();
         let result = null;
-        if (trimmedQuery.startsWith(".")) {
-            result = await CallExecuteControlCommand(
-                sampleWorkloadBEUrl,
-                kqlDatabaseQueryUrl,
-                kqlDatabaseItemId,
-                queryToExecute,
-                workloadClient
-            );
-        }
-        else {
-            result = await CallExecuteQuery(
-                sampleWorkloadBEUrl,
-                kqlDatabaseQueryUrl,
-                kqlDatabaseItemId,
-                queryToExecute,
-                workloadClient
-            );
-        }
+        setIsQueryInProgress(true);
+        try {
+            if (trimmedQuery.startsWith(".")) {
+                result = await CallExecuteControlCommand(
+                    sampleWorkloadBEUrl,
+                    kqlDatabaseQueryUrl,
+                    kqlDatabaseItemId,
+                    queryToExecute,
+                    workloadClient
+                );
+            }
+            else {
+                result = await CallExecuteQuery(
+                    sampleWorkloadBEUrl,
+                    kqlDatabaseQueryUrl,
+                    kqlDatabaseItemId,
+                    queryToExecute,
+                    workloadClient
+                );
+            }
 
-        if (result) {
-            setQueryResult(result);
+            if (result) {
+                setQueryResult(result);
+            }
+        }
+        catch (error) {
+            setQueryResult(null);
+            console.error("Error executing query:", error);
+        }
+        finally {
+            setIsQueryInProgress(false);
         }
     };
 
-    const cancelQuery = () => {
+    function cancelQuery() {
         setQueryResult(null);
     };
 
-    //TODO add logic for enable/disable query button
+    function isDisabledExecuteQueryButton(): boolean {
+        if (queryToExecute == null || queryToExecute.trim() == "") {
+            return true;
+        }
+        if(isQueryInProgress){
+            return true;
+        }
+        return false;
+    }
+
     //TODO add logic for enable/disable cancel button
     //TODO add add spinner for query running in background
 
@@ -61,7 +81,10 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                 onChange={(e) => setQueryToExecute(e.target.value)}
             />
             <div className='button-group'>
-                <button className='run-query-button' onClick={onRunQueryButtonClick}>Run Query</button>
+                <button className={isDisabledExecuteQueryButton() ? 'run-query-button-disabled' : 'run-query-button'}
+                    onClick={onRunQueryButtonClick}
+                    disabled={isDisabledExecuteQueryButton()}
+                >Run Query</button>
                 <button className='cancel-query-button' onClick={cancelQuery}>Cancel Query</button>
             </div>
             <KustoQueryResultComponent rawQueryResult={queryResult} />

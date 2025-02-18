@@ -263,6 +263,17 @@
         align-self: flex-start;
     }
 
+    .run-query-button-disabled {
+        background-color: #d3d3d3; 
+        color: #a9a9a9; 
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: not-allowed;
+        opacity: 0.6; 
+        align-self: flex-start;
+    }
+
     .cancel-query-button {
         background-color: #e11d48;
         color: white;
