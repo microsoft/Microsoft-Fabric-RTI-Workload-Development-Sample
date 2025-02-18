@@ -1,4 +1,3 @@
-import { Stack } from "@fluentui/react";
 import React from "react";
 
 interface Column {
@@ -28,33 +27,29 @@ export function KustoQueryResultComponent({ rawQueryResult }: KustoQueryResultPr
     const resultTable = parseRawQueryResult(rawQueryResult);
 
     return (
-        <Stack>
+        <div className="kusto-query-result-table">
             {resultTable ? (
-                <div className="kusto-query-result-table">
-                    <div className="table-container">
-                        <table className="styled-table">
-                            <thead>
-                                <tr>
-                                    {resultTable.Columns.map((column) => (
-                                        <th key={column.ColumnName}>{column.ColumnName}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {resultTable.Rows.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        {row.map((cell, cellIndex) => (
-                                            <td key={cellIndex}>{cell}</td>
-                                        ))}
-                                    </tr>
+                <table className="styled-table">
+                    <thead>
+                        <tr>
+                            {resultTable.Columns.map((column) => (
+                                <th key={column.ColumnName}>{column.ColumnName}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {resultTable.Rows.map((row, rowIndex) => (
+                            <tr key={rowIndex}>
+                                {row.map((cell, cellIndex) => (
+                                    <td key={cellIndex}>{cell}</td>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             ) : (
                 <label>Query Result is malformed</label>
             )}
-        </Stack>
+        </div>
     );
 }

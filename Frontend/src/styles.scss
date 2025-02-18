@@ -179,7 +179,6 @@
     }
 }
 
-
 .hidden-explorer {
     width: max-content;
     min-width: auto;
@@ -221,17 +220,9 @@
 
 
 .kusto-explorer {
-    min-width: 200px;
-    width: 70vw;
-    height: 70vh;
-    vertical-align: middle;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
-    margin: 5px 0;
-    padding: 5px;
-    display: flex;
-    flex-direction: column;
+    h2 {
+        padding: 0 0 0 0px
+    }
 
     .label-key {
         color: #707070;
@@ -243,16 +234,10 @@
         color: #242424;
     }
 
-    .section {
-        display: flex;
-        flex-direction: column;
-        row-gap: 10px;
-        white-space: inherit;
-        flex: 1;
-    }
-
     .kusto-query-input {
         resize: none;
+        padding: 10 10 10 10px;
+        margin: 20px 0px;
         flex: 1;
         width: 100%;
         height: auto;
@@ -287,35 +272,20 @@
         cursor: pointer;
         align-self: flex-end;
     }
-
-    .result-table {
-        margin-top: 20px;
-        border: 1px solid #ccc;
-        padding: 10px;
-        overflow: auto;
-        width: 100%;
-        height: 200px;
-        box-sizing: border-box;
-    }
 }
 
 .kusto-query-result-table {
     min-width: 200px;
-    width: 70vw;
-    height: 70vh;
+    width: 100%;
+    height: 300px;
     vertical-align: middle;
     border-radius: 8px;
     background: white;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
     margin: 5px 0;
-    padding: 5px;
     display: flex;
     flex-direction: column;
-
-    .table-container {
-        overflow-x: auto;
-        margin: 20px 0;
-    }
+    overflow: auto;
 
     .styled-table {
         width: 100%;
@@ -330,7 +300,7 @@
     }
 
     th {
-        background-color: #d3d3d3;
+        background-color: #d3d3d3; 
         color: black;
         font-weight: bold;
     }
