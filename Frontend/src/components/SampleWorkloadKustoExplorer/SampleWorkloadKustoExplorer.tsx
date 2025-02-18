@@ -64,7 +64,7 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                 <button className='run-query-button' onClick={onRunQueryButtonClick}>Run Query</button>
                 <button className='cancel-query-button' onClick={cancelQuery}>Cancel Query</button>
             </div>
-            {queryResult && (<KustoQueryResultComponent rawQueryResult={queryResult} />)}
+            <KustoQueryResultComponent rawQueryResult={queryResult} />
         </div>
     );
 }

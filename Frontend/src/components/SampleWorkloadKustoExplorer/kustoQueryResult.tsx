@@ -1,4 +1,5 @@
 import React from "react";
+import { Image } from "@fluentui/react-components";
 
 interface Column {
     ColumnName: string;
@@ -17,10 +18,10 @@ interface KustoQueryResultProps {
 }
 
 function parseRawQueryResult(rawQueryResult: any): Table | undefined {
-    if (!Array.isArray(rawQueryResult.Tables)) {
+    if (!rawQueryResult || !Array.isArray(rawQueryResult.Tables)) {
         return undefined;
     }
-    return rawQueryResult.Tables.find((table: any) => table.TableName === "Table_0");
+    return rawQueryResult.Tables.find((table: Table) => table.TableName === "Table_0");
 }
 
 export function KustoQueryResultComponent({ rawQueryResult }: KustoQueryResultProps) {
@@ -48,7 +49,10 @@ export function KustoQueryResultComponent({ rawQueryResult }: KustoQueryResultPr
                     </tbody>
                 </table>
             ) : (
-                <label>Query Result is malformed</label>
+                <div className="run-query-explore-results">
+                    <Image src="../../../internalAssets/Loupe.svg" />
+                    <h2>Run a query and explore the results here</h2>
+                </div>
             )}
         </div>
     );

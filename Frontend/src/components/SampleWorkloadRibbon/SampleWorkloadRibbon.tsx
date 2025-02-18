@@ -127,10 +127,13 @@ export function Ribbon(props: RibbonProps) {
         <Tab value="kustoExplorer" data-testid="kustoExplorer-tab-btn">kusto Explorer</Tab>
       </TabList>
 
-      <div className="toolbarContainer">
-        {["home"].includes(selectedValue as string) && <HomeTabToolbar {...props} />}
-      </div>
-
+      {
+        ["home"].includes(selectedValue as string) && (
+          <div className="toolbarContainer">
+            {selectedValue == "home" && <HomeTabToolbar {...props} />}
+          </div>
+        )
+      }
     </div>
   );
 };
