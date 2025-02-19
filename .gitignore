@@ -398,8 +398,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+**/.idea
 
 /Frontend/package-lock.json
+/Frontend/.vscode
 /package-lock.json
 
 # Fabric DevGateway Container Environment Files
