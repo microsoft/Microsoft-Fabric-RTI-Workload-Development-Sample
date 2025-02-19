@@ -400,6 +400,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 /Frontend/package-lock.json
+/Frontend/.vscode
 /package-lock.json
 
 # Fabric DevGateway Container Environment Files
