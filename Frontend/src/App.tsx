@@ -29,7 +29,7 @@ export interface ContextProps {
   workspaceObjectId?: string;
 }
 
-export interface KustoExplorerProps extends PageProps {
+export interface KustoComponentProps extends PageProps {
   kqlDatabaseDisplayName: string;
   kqlDatabaseItemId: string,
   kqlDatabaseQueryUrl: string;

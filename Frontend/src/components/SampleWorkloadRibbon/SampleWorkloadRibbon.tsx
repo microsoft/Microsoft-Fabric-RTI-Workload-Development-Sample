@@ -124,7 +124,8 @@ export function Ribbon(props: RibbonProps) {
       <CollabButtons {...props} />
       <TabList defaultSelectedValue="home" onTabSelect={onTabSelect}>
         <Tab value="home" data-testid="home-tab-btn">Home</Tab>
-        <Tab value="kustoExplorer" data-testid="kustoExplorer-tab-btn">kusto Explorer</Tab>
+        <Tab value="kustoExplorer" data-testid="kustoExplorer-tab-btn">Kusto Explorer</Tab>
+        <Tab value="kustoIngestor" data-testid="kustoIngestor-tab-btn">Kusto Ingestion</Tab>
       </TabList>
 
       {
