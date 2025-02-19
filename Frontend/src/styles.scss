@@ -218,6 +218,9 @@
     gap: 0.5rem
 }
 
+.divider {
+    margin: 20px 0px;
+}
 
 .kusto-explorer {
     h2 {
@@ -334,5 +337,22 @@
 
     tr:hover {
         background-color: #f1f1f1;
+    }
+}
+
+
+.kusto-ingestor {
+    h2 {
+        padding: 0 0 0 0px
+    }
+
+    .label-key {
+        color: #707070;
+        margin-right: 8px;
+    }
+
+    .label-value {
+        font-weight: normal;
+        color: #242424;
     }
 }

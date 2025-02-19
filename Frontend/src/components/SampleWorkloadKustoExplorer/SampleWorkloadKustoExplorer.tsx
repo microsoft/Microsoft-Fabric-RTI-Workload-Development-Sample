@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Image } from "@fluentui/react-components";
-import { KustoExplorerProps } from "../../App";
+import { KustoComponentProps } from "../../App";
 import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KustoExplorerController";
 import { KustoQueryResultComponent } from "./kustoQueryResult";
 import { Spinner, SpinnerSize } from "@fluentui/react";
 
-export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoExplorerProps) {
+export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [queryResult, setQueryResult] = useState<object[]>();
     const [queryToExecute, setQueryToExecute] = useState<string>("");
@@ -91,7 +91,7 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                 isQueryInProgress ?
                     (
                         <div className="run-query-explore-results">
-                            <Spinner label="Query in progress" size={SpinnerSize.large}/>
+                            <Spinner label="Query in progress" size={SpinnerSize.large} />
                         </div>
                     )
                     :

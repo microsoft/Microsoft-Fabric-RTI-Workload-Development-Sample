@@ -37,6 +37,7 @@ import {
 import "./../../styles.scss";
 import { ItemMetadataNotFound } from "../../models/WorkloadExceptionsModel";
 import { KustoExplorerComponent } from "../SampleWorkloadKustoExplorer/SampleWorkloadKustoExplorer";
+import { KustoIngestorComponent } from "../SampleWorkloadKustoIngestor/SampleWorkloadKustoIngestor";
 
 export function SampleWorkloadEditor(props: PageProps) {
   const { workloadClient } = props;
@@ -210,7 +211,7 @@ export function SampleWorkloadEditor(props: PageProps) {
             )}
             {!itemEditorErrorMessage && (
               <div>
-                <Divider alignContent="start">
+                <Divider alignContent="start" className="divider">
                   <b>Item Details</b>
                 </Divider>
                 <div className="section" data-testid='item-editor-metadata' >
@@ -225,7 +226,7 @@ export function SampleWorkloadEditor(props: PageProps) {
                     <Label><b>Item Description:</b> {sampleItem?.description}</Label>
                   )}
                 </div>
-                <Divider alignContent="start">
+                <Divider alignContent="start" className="divider">
                   <b>Related RTI Items</b>
                 </Divider>
                 <div className="section" data-testid='item-metadata' >
@@ -263,6 +264,15 @@ export function SampleWorkloadEditor(props: PageProps) {
             <span>
               <div className="section">
                 <KustoExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+              </div>
+            </span>
+          )
+        }
+        {
+          selectedTab == "kustoIngestor" && (
+            <span>
+              <div className="section">
+                <KustoIngestorComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
               </div>
             </span>
           )
