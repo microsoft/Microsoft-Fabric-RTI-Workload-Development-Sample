@@ -377,6 +377,10 @@
         background-color: #f9f9f9;
     }
 
+    tr:hover td:not(.actions-column) {
+        background-color: #ddd;
+    }
+
     .actions-column {
         text-align: center;
         border: none;
