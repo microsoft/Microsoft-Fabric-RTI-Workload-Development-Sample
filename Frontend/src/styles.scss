@@ -399,6 +399,18 @@
         align-items: center;
     }
 
+    .add-row-button {
+        background-color: #127865;
+        color: white;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+    
+    .add-row-button:hover {
+        color: black;
+        background-color: #0a5a4a;
+    }
+
     .dismiss-button {
         background-color: red;
         border-radius: 50%;

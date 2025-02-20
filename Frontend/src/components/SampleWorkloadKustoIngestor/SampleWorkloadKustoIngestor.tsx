@@ -79,7 +79,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     icon={<AddCircle32Regular />}
                     onClick={addRow}
                     disabled={rows.length >= maxRows}
-                    style={{ backgroundColor: '127865', color: 'white', borderRadius: '50%' }}>
+                    className="add-row-button">
                 </Button>
             </div>
             <div className="records-container">
