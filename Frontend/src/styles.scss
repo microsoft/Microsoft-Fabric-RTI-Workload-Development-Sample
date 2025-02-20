@@ -267,13 +267,13 @@
     }
 
     .run-query-button-disabled {
-        background-color: #d3d3d3; 
-        color: #a9a9a9; 
+        background-color: #d3d3d3;
+        color: #a9a9a9;
         border: none;
         padding: 10px 20px;
         border-radius: 5px;
         cursor: not-allowed;
-        opacity: 0.6; 
+        opacity: 0.6;
         align-self: flex-start;
     }
 
@@ -320,13 +320,14 @@
         text-align: left;
     }
 
-    th, td {
+    th,
+    td {
         padding: 12px 15px;
         border: 1px solid #ddd;
     }
 
     th {
-        background-color: #d3d3d3; 
+        background-color: #d3d3d3;
         color: black;
         font-weight: bold;
     }
@@ -365,7 +366,7 @@
     th, td {
         border: 1px solid #ddd;
         padding: 8px;
-        text-align: left;
+        text-align: center;
     }
 
     th {
@@ -374,10 +375,6 @@
 
     tr:nth-child(even) {
         background-color: #f9f9f9;
-    }
-
-    tr:hover {
-        background-color: #ddd;
     }
 
     .actions-column {
