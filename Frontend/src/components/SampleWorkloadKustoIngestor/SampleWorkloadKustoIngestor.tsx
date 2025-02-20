@@ -58,7 +58,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
             <Divider alignContent="start" className="divider">
                 <b>Rows generator</b>
             </Divider>
-            <div>
+            <div className="input-container">
                 <Input
                     placeholder="Timestamp"
                     value={stagingRow.timestamp}

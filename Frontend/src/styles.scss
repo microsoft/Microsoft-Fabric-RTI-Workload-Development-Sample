@@ -341,7 +341,6 @@
     }
 }
 
-
 .kusto-ingestor {
     h2 {
         padding: 0 0 0 0px;
@@ -418,5 +417,15 @@
         max-height: 300px;
         overflow-y: auto;
         margin-top: 20px;
+    }
+
+    .input-container {
+        display: flex;
+        gap: 5px; 
+        align-items: center; 
+    }
+
+    .input-container input {
+        width: 180px;
     }
 }
