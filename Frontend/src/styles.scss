@@ -343,7 +343,7 @@
 
 .kusto-ingestor {
     h2 {
-        padding: 0 0 0 0px
+        padding: 0 0 0 0px;
     }
 
     .label-key {
@@ -354,5 +354,60 @@
     .label-value {
         font-weight: normal;
         color: #242424;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+
+    .actions-column {
+        text-align: center;
+        border: none;
+        background-color: transparent;
+    }
+
+    .actions-column th, .actions-column td {
+        border: none;
+        background-color: transparent;
+    }
+
+    .value-column {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .remove-button {
+        background-color: #e11d48;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .remove-button:hover {
+        background-color: #c00;
     }
 }

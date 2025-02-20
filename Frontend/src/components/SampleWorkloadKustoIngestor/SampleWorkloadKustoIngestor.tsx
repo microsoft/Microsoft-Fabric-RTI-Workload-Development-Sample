@@ -84,7 +84,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                         <th>Timestamp</th>
                         <th>Name</th>
                         <th>Value</th>
-                        <th>Actions</th>
+                        <th className="actions-column"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -93,8 +93,8 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                             <td>{row.timestamp}</td>
                             <td>{row.name}</td>
                             <td>{row.value}</td>
-                            <td>
-                                <Button onClick={() => removeRow(index)}>Remove</Button>
+                            <td className="actions-column">
+                                <Button className="remove-button" onClick={() => removeRow(index)}>Remove</Button>
                             </td>
                         </tr>
                     ))}
