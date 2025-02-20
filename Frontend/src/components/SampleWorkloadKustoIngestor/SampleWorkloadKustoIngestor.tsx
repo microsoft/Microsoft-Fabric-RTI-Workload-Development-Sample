@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { KustoComponentProps } from "../../App";
 import { Divider, Button, Input } from "@fluentui/react-components";
+import { DismissCircle48Regular } from "@fluentui/react-icons";
 
 interface IotDataTableRow {
     timestamp: string;
@@ -95,7 +96,11 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                                 <td>{row.name}</td>
                                 <td>{row.value}</td>
                                 <td className="actions-column">
-                                    <Button className="remove-button" onClick={() => removeRow(index)}>Remove</Button>
+                                    <Button
+                                        icon={<DismissCircle48Regular />}
+                                        className="dismiss-button"
+                                        onClick={() => removeRow(index)}
+                                    />
                                 </td>
                             </tr>
                         ))}

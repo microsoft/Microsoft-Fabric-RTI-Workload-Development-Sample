@@ -399,18 +399,16 @@
         align-items: center;
     }
 
-    .remove-button {
-        background-color: #e11d48;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-left: 10px;
+    .dismiss-button {
+        background-color: red;
+        border-radius: 50%;
+        color: black;
+        transition: color 0.3s;
     }
-
-    .remove-button:hover {
-        background-color: #c00;
+    
+    .dismiss-button:hover {
+        background-color: black;
+        color: white;
     }
 
     .records-container {
