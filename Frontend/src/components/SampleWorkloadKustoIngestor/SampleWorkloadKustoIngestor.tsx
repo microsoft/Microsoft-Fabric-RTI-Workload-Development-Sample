@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { KustoComponentProps } from "../../App";
-import { Divider, Button, Input } from "@fluentui/react-components";
+import { Divider, Button, Input, Tooltip } from "@fluentui/react-components";
 import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
 
 interface IotDataTableRow {
@@ -75,12 +75,14 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     value={stagingRow.value}
                     onChange={(e) => handleInputChange(e, "value")}
                 />
-                <Button
-                    icon={<AddCircle32Regular />}
-                    onClick={addRow}
-                    disabled={rows.length >= maxRows}
-                    className="add-row-button">
-                </Button>
+                <Tooltip content={rows.length >= maxRows ? `${maxRows} limit reached` : "add a new record"} relationship={"label"}>
+                    <Button
+                        icon={<AddCircle32Regular />}
+                        onClick={addRow}
+                        disabled={rows.length >= maxRows}
+                        className="add-row-button">
+                    </Button>
+                </Tooltip>
             </div>
             <div className="records-container">
                 <table>

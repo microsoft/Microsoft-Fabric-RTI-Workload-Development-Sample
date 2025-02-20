@@ -411,6 +411,11 @@
         background-color: #0a5a4a;
     }
 
+    .add-row-button:disabled {
+        background-color: gray;
+        color: white;
+    }
+
     .dismiss-button {
         background-color: red;
         border-radius: 50%;
