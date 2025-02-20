@@ -12,7 +12,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
     const [rows, setRows] = useState<IotDataTableRow[]>([]);
     const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
     const targetTable = "IotData";
-    const maxRows = 10;
+    const maxRows = 20;
 
     function generateRandomRow(): IotDataTableRow {
         const timestamp = new Date().toISOString();
@@ -78,28 +78,30 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     {rows.length >= maxRows ? `${maxRows} rows limit` : "Add Row"}
                 </Button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Name</th>
-                        <th>Value</th>
-                        <th className="actions-column"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((row, index) => (
-                        <tr key={index}>
-                            <td>{row.timestamp}</td>
-                            <td>{row.name}</td>
-                            <td>{row.value}</td>
-                            <td className="actions-column">
-                                <Button className="remove-button" onClick={() => removeRow(index)}>Remove</Button>
-                            </td>
+            <div className="records-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Name</th>
+                            <th>Value</th>
+                            <th className="actions-column"></th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {rows.map((row, index) => (
+                            <tr key={index}>
+                                <td>{row.timestamp}</td>
+                                <td>{row.name}</td>
+                                <td>{row.value}</td>
+                                <td className="actions-column">
+                                    <Button className="remove-button" onClick={() => removeRow(index)}>Remove</Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

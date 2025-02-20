@@ -363,7 +363,8 @@
         margin-top: 20px;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #ddd;
         padding: 8px;
         text-align: center;
@@ -387,7 +388,8 @@
         background-color: transparent;
     }
 
-    .actions-column th, .actions-column td {
+    .actions-column th,
+    .actions-column td {
         border: none !important;
         background-color: transparent !important;
     }
@@ -410,5 +412,11 @@
 
     .remove-button:hover {
         background-color: #c00;
+    }
+
+    .records-container {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 20px;
     }
 }
