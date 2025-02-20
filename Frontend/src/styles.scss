@@ -373,7 +373,7 @@
         background-color: #f2f2f2;
     }
 
-    tr:nth-child(even) {
+    tr:nth-child(even) td:not(.actions-column) {
         background-color: #f9f9f9;
     }
 
@@ -384,8 +384,8 @@
     }
 
     .actions-column th, .actions-column td {
-        border: none;
-        background-color: transparent;
+        border: none !important;
+        background-color: transparent !important;
     }
 
     .value-column {
