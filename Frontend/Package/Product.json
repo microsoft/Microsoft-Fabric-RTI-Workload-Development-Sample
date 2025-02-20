@@ -85,5 +85,5 @@
           "license": {"url": "https://example.com/license"}
       }
     },
-    "compatibleItemTypes" : ["Lakehouse"]
+    "compatibleItemTypes" : ["KustoEventHouse", "KustoDatabase"]
 }
