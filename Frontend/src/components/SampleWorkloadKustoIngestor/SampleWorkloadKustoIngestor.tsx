@@ -10,16 +10,22 @@ interface IotDataTableRow {
 
 export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
     const [rows, setRows] = useState<IotDataTableRow[]>([]);
-    const [stagingRow, setStagingRow] = useState<IotDataTableRow>({
-        timestamp: "",
-        name: "",
-        value: ""
-    });
+    const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
     const targetTable = "IotData";
+    const maxRows = 10;
+
+    function generateRandomRow(): IotDataTableRow {
+        const timestamp = new Date().toISOString();
+        const name = `sensor-${Math.floor(Math.random() * 1000)}`;
+        const value = (Math.random()).toString();
+        return { timestamp, name, value };
+    }
 
     function addRow() {
-        setRows([...rows, stagingRow]);
-        setStagingRow({ timestamp: "", name: "", value: "" });
+        if (rows.length < maxRows) {
+            setRows([...rows, stagingRow]);
+            setStagingRow(generateRandomRow());
+        }
     }
 
     function removeRow(index: number) {
@@ -68,7 +74,9 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     value={stagingRow.value}
                     onChange={(e) => handleInputChange(e, "value")}
                 />
-                <Button onClick={addRow}>Add Row</Button>
+                <Button onClick={addRow} disabled={rows.length >= maxRows}>
+                    {rows.length >= maxRows ? `${maxRows} rows limit` : "Add Row"}
+                </Button>
             </div>
             <table>
                 <thead>
