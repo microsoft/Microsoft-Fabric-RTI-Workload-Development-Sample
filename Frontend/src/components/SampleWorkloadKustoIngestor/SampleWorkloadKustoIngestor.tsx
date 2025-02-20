@@ -2,24 +2,24 @@ import React, { useState } from "react";
 import { KustoComponentProps } from "../../App";
 import { Divider, Button, Input } from "@fluentui/react-components";
 
-interface TableRow {
-    column1: string;
-    column2: string;
-    column3: string;
+interface IotDataTableRow {
+    timestamp: string;
+    name: string;
+    value: string;
 }
 
 export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
-    const [rows, setRows] = useState<TableRow[]>([]);
-    const [stagingRow, setStagingRow] = useState<TableRow>({
-        column1: "",
-        column2: "",
-        column3: ""
+    const [rows, setRows] = useState<IotDataTableRow[]>([]);
+    const [stagingRow, setStagingRow] = useState<IotDataTableRow>({
+        timestamp: "",
+        name: "",
+        value: ""
     });
     const targetTable = "IotData";
 
     function addRow() {
         setRows([...rows, stagingRow]);
-        setStagingRow({ column1: "", column2: "", column3: "" });
+        setStagingRow({ timestamp: "", name: "", value: "" });
     }
 
     function removeRow(index: number) {
@@ -27,7 +27,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
         setRows(newRows);
     }
 
-    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>, column: keyof TableRow) {
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>, column: keyof IotDataTableRow) {
         setStagingRow({ ...stagingRow, [column]: e.target.value });
     }
 
@@ -50,41 +50,41 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                 <label className='label-value'>{targetTable}</label>
             </div>
             <Divider alignContent="start" className="divider">
-                <b>Records generator</b>
+                <b>Rows generator</b>
             </Divider>
             <div>
                 <Input
-                    placeholder="Column 1"
-                    value={stagingRow.column1}
-                    onChange={(e) => handleInputChange(e, "column1")}
+                    placeholder="Timestamp"
+                    value={stagingRow.timestamp}
+                    onChange={(e) => handleInputChange(e, "timestamp")}
                 />
                 <Input
-                    placeholder="Column 2"
-                    value={stagingRow.column2}
-                    onChange={(e) => handleInputChange(e, "column2")}
+                    placeholder="Name"
+                    value={stagingRow.name}
+                    onChange={(e) => handleInputChange(e, "name")}
                 />
                 <Input
-                    placeholder="Column 3"
-                    value={stagingRow.column3}
-                    onChange={(e) => handleInputChange(e, "column3")}
+                    placeholder="Value"
+                    value={stagingRow.value}
+                    onChange={(e) => handleInputChange(e, "value")}
                 />
                 <Button onClick={addRow}>Add Row</Button>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Column 1</th>
-                        <th>Column 2</th>
-                        <th>Column 3</th>
+                        <th>Timestamp</th>
+                        <th>Name</th>
+                        <th>Value</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {rows.map((row, index) => (
                         <tr key={index}>
-                            <td>{row.column1}</td>
-                            <td>{row.column2}</td>
-                            <td>{row.column3}</td>
+                            <td>{row.timestamp}</td>
+                            <td>{row.name}</td>
+                            <td>{row.value}</td>
                             <td>
                                 <Button onClick={() => removeRow(index)}>Remove</Button>
                             </td>
