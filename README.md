@@ -1,28 +1,21 @@
-# Project
+# Microsoft Fabric RTI Sample Workload
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+Welcome to the Microsoft Fabric RTI Sample Workload repository.  
+This repository contains an application hosting a sample Microsoft Fabric workload.  
+We will be using this repository to demonstrate key scenarios and features of the Microsoft Fabric RTI (Real-Time Intelligence) platform.  
+Among the features we will be demonstrating are:
+- Eventhouse and KQL Database: Real-time data ingestion and querying
+- Eventstream: Real-time data streaming and processing engine (coming soon)
+- Activator: Real-time data processing and alerting engine (coming soon)
 
-As the maintainer of this project, please make a few updates:
+Our repo is based on the [Microsoft-Fabric-workload-development-sample](https://github.com/microsoft/Microsoft-Fabric-workload-development-sample) repository,  
+and the official documentation [Microsoft Fabric Workload Development Kit](https://learn.microsoft.com/en-us/fabric/workload-development-kit/development-kit-overview).
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Disclaimer
 
-## Contributing
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+This repository is a stripped version of the [Microsoft-Fabric-workload-development-sample](https://github.com/microsoft/Microsoft-Fabric-workload-development-sample) repository.  
+While this repository is intended to demonstrate the capabilities of the Microsoft Fabric RTI platform, it might not be up-to-date with the latest changes in the original repository.  
+For the various features and capabilities of a Workload, please refer to the original repository.
 
 ## Trademarks
 
@@ -31,3 +24,8 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+## Quick Start - Running the Sample Workload in a Local Development Environment
+
+Please refer to the [Microsoft Fabric Workload Development Kit Quickstart Guide](https://learn.microsoft.com/en-us/fabric/workload-development-kit/quickstart-sample) documentation for detailed instructions on how to set up your development environment.  
+Since this repository is based on the [Microsoft-Fabric-workload-development-sample](https://github.com/microsoft/Microsoft-Fabric-workload-development-sample) repository, the instructions are the same.
