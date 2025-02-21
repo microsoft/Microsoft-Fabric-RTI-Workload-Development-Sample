@@ -40,7 +40,8 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
     }
 
     function onIngestButtonClick() {
-        // Ingest data logic here
+        const csvData = convertRowsToCSV(rows);
+        console.log(csvData); // Replace this with your ingestion logic
     }
 
     function isDisabledIngestButton(): boolean {
@@ -53,6 +54,11 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
 
     function hasRows(): boolean {
         return rows.length > 0;
+    }
+
+    function convertRowsToCSV(rows: IotDataTableRow[]): string {
+        const csvRows = rows.map(row => `${row.timestamp},${row.name},${row.value}`);
+        return csvRows.join("\n");
     }
 
     return (
