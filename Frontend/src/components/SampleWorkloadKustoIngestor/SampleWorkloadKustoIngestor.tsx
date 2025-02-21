@@ -1,19 +1,110 @@
-import React from "react";
-import { KustoComponentProps } from "../../App";
+import React, { useState } from "react";
+import { KustoIngestorComponentProps } from "../../App";
+import { Divider, Button, Input, Tooltip, RadioGroup, Radio } from "@fluentui/react-components";
+import { MessageBar } from "@fluentui/react";
+import { MessageBarType } from "@fluentui/react";
+import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
+import { CallQueuedIngest, CallStreamingIngest } from "../../controller/KustoIngestorController";
 
-export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
+interface IotDataTableRow {
+    timestamp: string;
+    name: string;
+    value: string;
+}
+
+export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KustoIngestorComponentProps) {
+    const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
+    const [rows, setRows] = useState<IotDataTableRow[]>([]);
+    const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
+    const [ingestionType, setIngestionType] = useState<string>("streaming");
+    const [ingestionSuccess, setIngestionSuccess] = useState<boolean | null>(null);
+    const [isIngestionInProgress, setIsIngestionInProgress] = useState<boolean>(false);
+    const targetTable = "IotData";
+    const maxRows = 20;
+
+    function generateRandomRow(): IotDataTableRow {
+        const timestamp = new Date().toISOString();
+        const name = `sensor-${Math.floor(Math.random() * 1000)}`;
+        const value = (Math.random()).toString();
+        return { timestamp, name, value };
+    }
+
+    function addRow() {
+        if (rows.length < maxRows) {
+            setRows([...rows, stagingRow]);
+            setStagingRow(generateRandomRow());
+        }
+    }
+
+    function removeRow(index: number) {
+        const newRows = rows.filter((_, i) => i !== index);
+        setRows(newRows);
+    }
+
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>, column: keyof IotDataTableRow) {
+        setStagingRow({ ...stagingRow, [column]: e.target.value });
+    }
+
+    async function onIngestButtonClick() {
+        try {
+            setIngestionSuccess(null);
+            setIsIngestionInProgress(true);
+            const contentToIngest = convertRowsToCSV(rows);
+            if (ingestionType === "queued") {
+                await CallQueuedIngest(
+                    sampleWorkloadBEUrl,
+                    kqlDatabaseIngestionUrl,
+                    kqlDatabaseItemId,
+                    targetTable,
+                    contentToIngest,
+                    workloadClient
+                );
+            } else if (ingestionType === "streaming") {
+                await CallStreamingIngest(
+                    sampleWorkloadBEUrl,
+                    kqlDatabaseIngestionUrl,
+                    kqlDatabaseItemId,
+                    targetTable,
+                    contentToIngest,
+                    workloadClient
+                );
+            }
+            setIngestionSuccess(true);
+        }
+        catch (error) {
+            console.error("Error ingesting data:", error);
+            setIngestionSuccess(false);
+        } finally {
+            setIsIngestionInProgress(false);
+        }
+    }
+
+    function isDisabledIngestButton(): boolean {
+        return rows.length === 0 || isIngestionInProgress;
+    }
+
+    function isDisabledAddRowButton(): boolean {
+        return rows.length >= maxRows;
+    }
+
+    function hasRows(): boolean {
+        return rows.length > 0;
+    }
+
+    function convertRowsToCSV(rows: IotDataTableRow[]): string {
+        const csvRows = rows.map(row => `${row.timestamp},${row.name},${row.value}`);
+        return csvRows.join("\n");
+    }
+
     return (
         <div className='kusto-ingestor'>
             <h2>Kusto Ingestion Wizard</h2>
-            <div>
-                <label>Coming soon! Stay tuned as we present Kusto streaming and queued ingestion capabilities.</label>
-            </div>
-            {/* <Divider alignContent="start" className="divider">
+            <Divider alignContent="start" className="divider">
                 <b>Ingestion target</b>
             </Divider>
             <div>
-                <label className='label-key'>KQL Database Query Url:</label>
-                <label className='label-value'>{kqlDatabaseQueryUrl}</label>
+                <label className='label-key'>KQL Database Ingestion Url:</label>
+                <label className='label-value'>{kqlDatabaseIngestionUrl}</label>
             </div>
             <div>
                 <label className='label-key'>KQL Database name:</label>
@@ -24,8 +115,96 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                 <label className='label-value'>{targetTable}</label>
             </div>
             <Divider alignContent="start" className="divider">
-                <b>Records generator</b>
-            </Divider> */}
+                <b>Rows generator</b>
+            </Divider>
+            <div className="input-container">
+                <Input
+                    placeholder="Timestamp"
+                    value={stagingRow.timestamp}
+                    onChange={(e) => handleInputChange(e, "timestamp")}
+                />
+                <Input
+                    placeholder="Name"
+                    value={stagingRow.name}
+                    onChange={(e) => handleInputChange(e, "name")}
+                />
+                <Input
+                    placeholder="Value"
+                    value={stagingRow.value}
+                    onChange={(e) => handleInputChange(e, "value")}
+                />
+                <Tooltip content={rows.length >= maxRows ? `${maxRows} limit reached` : "add a new record"} relationship={"label"}>
+                    <Button
+                        icon={<AddCircle32Regular />}
+                        onClick={addRow}
+                        disabled={isDisabledAddRowButton()}
+                        className="add-row-button">
+                    </Button>
+                </Tooltip>
+            </div>
+            {hasRows() && (
+                <>
+                    <div className="rows-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                                    <th className="actions-column"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rows.map((row, index) => (
+                                    <tr key={index}>
+                                        <td>{row.timestamp}</td>
+                                        <td>{row.name}</td>
+                                        <td>{row.value}</td>
+                                        <td className="actions-column">
+                                            <Button
+                                                icon={<DismissCircle48Regular />}
+                                                className="remove-row-button"
+                                                onClick={() => removeRow(index)}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <Divider alignContent="start" className="divider">
+                        <b>Data Ingestion</b>
+                    </Divider>
+                    <div className="data-ingestion">
+                        <Button
+                            className={`ingest-button ${isIngestionInProgress ? 'disabled' : ''}`}
+                            onClick={onIngestButtonClick}
+                            disabled={isDisabledIngestButton()}>
+                            {isIngestionInProgress ? 'Ingesting...' : 'Ingest Data'}
+                        </Button>
+                        <RadioGroup
+                            className="ingestion-type-radio-group"
+                            value={ingestionType}
+                            onChange={(_e, data) => setIngestionType(data.value)}
+                        >
+                            <Radio value="streaming" label="Streaming Ingestion" />
+                            <Radio value="queued" label="Queued Ingestion" />
+                        </RadioGroup>
+                    </div>
+                </>
+            )}
+            {ingestionSuccess !== null && (
+                <MessageBar
+                    messageBarType={ingestionSuccess ? MessageBarType.success : MessageBarType.error}
+                    isMultiline={true}
+                    onDismiss={() => setIngestionSuccess(null)}
+                >
+                    {ingestionSuccess ?
+                        `Data ingested successfully! Query ${targetTable} to see the new records in the table, if queued ingestion was used, it may take a few minutes to see the new records.`
+                        : "Error ingesting data."
+                    }
+                </MessageBar>
+            )}
         </div>
     );
 }

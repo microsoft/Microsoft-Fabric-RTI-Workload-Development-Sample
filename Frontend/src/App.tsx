@@ -29,10 +29,16 @@ export interface ContextProps {
   workspaceObjectId?: string;
 }
 
-export interface KustoComponentProps extends PageProps {
+export interface KustoExplorerComponentProps extends PageProps {
   kqlDatabaseDisplayName: string;
   kqlDatabaseItemId: string,
   kqlDatabaseQueryUrl: string;
+}
+
+export interface KustoIngestorComponentProps extends PageProps {
+  kqlDatabaseDisplayName: string;
+  kqlDatabaseItemId: string,
+  kqlDatabaseIngestionUrl: string;
 }
 
 export function App({ history, workloadClient }: AppProps) {

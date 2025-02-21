@@ -1,7 +1,10 @@
 ﻿using System.Data;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Kusto.Data;
 using Kusto.Data.Common;
+using Kusto.Ingest;
 
 namespace Fabric.Rti.workload.Backend.Services;
 
@@ -26,7 +29,7 @@ public class KustoClientService : IKustoClientService
             databaseName,
             query,
             clientRequestProperties,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
     }
 
     public async Task<IDataReader> ExecuteControlCommandAsync(
@@ -41,6 +44,22 @@ public class KustoClientService : IKustoClientService
             databaseName,
             command,
             clientRequestProperties,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
+    }
+
+    public async Task<IKustoIngestionResult> QueuedIngestFromStreamAsync(string ingestionUrl, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null)
+    {
+        var connectionStringBuilder = new KustoConnectionStringBuilder(ingestionUrl).WithAadUserTokenAuthentication(token);
+        using var ingestClient = KustoIngestFactory.CreateQueuedIngestClient(connectionStringBuilder);
+
+        return await ingestClient.IngestFromStreamAsync(stream, ingestionProperties);
+    }
+    
+    public async Task<IKustoIngestionResult> StreamIngestFromStreamAsync(string ingestionUrl, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null)
+    {
+        var connectionStringBuilder = new KustoConnectionStringBuilder(ingestionUrl).WithAadUserTokenAuthentication(token);
+        using var ingestClient = KustoIngestFactory.CreateStreamingIngestClient(connectionStringBuilder);
+
+        return await ingestClient.IngestFromStreamAsync(stream, ingestionProperties);
     }
 }

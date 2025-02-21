@@ -267,13 +267,13 @@
     }
 
     .run-query-button-disabled {
-        background-color: #d3d3d3; 
-        color: #a9a9a9; 
+        background-color: #d3d3d3;
+        color: #a9a9a9;
         border: none;
         padding: 10px 20px;
         border-radius: 5px;
         cursor: not-allowed;
-        opacity: 0.6; 
+        opacity: 0.6;
         align-self: flex-start;
     }
 
@@ -320,13 +320,14 @@
         text-align: left;
     }
 
-    th, td {
+    th,
+    td {
         padding: 12px 15px;
         border: 1px solid #ddd;
     }
 
     th {
-        background-color: #d3d3d3; 
+        background-color: #d3d3d3;
         color: black;
         font-weight: bold;
     }
@@ -340,10 +341,9 @@
     }
 }
 
-
 .kusto-ingestor {
     h2 {
-        padding: 0 0 0 0px
+        padding: 0 0 0 0px;
     }
 
     .label-key {
@@ -354,5 +354,123 @@
     .label-value {
         font-weight: normal;
         color: #242424;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) td:not(.actions-column) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover td:not(.actions-column) {
+        background-color: #ddd;
+    }
+
+    .actions-column {
+        text-align: center;
+        border: none;
+        background-color: transparent;
+    }
+
+    .actions-column th,
+    .actions-column td {
+        border: none !important;
+        background-color: transparent !important;
+    }
+
+    .add-row-button {
+        background-color: #127865;
+        color: ddd;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+        margin-left: 42px;
+    }
+
+    .add-row-button:hover {
+        color: f2f2f2;
+        background-color: #0a5a4a;
+    }
+
+    .add-row-button:disabled {
+        background-color: gray;
+        color: white;
+    }
+
+    .remove-row-button {
+        background-color: f1364b;
+        border-radius: 50%;
+        color: ddd;
+        transition: color 0.3s;
+    }
+
+    .remove-row-button:hover {
+        background-color: rgb(240, 94, 94);
+        color: f2f2f2;
+    }
+
+    .rows-container {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-top: 20px;
+    }
+
+    .input-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .input-container input {
+        width: 180px;
+    }
+
+    .data-ingestion {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .ingest-button {
+            background-color: #127865;
+            color: #ddd;
+            transition: background-color 0.3s ease;
+            margin-right: auto;
+        }
+
+        .ingest-button:hover {
+            color: #f2f2f2;
+            background-color: #0a5a4a;
+        }
+
+        .ingest-button.disabled {
+            background-color: #f3f2f1;
+            color: #a19f9d;
+            cursor: not-allowed;
+        }
+
+        .ingestion-type-radio-group {
+            margin-left: 10px;
+            margin-top: 10px;
+            margin-left: auto;
+            width: 200px;
+
+            .label {
+                margin-left: 8px;
+            }
+        }
     }
 }
