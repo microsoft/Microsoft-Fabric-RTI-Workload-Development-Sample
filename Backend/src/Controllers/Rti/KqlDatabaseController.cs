@@ -96,6 +96,42 @@ public class KqlDatabaseController : ControllerBase
             return BadRequest();
         }
     }
+    
+    [HttpPost("KqlDatabases/streamIngest")]
+    public async Task<IActionResult> StreamIngestToKqlDatabase([FromBody] KqlIngestRequest request)
+    {
+        try
+        {
+            var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
+                _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
+            var scopes = new[] { $"{request.IngestionServiceUri}/.default" };
+
+            var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
+            var ingestionProperties = CreateStreamingIngestionProperties(request);
+
+            await using var stream = await GetStreamFromStringAsync(request.Content);
+            
+            var ingestionResult = await _kustoClientService.StreamIngestFromStreamAsync(request.IngestionServiceUri, stream, ingestionProperties, token);
+
+            if (ingestionResult != null)
+            {
+                var ingestionStatus = ingestionResult.GetIngestionStatusCollection().ToList().First().Status;
+                _logger.LogInformation($"StreamIngestToKqlDatabase: Ingestion status: {ingestionStatus}");
+            }
+            
+            return Ok(ingestionResult);
+        }
+        catch (AuthenticationException ex)
+        {
+            _logger.LogError($"StreamIngestToKqlDatabase: Authentication failed for url {request.IngestionServiceUri}. Error: {ex.Message}");
+            return Unauthorized();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"StreamIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} Error: {ex.Message}");
+            return Problem();
+        }
+    }
 
     [HttpPost("KqlDatabases/queuedIngest")]
     public async Task<IActionResult> QueuedIngestToKqlDatabase([FromBody] KqlIngestRequest request)
@@ -111,7 +147,7 @@ public class KqlDatabaseController : ControllerBase
 
             await using var stream = await GetStreamFromStringAsync(request.Content);
             
-            var ingestionResult = await _kustoClientService.IngestFromStreamAsync(request.IngestionServiceUri, stream, ingestionProperties, token);
+            var ingestionResult = await _kustoClientService.QueuedIngestFromStreamAsync(request.IngestionServiceUri, stream, ingestionProperties, token);
 
             if (ingestionResult != null)
             {
@@ -145,7 +181,23 @@ public class KqlDatabaseController : ControllerBase
         properties.SetOption(ClientRequestProperties.OptionServerTimeout, DefaultQueryTimeout);
         return properties;
     }
+    
+    private KustoIngestionProperties CreateStreamingIngestionProperties(KqlIngestRequest request)
+    {
+        var ingestProps = new KustoIngestionProperties(request.KqlDatabaseItemId, request.TableName)
+        {
+            IngestionMapping =
+            {
+                IngestionMappingReference = request.IngestionMappingName
+            },
+            // set to false, assuming the content is provided without a header and the first line is a record 
+            AdditionalProperties = new Dictionary<string, string> { { "ignoreFirstRecord", "False" } },
+            Format = DataSourceFormat.csv
+        };
 
+        return ingestProps;
+    }
+    
     private KustoQueuedIngestionProperties CreateQueuedIngestionProperties(KqlIngestRequest request)
     {
         var ingestProps = new KustoQueuedIngestionProperties(request.KqlDatabaseItemId, request.TableName)
