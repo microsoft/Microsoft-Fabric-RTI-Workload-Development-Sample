@@ -393,17 +393,12 @@
         background-color: transparent !important;
     }
 
-    .value-column {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
     .add-row-button {
         background-color: #127865;
         color: ddd;
         border-radius: 50%;
         transition: background-color 0.3s ease;
+        margin-left: 42px;
     }
 
     .add-row-button:hover {
@@ -416,19 +411,19 @@
         color: white;
     }
 
-    .dismiss-button {
+    .remove-row-button {
         background-color: f1364b;
         border-radius: 50%;
         color: ddd;
         transition: color 0.3s;
     }
 
-    .dismiss-button:hover {
+    .remove-row-button:hover {
         background-color: rgb(240, 94, 94);
         color: f2f2f2;
     }
 
-    .records-container {
+    .rows-container {
         max-height: 300px;
         overflow-y: auto;
         margin-top: 20px;
@@ -436,7 +431,7 @@
 
     .input-container {
         display: flex;
-        gap: 5px;
+        gap: 20px;
         align-items: center;
     }
 

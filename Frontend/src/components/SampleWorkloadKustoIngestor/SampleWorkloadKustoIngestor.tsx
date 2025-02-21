@@ -84,7 +84,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     </Button>
                 </Tooltip>
             </div>
-            <div className="records-container">
+            <div className="rows-container">
                 <table>
                     <thead>
                         <tr>
@@ -103,7 +103,7 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                                 <td className="actions-column">
                                     <Button
                                         icon={<DismissCircle48Regular />}
-                                        className="dismiss-button"
+                                        className="remove-row-button"
                                         onClick={() => removeRow(index)}
                                     />
                                 </td>
