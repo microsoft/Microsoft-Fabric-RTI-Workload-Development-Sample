@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { KustoComponentProps } from "../../App";
-import { Divider, Button, Input, Tooltip } from "@fluentui/react-components";
+import { Divider, Button, Input, Tooltip, RadioGroup, Radio } from "@fluentui/react-components";
 import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
 
 interface IotDataTableRow {
@@ -12,6 +12,7 @@ interface IotDataTableRow {
 export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
     const [rows, setRows] = useState<IotDataTableRow[]>([]);
     const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
+    const [ingestionType, setIngestionType] = useState<string>("streaming");
     const targetTable = "IotData";
     const maxRows = 20;
 
@@ -140,6 +141,14 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                             disabled={isDisabledIngestButton()}>
                             Ingest Data
                         </Button>
+                        <RadioGroup
+                            className="ingestion-type-radio-group"
+                            value={ingestionType}
+                            onChange={(_e, data) => setIngestionType(data.value)}
+                        >
+                            <Radio value="streaming" label="Streaming Ingestion" />
+                            <Radio value="queued" label="Queued Ingestion" />
+                        </RadioGroup>
                     </div>
                 </>
             )}

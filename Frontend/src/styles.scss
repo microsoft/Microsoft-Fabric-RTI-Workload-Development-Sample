@@ -439,14 +439,32 @@
         width: 180px;
     }
 
-    .ingest-button {
-        background-color: #127865;
-        color: #ddd;
-        transition: background-color 0.3s ease;
-    }
-    
-    .ingest-button:hover {
-        color: #f2f2f2;
-        background-color: #0a5a4a;
+    .data-ingestion {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .ingest-button {
+            background-color: #127865;
+            color: #ddd;
+            transition: background-color 0.3s ease;
+            margin-right: auto;
+        }
+
+        .ingest-button:hover {
+            color: #f2f2f2;
+            background-color: #0a5a4a;
+        }
+
+        .ingestion-type-radio-group {
+            margin-left: 10px;
+            margin-top: 10px;
+            margin-left: auto;
+            width: 200px;
+
+            .label {
+                margin-left: 8px;
+            }
+        }
     }
 }
