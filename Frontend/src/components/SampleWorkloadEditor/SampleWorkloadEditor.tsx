@@ -36,8 +36,8 @@ import {
 } from "../../models/SampleWorkloadModel";
 import "./../../styles.scss";
 import { ItemMetadataNotFound } from "../../models/WorkloadExceptionsModel";
-import { KustoExplorerComponent } from "../SampleWorkloadKustoExplorer/SampleWorkloadKustoExplorer";
-import { KustoIngestorComponent } from "../SampleWorkloadKustoIngestor/SampleWorkloadKustoIngestor";
+import { KqlExplorerComponent } from "../SampleWorkloadKqlExplorer/SampleWorkloadKqlExplorer";
+import { KqlIngestorComponent } from "../SampleWorkloadKqlIngestor/SampleWorkloadKqlIngestor";
 import { EventstreamComponent } from "../SampleWorkloadEventstream/SampleWorkloadEventstream";
 import { ActivatorComponent } from "../SampleWorkloadActivator/SampleWorkloadActivator";
 
@@ -262,19 +262,19 @@ export function SampleWorkloadEditor(props: PageProps) {
           </span>
         )}
         {
-          selectedTab == "kustoExplorer" && (
+          selectedTab == "kqlExplorer" && (
             <span>
               <div className="section">
-                <KustoExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+                <KqlExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
               </div>
             </span>
           )
         }
         {
-          selectedTab == "kustoIngestor" && (
+          selectedTab == "kqlIngestor" && (
             <span>
               <div className="section">
-                <KustoIngestorComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseIngestionUrl={kqlDatabaseIngestionUrl} />
+                <KqlIngestorComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseIngestionUrl={kqlDatabaseIngestionUrl} />
               </div>
             </span>
           )

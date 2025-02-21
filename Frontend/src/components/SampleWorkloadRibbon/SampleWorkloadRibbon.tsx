@@ -124,8 +124,8 @@ export function Ribbon(props: RibbonProps) {
       <CollabButtons {...props} />
       <TabList defaultSelectedValue="home" onTabSelect={onTabSelect}>
         <Tab value="home" data-testid="home-tab-btn">Home</Tab>
-        <Tab value="kustoExplorer" data-testid="kustoExplorer-tab-btn">Kusto Explorer</Tab>
-        <Tab value="kustoIngestor" data-testid="kustoIngestor-tab-btn">Kusto Ingestion</Tab>
+        <Tab value="kqlExplorer" data-testid="kqlExplorer-tab-btn">KQL Explorer</Tab>
+        <Tab value="kqlIngestor" data-testid="kqlIngestor-tab-btn">KQL Ingestion</Tab>
         <Tab value="eventStream" data-testid="EventStream-tab-btn">Eventstream</Tab>
         <Tab value="activator" data-testid="Actuator-tab-btn">Activator</Tab>
       </TabList>

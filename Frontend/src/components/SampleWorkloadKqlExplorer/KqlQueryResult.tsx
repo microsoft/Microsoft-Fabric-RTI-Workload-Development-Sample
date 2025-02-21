@@ -12,7 +12,7 @@ interface Table {
     Rows: string[][];
 }
 
-interface KustoQueryResultProps {
+interface KqlQueryResultProps {
     rawQueryResult: any;
 }
 
@@ -23,11 +23,11 @@ function parseRawQueryResult(rawQueryResult: any): Table | undefined {
     return rawQueryResult.Tables.find((table: Table) => table.TableName === "Table_0");
 }
 
-export function KustoQueryResultComponent({ rawQueryResult }: KustoQueryResultProps) {
+export function KqlQueryResultComponent({ rawQueryResult }: KqlQueryResultProps) {
     const resultTable = parseRawQueryResult(rawQueryResult);
 
     return (
-        <div className="kusto-query-result-table">
+        <div className="kql-query-result-table">
 
             <table className="styled-table">
                 <thead>

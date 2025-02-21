@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Image } from "@fluentui/react-components";
-import { KustoExplorerComponentProps } from "../../App";
-import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KustoExplorerController";
-import { KustoQueryResultComponent } from "./kustoQueryResult";
+import { KqlExplorerComponentProps } from "../../App";
+import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KqlExplorerController";
+import { KqlQueryResultComponent } from "./KqlQueryResult";
 import { Spinner, SpinnerSize } from "@fluentui/react";
 
-export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoExplorerComponentProps) {
+export function KqlExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KqlExplorerComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [queryResult, setQueryResult] = useState<object[]>();
     const [queryToExecute, setQueryToExecute] = useState<string>("");
@@ -64,8 +64,8 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
     }
 
     return (
-        <div className='kusto-explorer'>
-            <h2>Kusto Explorer</h2>
+        <div className='kql-explorer'>
+            <h2>KQL Explorer</h2>
             <div>
                 <label className='label-key'>KQL Database name:</label>
                 <label className='label-value'>{kqlDatabaseDisplayName}</label>
@@ -75,7 +75,7 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                 <label className='label-value'>{kqlDatabaseQueryUrl}</label>
             </div>
             <textarea
-                className='kusto-query-input'
+                className='kql-query-input'
                 rows={5}
                 placeholder='Type your query here...'
                 onChange={(e) => setQueryToExecute(e.target.value)}
@@ -98,7 +98,7 @@ export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName,
                     (
                         queryResult ?
                             (
-                                <KustoQueryResultComponent rawQueryResult={queryResult} />
+                                <KqlQueryResultComponent rawQueryResult={queryResult} />
                             ) :
                             (
                                 <div className="run-query-explore-results">
