@@ -38,6 +38,22 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
         setStagingRow({ ...stagingRow, [column]: e.target.value });
     }
 
+    function onIngestButtonClick() {
+        // Ingest data logic here
+    }
+
+    function isDisabledIngestButton(): boolean {
+        return rows.length === 0;
+    }
+
+    function isDisabledAddRowButton(): boolean {
+        return rows.length >= maxRows;
+    }
+
+    function hasRows(): boolean {
+        return rows.length > 0;
+    }
+
     return (
         <div className='kusto-ingestor'>
             <h2>Kusto Ingestion Wizard</h2>
@@ -79,39 +95,54 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     <Button
                         icon={<AddCircle32Regular />}
                         onClick={addRow}
-                        disabled={rows.length >= maxRows}
+                        disabled={isDisabledAddRowButton()}
                         className="add-row-button">
                     </Button>
                 </Tooltip>
             </div>
-            <div className="rows-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Name</th>
-                            <th>Value</th>
-                            <th className="actions-column"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((row, index) => (
-                            <tr key={index}>
-                                <td>{row.timestamp}</td>
-                                <td>{row.name}</td>
-                                <td>{row.value}</td>
-                                <td className="actions-column">
-                                    <Button
-                                        icon={<DismissCircle48Regular />}
-                                        className="remove-row-button"
-                                        onClick={() => removeRow(index)}
-                                    />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            {hasRows() && (
+                <>
+                    <div className="rows-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                                    <th className="actions-column"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rows.map((row, index) => (
+                                    <tr key={index}>
+                                        <td>{row.timestamp}</td>
+                                        <td>{row.name}</td>
+                                        <td>{row.value}</td>
+                                        <td className="actions-column">
+                                            <Button
+                                                icon={<DismissCircle48Regular />}
+                                                className="remove-row-button"
+                                                onClick={() => removeRow(index)}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <Divider alignContent="start" className="divider">
+                        <b>Data Ingestion</b>
+                    </Divider>
+                    <div className="data-ingestion">
+                        <Button
+                            className="ingest-button"
+                            onClick={onIngestButtonClick}
+                            disabled={isDisabledIngestButton()}>
+                            Ingest Data
+                        </Button>
+                    </div>
+                </>
+            )}
         </div>
     );
 }
