@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Image } from "@fluentui/react-components";
-import { KustoComponentProps } from "../../App";
+import { KustoExplorerComponentProps } from "../../App";
 import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KustoExplorerController";
 import { KustoQueryResultComponent } from "./kustoQueryResult";
 import { Spinner, SpinnerSize } from "@fluentui/react";
 
-export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
+export function KustoExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoExplorerComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [queryResult, setQueryResult] = useState<object[]>();
     const [queryToExecute, setQueryToExecute] = useState<string>("");

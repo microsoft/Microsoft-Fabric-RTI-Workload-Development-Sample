@@ -272,7 +272,7 @@ export function SampleWorkloadEditor(props: PageProps) {
           selectedTab == "kustoIngestor" && (
             <span>
               <div className="section">
-                <KustoIngestorComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+                <KustoIngestorComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseIngestionUrl={kqlDatabaseIngestionUrl} />
               </div>
             </span>
           )

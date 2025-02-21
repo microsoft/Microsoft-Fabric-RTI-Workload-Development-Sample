@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { KustoComponentProps } from "../../App";
+import { KustoIngestorComponentProps } from "../../App";
 import { Divider, Button, Input, Tooltip, RadioGroup, Radio } from "@fluentui/react-components";
 import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
+import { CallQueuedIngest } from "../../controller/KustoIngestorController";
 
 interface IotDataTableRow {
     timestamp: string;
@@ -9,7 +10,8 @@ interface IotDataTableRow {
     value: string;
 }
 
-export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KustoComponentProps) {
+export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KustoIngestorComponentProps) {
+    const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [rows, setRows] = useState<IotDataTableRow[]>([]);
     const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
     const [ingestionType, setIngestionType] = useState<string>("streaming");
@@ -39,9 +41,21 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
         setStagingRow({ ...stagingRow, [column]: e.target.value });
     }
 
-    function onIngestButtonClick() {
-        const csvData = convertRowsToCSV(rows);
-        console.log(csvData); // Replace this with your ingestion logic
+    async function onIngestButtonClick() {
+        try {
+            const contentToIngest = convertRowsToCSV(rows);
+            await CallQueuedIngest(
+                sampleWorkloadBEUrl,
+                kqlDatabaseIngestionUrl,
+                kqlDatabaseItemId,
+                targetTable,
+                contentToIngest,
+                workloadClient
+            );
+        }
+        catch (error) {
+            console.error("Error executing query:", error);
+        }
     }
 
     function isDisabledIngestButton(): boolean {
@@ -68,8 +82,8 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                 <b>Ingestion target</b>
             </Divider>
             <div>
-                <label className='label-key'>KQL Database Query Url:</label>
-                <label className='label-value'>{kqlDatabaseQueryUrl}</label>
+                <label className='label-key'>KQL Database Ingestion Url:</label>
+                <label className='label-value'>{kqlDatabaseIngestionUrl}</label>
             </div>
             <div>
                 <label className='label-key'>KQL Database name:</label>
