@@ -456,6 +456,12 @@
             background-color: #0a5a4a;
         }
 
+        .ingest-button.disabled {
+            background-color: #f3f2f1;
+            color: #a19f9d;
+            cursor: not-allowed;
+        }
+
         .ingestion-type-radio-group {
             margin-left: 10px;
             margin-top: 10px;

@@ -34,7 +34,7 @@ export async function CallQueuedIngest(workloadBEUrl: string, kqlDatabaseIngesti
     }
     catch (error) {
         console.error('Error in CallQueuedIngest:', error);
-        return null;
+        throw error;
     }
 }
 
@@ -72,6 +72,6 @@ export async function CallStreamingIngest(workloadBEUrl: string, kqlDatabaseInge
     }
     catch (error) {
         console.error('Error in CallStreamingIngest:', error);
-        return null;
+        throw error;
     }
 }

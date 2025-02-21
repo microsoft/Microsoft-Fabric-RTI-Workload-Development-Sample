@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { KustoIngestorComponentProps } from "../../App";
 import { Divider, Button, Input, Tooltip, RadioGroup, Radio } from "@fluentui/react-components";
+import { MessageBar } from "@fluentui/react";
+import { MessageBarType } from "@fluentui/react";
 import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
 import { CallQueuedIngest, CallStreamingIngest } from "../../controller/KustoIngestorController";
 
@@ -15,6 +17,8 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
     const [rows, setRows] = useState<IotDataTableRow[]>([]);
     const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
     const [ingestionType, setIngestionType] = useState<string>("streaming");
+    const [ingestionSuccess, setIngestionSuccess] = useState<boolean | null>(null);
+    const [isIngestionInProgress, setIsIngestionInProgress] = useState<boolean>(false);
     const targetTable = "IotData";
     const maxRows = 20;
 
@@ -43,6 +47,8 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
 
     async function onIngestButtonClick() {
         try {
+            setIngestionSuccess(null);
+            setIsIngestionInProgress(true);
             const contentToIngest = convertRowsToCSV(rows);
             if (ingestionType === "queued") {
                 await CallQueuedIngest(
@@ -63,14 +69,18 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     workloadClient
                 );
             }
+            setIngestionSuccess(true);
         }
         catch (error) {
             console.error("Error ingesting data:", error);
+            setIngestionSuccess(false);
+        } finally {
+            setIsIngestionInProgress(false);
         }
     }
 
     function isDisabledIngestButton(): boolean {
-        return rows.length === 0;
+        return rows.length === 0 || isIngestionInProgress;
     }
 
     function isDisabledAddRowButton(): boolean {
@@ -167,10 +177,10 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                     </Divider>
                     <div className="data-ingestion">
                         <Button
-                            className="ingest-button"
+                            className={`ingest-button ${isIngestionInProgress ? 'disabled' : ''}`}
                             onClick={onIngestButtonClick}
                             disabled={isDisabledIngestButton()}>
-                            Ingest Data
+                            {isIngestionInProgress ? 'Ingesting...' : 'Ingest Data'}
                         </Button>
                         <RadioGroup
                             className="ingestion-type-radio-group"
@@ -182,6 +192,18 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
                         </RadioGroup>
                     </div>
                 </>
+            )}
+            {ingestionSuccess !== null && (
+                <MessageBar
+                    messageBarType={ingestionSuccess ? MessageBarType.success : MessageBarType.error}
+                    isMultiline={true}
+                    onDismiss={() => setIngestionSuccess(null)}
+                >
+                    {ingestionSuccess ?
+                        `Data ingested successfully! Query ${targetTable} to see the new records in the table, if queued ingestion was used, it may take a few minutes to see the new records.`
+                        : "Error ingesting data."
+                    }
+                </MessageBar>
             )}
         </div>
     );
