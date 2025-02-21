@@ -126,6 +126,8 @@ export function Ribbon(props: RibbonProps) {
         <Tab value="home" data-testid="home-tab-btn">Home</Tab>
         <Tab value="kustoExplorer" data-testid="kustoExplorer-tab-btn">Kusto Explorer</Tab>
         <Tab value="kustoIngestor" data-testid="kustoIngestor-tab-btn">Kusto Ingestion</Tab>
+        <Tab value="eventStream" data-testid="EventStream-tab-btn">Eventstream</Tab>
+        <Tab value="activator" data-testid="Actuator-tab-btn">Activator</Tab>
       </TabList>
 
       {

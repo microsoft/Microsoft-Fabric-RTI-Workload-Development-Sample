@@ -38,6 +38,8 @@ import "./../../styles.scss";
 import { ItemMetadataNotFound } from "../../models/WorkloadExceptionsModel";
 import { KustoExplorerComponent } from "../SampleWorkloadKustoExplorer/SampleWorkloadKustoExplorer";
 import { KustoIngestorComponent } from "../SampleWorkloadKustoIngestor/SampleWorkloadKustoIngestor";
+import { EventstreamComponent } from "../SampleWorkloadEventstream/SampleWorkloadEventstream";
+import { ActivatorComponent } from "../SampleWorkloadActivator/SampleWorkloadActivator";
 
 export function SampleWorkloadEditor(props: PageProps) {
   const { workloadClient } = props;
@@ -273,6 +275,24 @@ export function SampleWorkloadEditor(props: PageProps) {
             <span>
               <div className="section">
                 <KustoIngestorComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseIngestionUrl={kqlDatabaseIngestionUrl} />
+              </div>
+            </span>
+          )
+        }
+        {
+          selectedTab == "eventStream" && (
+            <span>
+              <div className="section">
+                <EventstreamComponent />
+              </div>
+            </span>
+          )
+        }
+        {
+          selectedTab == "activator" && (
+            <span>
+              <div className="section">
+                <ActivatorComponent />
               </div>
             </span>
           )
