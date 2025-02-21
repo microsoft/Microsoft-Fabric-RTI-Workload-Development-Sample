@@ -97,8 +97,8 @@ public class KqlDatabaseController : ControllerBase
         }
     }
     
-    [HttpPost("KqlDatabases/streamIngest")]
-    public async Task<IActionResult> StreamIngestToKqlDatabase([FromBody] KqlIngestRequest request)
+    [HttpPost("KqlDatabases/streamingIngest")]
+    public async Task<IActionResult> StreamingIngestToKqlDatabase([FromBody] KqlIngestRequest request)
     {
         try
         {
@@ -116,19 +116,19 @@ public class KqlDatabaseController : ControllerBase
             if (ingestionResult != null)
             {
                 var ingestionStatus = ingestionResult.GetIngestionStatusCollection().ToList().First().Status;
-                _logger.LogInformation($"StreamIngestToKqlDatabase: Ingestion status: {ingestionStatus}");
+                _logger.LogInformation($"StreamingIngestToKqlDatabase: Ingestion status: {ingestionStatus}");
             }
             
             return Ok(ingestionResult);
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"StreamIngestToKqlDatabase: Authentication failed for url {request.IngestionServiceUri}. Error: {ex.Message}");
+            _logger.LogError($"StreamingIngestToKqlDatabase: Authentication failed for url {request.IngestionServiceUri}. Error: {ex.Message}");
             return Unauthorized();
         }
         catch (Exception ex)
         {
-            _logger.LogError($"StreamIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} Error: {ex.Message}");
+            _logger.LogError($"StreamingIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} Error: {ex.Message}");
             return Problem();
         }
     }
