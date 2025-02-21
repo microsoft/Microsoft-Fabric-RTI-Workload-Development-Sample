@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { KustoIngestorComponentProps } from "../../App";
+import { KqlIngestorComponentProps } from "../../App";
 import { Divider, Button, Input, Tooltip, RadioGroup, Radio } from "@fluentui/react-components";
 import { MessageBar } from "@fluentui/react";
 import { MessageBarType } from "@fluentui/react";
 import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
-import { CallQueuedIngest, CallStreamingIngest } from "../../controller/KustoIngestorController";
+import { CallQueuedIngest, CallStreamingIngest } from "../../controller/KqlIngestorController";
 
 interface IotDataTableRow {
     timestamp: string;
@@ -12,7 +12,7 @@ interface IotDataTableRow {
     value: string;
 }
 
-export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KustoIngestorComponentProps) {
+export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KqlIngestorComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [rows, setRows] = useState<IotDataTableRow[]>([]);
     const [stagingRow, setStagingRow] = useState<IotDataTableRow>(generateRandomRow());
@@ -97,8 +97,8 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
     }
 
     return (
-        <div className='kusto-ingestor'>
-            <h2>Kusto Ingestion Wizard</h2>
+        <div className='kql-ingestor'>
+            <h2>KQL Ingestion Wizard</h2>
             <Divider alignContent="start" className="divider">
                 <b>Ingestion target</b>
             </Divider>
