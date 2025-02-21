@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { KustoIngestorComponentProps } from "../../App";
 import { Divider, Button, Input, Tooltip, RadioGroup, Radio } from "@fluentui/react-components";
 import { DismissCircle48Regular, AddCircle32Regular } from "@fluentui/react-icons";
-import { CallQueuedIngest } from "../../controller/KustoIngestorController";
+import { CallQueuedIngest, CallStreamingIngest } from "../../controller/KustoIngestorController";
 
 interface IotDataTableRow {
     timestamp: string;
@@ -44,17 +44,28 @@ export function KustoIngestorComponent({ workloadClient, kqlDatabaseDisplayName,
     async function onIngestButtonClick() {
         try {
             const contentToIngest = convertRowsToCSV(rows);
-            await CallQueuedIngest(
-                sampleWorkloadBEUrl,
-                kqlDatabaseIngestionUrl,
-                kqlDatabaseItemId,
-                targetTable,
-                contentToIngest,
-                workloadClient
-            );
+            if (ingestionType === "queued") {
+                await CallQueuedIngest(
+                    sampleWorkloadBEUrl,
+                    kqlDatabaseIngestionUrl,
+                    kqlDatabaseItemId,
+                    targetTable,
+                    contentToIngest,
+                    workloadClient
+                );
+            } else if (ingestionType === "streaming") {
+                await CallStreamingIngest(
+                    sampleWorkloadBEUrl,
+                    kqlDatabaseIngestionUrl,
+                    kqlDatabaseItemId,
+                    targetTable,
+                    contentToIngest,
+                    workloadClient
+                );
+            }
         }
         catch (error) {
-            console.error("Error executing query:", error);
+            console.error("Error ingesting data:", error);
         }
     }
 
