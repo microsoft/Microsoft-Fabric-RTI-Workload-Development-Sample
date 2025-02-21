@@ -401,13 +401,13 @@
 
     .add-row-button {
         background-color: #127865;
-        color: white;
+        color: ddd;
         border-radius: 50%;
         transition: background-color 0.3s ease;
     }
-    
+
     .add-row-button:hover {
-        color: black;
+        color: f2f2f2;
         background-color: #0a5a4a;
     }
 
@@ -417,15 +417,15 @@
     }
 
     .dismiss-button {
-        background-color: red;
+        background-color: f1364b;
         border-radius: 50%;
-        color: black;
+        color: ddd;
         transition: color 0.3s;
     }
-    
+
     .dismiss-button:hover {
-        background-color: black;
-        color: white;
+        background-color: rgb(240, 94, 94);
+        color: f2f2f2;
     }
 
     .records-container {
@@ -436,8 +436,8 @@
 
     .input-container {
         display: flex;
-        gap: 5px; 
-        align-items: center; 
+        gap: 5px;
+        align-items: center;
     }
 
     .input-container input {
