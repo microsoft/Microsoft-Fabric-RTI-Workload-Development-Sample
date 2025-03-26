@@ -8,15 +8,15 @@ namespace Fabric.Rti.workload.Backend.Services;
 
 public interface IFabricApiClient
 {
-    public Task<Eventhouse> CreateEventhouse(Guid workspaceId, string displayName, string token);
+    public Task<Eventhouse> CreateEventhouseAsync(Guid workspaceId, string displayName, string token);
 
-    public Task<Eventhouse> GetEventhouse(Guid workspaceId, Guid eventhouseId, string token);
+    public Task<Eventhouse> GetEventhouseAsync(Guid workspaceId, Guid eventhouseId, string token);
 
-    public Task<KQLDatabase> GetKqlDatabase(Guid workspaceId, Guid kqlDatabaseId, string token);
+    public Task<KQLDatabase> GetKqlDatabaseAsync(Guid workspaceId, Guid kqlDatabaseId, string token);
 
-    public Task<KQLDatabase> UpdateKqlDatabase(Guid workspaceId, Guid kqlDatabaseId, string newDisplayName, string token);
+    public Task<KQLDatabase> UpdateKqlDatabaseAsync(Guid workspaceId, Guid kqlDatabaseId, string newDisplayName, string token);
 
-    public Task<Eventstream> CreateEventstream(Guid workspaceId, string displayName, string token);
+    public Task<Eventstream> CreateEventstreamAsync(Guid workspaceId, string displayName, string token);
     
-    public Task UpdateEventstreamDefinition(Guid workspaceId, Guid eventstreamId, EventstreamDefinition eventstreamDefinition, string token);
+    public Task UpdateEventstreamDefinitionAsync(Guid workspaceId, Guid eventstreamId, EventstreamDefinition eventstreamDefinition, string token);
 }

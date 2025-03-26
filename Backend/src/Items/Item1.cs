@@ -114,8 +114,8 @@ namespace Fabric.Rti.workload.Backend.Items
                 var kqlDatabaseDisplayName = $"{DisplayName}_KQLDatabase";
                 var eventstreamDisplayName = $"{DisplayName}_Eventstream";
                 
-                var eventhouseItemTask = _fabricApiClient.CreateEventhouse(WorkspaceObjectId, eventhouseDisplayName, fabricToken);
-                var eventstreamItemTask =  _fabricApiClient.CreateEventstream(WorkspaceObjectId, eventstreamDisplayName, fabricToken);
+                var eventhouseItemTask = _fabricApiClient.CreateEventhouseAsync(WorkspaceObjectId, eventhouseDisplayName, fabricToken);
+                var eventstreamItemTask =  _fabricApiClient.CreateEventstreamAsync(WorkspaceObjectId, eventstreamDisplayName, fabricToken);
                 
                 var itemsCreationTasks = new List<Task>
                 {
@@ -125,11 +125,11 @@ namespace Fabric.Rti.workload.Backend.Items
 
                 await Task.WhenAll(itemsCreationTasks);
                 
-                var eventhouseItem = await _fabricApiClient.GetEventhouse(WorkspaceObjectId, eventhouseItemTask.Result.Id.Value, fabricToken);
+                var eventhouseItem = await _fabricApiClient.GetEventhouseAsync(WorkspaceObjectId, eventhouseItemTask.Result.Id.Value, fabricToken);
 
                 var defaultKqlDatabaseId = eventhouseItem.Properties.DatabasesItemIds.FirstOrDefault();
-                await _fabricApiClient.UpdateKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, kqlDatabaseDisplayName, fabricToken);
-                var kqlDatabaseItem = await _fabricApiClient.GetKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, fabricToken);
+                await _fabricApiClient.UpdateKqlDatabaseAsync(WorkspaceObjectId, defaultKqlDatabaseId, kqlDatabaseDisplayName, fabricToken);
+                var kqlDatabaseItem = await _fabricApiClient.GetKqlDatabaseAsync(WorkspaceObjectId, defaultKqlDatabaseId, fabricToken);
                 
                 metadata.EventhouseItemId = eventhouseItem.Id;
                 metadata.EventhouseDisplayName = eventhouseItem.DisplayName;
@@ -203,7 +203,7 @@ namespace Fabric.Rti.workload.Backend.Items
                     metadata.KqlDatabaseDisplayName,
                     RtiConstants.KustoIotDataTableName);
 
-                await _fabricApiClient.UpdateEventstreamDefinition(
+                await _fabricApiClient.UpdateEventstreamDefinitionAsync(
                     WorkspaceObjectId,
                     metadata.EventstreamItemId.Value,
                     eventstreamDefinition,
