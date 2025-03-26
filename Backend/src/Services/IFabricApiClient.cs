@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Fabric.Api.Eventhouse.Models;
+using Microsoft.Fabric.Api.Eventstream.Models;
 using Microsoft.Fabric.Api.KQLDatabase.Models;
 
 namespace Fabric.Rti.workload.Backend.Services;
@@ -14,4 +15,8 @@ public interface IFabricApiClient
     public Task<KQLDatabase> GetKqlDatabase(Guid workspaceId, Guid kqlDatabaseId, string token);
 
     public Task<KQLDatabase> UpdateKqlDatabase(Guid workspaceId, Guid kqlDatabaseId, string newDisplayName, string token);
+
+    public Task<Eventstream> CreateEventstream(Guid workspaceId, string displayName, string token);
+    
+    public Task UpdateEventstreamDefinition(Guid workspaceId, Guid eventstreamId, EventstreamDefinition eventstreamDefinition, string token);
 }

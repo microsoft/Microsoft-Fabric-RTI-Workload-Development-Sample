@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Microsoft.Fabric.Api;
 using Microsoft.Fabric.Api.Eventhouse.Models;
+using Microsoft.Fabric.Api.Eventstream.Models;
 using Microsoft.Fabric.Api.KQLDatabase.Models;
 
 namespace Fabric.Rti.workload.Backend.Services;
@@ -42,5 +43,21 @@ public class FabricApiClient : IFabricApiClient
         };
         
         return await fabricClient.KQLDatabase.Items.UpdateKQLDatabaseAsync(workspaceId, kqlDatabaseId, updateRequest);
+    }
+
+    public async Task<Eventstream> CreateEventstream(Guid workspaceId, string displayName, string token)
+    {
+        var fabricClient = new FabricClient(token, _fabricBaseUri);
+        var createEventstreamRequest = new CreateEventstreamRequest(displayName);
+
+        return await fabricClient.Eventstream.Items.CreateEventstreamAsync(workspaceId, createEventstreamRequest);
+    }
+    
+    public async Task UpdateEventstreamDefinition(Guid workspaceId, Guid eventstreamId, EventstreamDefinition eventstreamDefinition, string token)
+    {
+        var fabricClient = new FabricClient(token, _fabricBaseUri);
+        var updateDefinitionRequest = new UpdateEventstreamDefinitionRequest(eventstreamDefinition);
+
+        await fabricClient.Eventstream.Items.UpdateEventstreamDefinitionAsync(workspaceId, eventstreamId, updateDefinitionRequest);
     }
 }
