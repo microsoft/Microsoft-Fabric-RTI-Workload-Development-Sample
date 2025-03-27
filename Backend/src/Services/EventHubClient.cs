@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Fabric.Rti.workload.Backend.Services;
 
-public class EventHubClient : IEventHubClient
+public class EventHubClient : IEventHubClient, IAsyncDisposable
 {
     private readonly EventHubProducerClient m_eventHubProducerClient;
     
@@ -29,5 +28,10 @@ public class EventHubClient : IEventHubClient
         }
 
         await m_eventHubProducerClient.SendAsync(eventBatch, cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await m_eventHubProducerClient.DisposeAsync();
     }
 }
