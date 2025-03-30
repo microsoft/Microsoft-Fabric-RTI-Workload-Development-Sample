@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts.RtiContracts;
 using Microsoft.Fabric.Api.Core.Models;
 using Microsoft.Fabric.Api.Eventstream.Models;
@@ -57,7 +58,7 @@ public static class EventstreamUtils
             [
                 new EventstreamSource
                 {
-                    Name = "customEndpoint1",
+                    Name = RtiConstants.EventStreamCustomEndpointSourceName,
                     Type = "CustomEndpoint",
                     Properties = new EmptyProperties()
                 }
@@ -73,7 +74,7 @@ public static class EventstreamUtils
                     [
                         new EventstreamInputNode
                         {
-                            Name = "customEndpoint1"
+                            Name = RtiConstants.EventStreamCustomEndpointSourceName
                         }
                     ]
                 }

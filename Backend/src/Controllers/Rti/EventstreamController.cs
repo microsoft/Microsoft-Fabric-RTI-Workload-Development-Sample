@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts.RtiContracts;
@@ -14,31 +15,34 @@ namespace Fabric.Rti.workload.Backend.Controllers.Rti;
 public class EventstreamController : ControllerBase
 {
     private static readonly IList<string> EventstreamFabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.EventstreamReadWriteAll}" };
-    
+
     private readonly ILogger<KqlDatabaseController> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAuthenticationService _authenticationService;
-    
+    private readonly IFabricApiClient _fabricApiClient;
+
     public EventstreamController(
         ILogger<KqlDatabaseController> logger,
         IHttpContextAccessor httpContextAccessor,
-        IAuthenticationService authenticationService)
+        IAuthenticationService authenticationService,
+        IFabricApiClient fabricApiClient)
     {
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
         _authenticationService = authenticationService;
+        _fabricApiClient = fabricApiClient;
     }
-    
-    [HttpPost("Eventstream/{eventStreamItemId}/Send")]
-    public async Task<IActionResult> SendEventStreamItem(string eventStreamItemId, [FromBody] EventstreamSendEventsRequest request)
+
+    [HttpPost("workspaces/{workspaceId}/eventstreams/{eventstreamId}/SendEvents")]
+    public async Task<IActionResult> SendEvents(Guid workspaceId, Guid eventStreamItemId, [FromBody] EventstreamSendEventsRequest request)
     {
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-                _httpContextAccessor.HttpContext, allowedScopes: new[] {WorkloadScopes.EventstreamReadWriteAll});
+                _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.EventstreamReadWriteAll });
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, EventstreamFabricScopes);
-            
-            await using var eventHubClient = CreateEventHubClient(eventStreamItemId, token);
+
+            await using var eventHubClient = await CreateEventHubClient(workspaceId, eventStreamItemId, token);
             var jsonArray = request.Events;
             await eventHubClient.SendAsync(jsonArray);
 
@@ -46,19 +50,46 @@ public class EventstreamController : ControllerBase
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"SendEventStreamItem: Authentication failed for EventStream Item {eventStreamItemId}. Error: {ex.Message}");
+            _logger.LogError($"SendEvents: Authentication failed for EventStream Item {eventStreamItemId}. Error: {ex.Message}");
             return Unauthorized();
         }
         catch (Exception ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Error sending events to EventStream Item {eventStreamItemId}. Error: {ex.Message}");
+            _logger.LogError($"SendEvents: Error sending events to EventStream Item {eventStreamItemId}. Error: {ex.Message}");
             return BadRequest();
         }
     }
-    
-    private EventHubClient CreateEventHubClient(string eventStreamItemId, string fabricToken)
+
+    private async Task<EventHubClient> CreateEventHubClient(Guid workspaceId, Guid eventStreamItemId, string fabricToken)
     {
-        var connectionString = "DummyConnectionString"; // Replace with actual connection string retrieval logic
+        var connectionString = await GetEventStreamCustomEndpointConnectionString(workspaceId, eventStreamItemId, fabricToken);
+     
         return new EventHubClient(connectionString);
     }
+
+    private async Task<string> GetEventStreamCustomEndpointConnectionString(Guid workspaceId, Guid eventStreamItemId, string fabricToken)
+    {
+        var eventstreamTopology = await _fabricApiClient.GetEventstreamTopologyAsync(workspaceId, eventStreamItemId, fabricToken);
+        var customEndpointSourceId =
+            eventstreamTopology.Sources
+                .Where(source => string.Equals(source.Name, RtiConstants.EventStreamCustomEndpointSourceName, StringComparison.OrdinalIgnoreCase))
+                .Select(source => source.Id).FirstOrDefault();
+
+        if (customEndpointSourceId == null)
+        {
+            throw new InvalidOperationException($"Custom endpoint source '{RtiConstants.EventStreamCustomEndpointSourceName}' not found in event stream topology.");
+        }
+
+        var customEndpointConnection = await _fabricApiClient.GetEventstreamSourceConnectionAsync(workspaceId, eventStreamItemId, Guid.Parse(customEndpointSourceId), fabricToken);
+
+        if (customEndpointConnection == null)
+        {
+            throw new InvalidOperationException($"Custom endpoint connection for source '{RtiConstants.EventStreamCustomEndpointSourceName}' not found.");
+        }
+
+        var connectionString = customEndpointConnection.AccessKeys.PrimaryConnectionString;
+
+        return connectionString;
+    }
 }
+    
