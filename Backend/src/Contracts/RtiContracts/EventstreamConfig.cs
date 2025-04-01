@@ -84,14 +84,11 @@ public class EventhouseDataConnection
     [JsonPropertyName("itemId")]
     public Guid ItemId { get; set; }
     
-    [JsonPropertyName("databaseName")]
-    public string DatabaseName { get; set; }
-    
     [JsonPropertyName("tableName")]
     public string TableName { get; set; }
     
-    [JsonPropertyName("inputSerialization")]
-    public EventhouseInputSerialization InputSerialization { get; set; }
+    [JsonPropertyName("connectionName")]
+    public string ConnectionName { get; set; }
 }
 
 public class EventhouseInputSerialization

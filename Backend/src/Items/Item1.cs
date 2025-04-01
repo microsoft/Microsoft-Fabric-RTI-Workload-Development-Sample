@@ -198,9 +198,9 @@ namespace Fabric.Rti.workload.Backend.Items
             try
             {
                 var eventstreamDefinition = EventstreamUtils.CreateEventstreamDefinitionWithEventhouseDataConnection(
+                    metadata.EventstreamDisplayName,
                     WorkspaceObjectId,
                     metadata.KqlDatabaseItemId.Value,
-                    metadata.KqlDatabaseDisplayName,
                     RtiConstants.KustoIotDataTableName);
 
                 await _fabricApiClient.UpdateEventstreamDefinitionAsync(

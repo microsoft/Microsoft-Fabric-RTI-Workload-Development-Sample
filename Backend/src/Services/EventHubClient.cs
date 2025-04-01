@@ -24,7 +24,7 @@ public class EventHubClient : IEventHubClient, IAsyncDisposable
         foreach (var jToken in jsonArray)
         {
             var jsonString = JsonConvert.SerializeObject(jToken);
-            eventBatch.TryAdd(new EventData(Encoding.Unicode.GetBytes(jsonString)));
+            eventBatch.TryAdd(new EventData(jsonString));
         }
 
         await m_eventHubProducerClient.SendAsync(eventBatch, cancellationToken);

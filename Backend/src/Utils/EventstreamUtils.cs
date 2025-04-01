@@ -22,15 +22,15 @@ public static class EventstreamUtils
     };
     
     public static EventstreamDefinition CreateEventstreamDefinitionWithEventhouseDataConnection(
+        string eventstreamName,
         Guid kqlDatabaseWorkspaceId,
         Guid kqlDatabaseItemId,
-        string kqlDatabaseDisplayName,
         string kqlTableName)
     {
         var payload = CreateEventstreamConfigWithEventhouseDataConnection(
+            eventstreamName,
             kqlDatabaseWorkspaceId,
             kqlDatabaseItemId,
-            kqlDatabaseDisplayName,
             kqlTableName);
 
         var parts = new List<EventstreamDefinitionPart>
@@ -47,9 +47,9 @@ public static class EventstreamUtils
     }
 
     private static EventstreamConfig CreateEventstreamConfigWithEventhouseDataConnection(
+        string eventstreamName,
         Guid kqlDatabaseWorkspaceId,
         Guid kqlDatabaseItemId,
-        string kqlDatabaseDisplayName,
         string kqlTableName)
     {
         return new EventstreamConfig
@@ -67,7 +67,7 @@ public static class EventstreamUtils
             [
                 new EventstreamStream
                 {
-                    Name = "stream1",
+                    Name = eventstreamName + "-stream",
                     Type = "DefaultStream",
                     Properties = new EmptyProperties(),
                     InputNodes =
@@ -87,24 +87,17 @@ public static class EventstreamUtils
                     Type = "Eventhouse",
                     Properties = new EventhouseDataConnection
                     {
-                        DataIngestionMode = "ProcessedIngestion",
+                        DataIngestionMode = "DirectIngestion",
                         WorkspaceId = kqlDatabaseWorkspaceId,
                         ItemId = kqlDatabaseItemId,
-                        DatabaseName = kqlDatabaseDisplayName,
                         TableName = kqlTableName,
-                        InputSerialization = new EventhouseInputSerialization
-                        {
-                            Type = "Json",
-                            Properties = new Dictionary<string, string> {
-                                { "encoding", "UTF8"}
-                            }
-                        }
+                        ConnectionName = "EventhouseDataConnection"
                     },
                     InputNodes =
                     [
                         new EventstreamInputNode
                         {
-                            Name = "stream1"
+                            Name = eventstreamName + "-stream"
                         }
                     ],
                     InputSchemas = []
