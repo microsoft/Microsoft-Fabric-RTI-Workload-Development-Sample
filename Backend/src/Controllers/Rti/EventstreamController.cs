@@ -14,7 +14,7 @@ namespace Fabric.Rti.workload.Backend.Controllers.Rti;
 
 public class EventstreamController : ControllerBase
 {
-    private static readonly IList<string> EventstreamFabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.EventstreamReadWriteAll}" };
+    private static readonly IList<string> EventstreamFabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/Eventstream.ReadWrite.All" };
 
     private readonly ILogger<KqlDatabaseController> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -34,15 +34,15 @@ public class EventstreamController : ControllerBase
     }
 
     [HttpPost("workspaces/{workspaceId}/eventstreams/{eventstreamId}/SendEvents")]
-    public async Task<IActionResult> SendEvents(Guid workspaceId, Guid eventStreamItemId, [FromBody] EventstreamSendEventsRequest request)
+    public async Task<IActionResult> SendEvents(Guid workspaceId, Guid eventstreamId, [FromBody] EventstreamSendEventsRequest request)
     {
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-                _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.EventstreamReadWriteAll });
+                _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.FabricEventstreamReadWriteAll });
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, EventstreamFabricScopes);
 
-            await using var eventHubClient = await CreateEventHubClient(workspaceId, eventStreamItemId, token);
+            await using var eventHubClient = await CreateEventHubClient(workspaceId, eventstreamId, token);
             var jsonArray = request.Events;
             await eventHubClient.SendAsync(jsonArray);
 
@@ -50,12 +50,12 @@ public class EventstreamController : ControllerBase
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"SendEvents: Authentication failed for EventStream Item {eventStreamItemId}. Error: {ex.Message}");
+            _logger.LogError($"SendEvents: Authentication failed for EventStream Item {eventstreamId}. Error: {ex.Message}");
             return Unauthorized();
         }
         catch (Exception ex)
         {
-            _logger.LogError($"SendEvents: Error sending events to EventStream Item {eventStreamItemId}. Error: {ex.Message}");
+            _logger.LogError($"SendEvents: Error sending events to EventStream Item {eventstreamId}. Error: {ex.Message}");
             return BadRequest();
         }
     }

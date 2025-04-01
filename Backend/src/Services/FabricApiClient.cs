@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts.FabricAPIPreview;
@@ -75,7 +75,8 @@ public class FabricApiClient : IFabricApiClient
         var eventstreamTopologyUrl = $"{_fabricBaseUri}/v1/workspaces/{workspaceId}/eventstreams/{eventstreamId}/topology";
 
         var response = await _httpClientService.GetAsync(eventstreamTopologyUrl, token);
-        var topologyResponse = await response.Content.ReadAsAsync<EventstreamTopologyResponse>();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var topologyResponse = JsonSerializer.Deserialize<EventstreamTopologyResponse>(responseContent);
         
         return topologyResponse;
     }
@@ -86,7 +87,8 @@ public class FabricApiClient : IFabricApiClient
         var eventstreamSourceConnectionUrl = $"{_fabricBaseUri}/v1/workspaces/{workspaceId}/eventstreams/{eventstreamId}/sources/{sourceId}/connection";
 
         var response = await _httpClientService.GetAsync(eventstreamSourceConnectionUrl, token);
-        var sourceConnectionResponse = await response.Content.ReadAsAsync<SourceConnectionResponse>();
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var sourceConnectionResponse = JsonSerializer.Deserialize<SourceConnectionResponse>(responseContent);
         
         return sourceConnectionResponse;
     }
