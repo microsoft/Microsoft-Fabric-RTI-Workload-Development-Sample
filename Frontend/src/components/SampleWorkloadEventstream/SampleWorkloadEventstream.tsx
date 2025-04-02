@@ -1,8 +1,47 @@
 import { EventstreamComponentProps } from "../../App";
-import { Divider } from "@fluentui/react-components";
-import React from "react";
+import { Button, Divider } from "@fluentui/react-components";
+import React, { useState } from "react";
+import { SampleWorkloadDataGenerator } from "../SampleWorkloadDataGenerator/SampleWorkloadDataGenerator";
+import { MessageBar } from "@fluentui/react";
+import { MessageBarType } from "@fluentui/react";
 
 export function EventstreamComponent({ eventstreamDisplayName, eventstreamItemId }: EventstreamComponentProps) {
+    const [sendSuccess, setSendSuccess] = useState<boolean | null>(null);
+    const [isSendInProgress, setIsSendInProgress] = useState<boolean>(false);
+    const targetTable = "IotData";
+
+    const dataGenerator = SampleWorkloadDataGenerator();
+    const { UI: DataGeneratorUI, hasRows, removeAllRows } = dataGenerator;
+
+    async function onSendButtonClick() {
+        try {
+            setSendSuccess(null);
+            setIsSendInProgress(true);
+            //const contentToIngest = getRowsAsCSV();
+           /* await CallQueuedIngest(
+                sampleWorkloadBEUrl,
+                kqlDatabaseIngestionUrl,
+                kqlDatabaseItemId,
+                targetTable,
+                contentToIngest,
+                workloadClient
+            );
+            */
+            setSendSuccess(true);
+            removeAllRows();
+        }
+        catch (error) {
+            console.error("Error ingesting data:", error);
+            setSendSuccess(false);
+        } finally {
+            setIsSendInProgress(false);
+        }
+    }
+
+    function isDisabledSendButton(): boolean {
+        return !hasRows() || isSendInProgress;
+    }
+
     return (
         <div className='eventstream-editor'>
             <h2>Eventstream</h2>
@@ -23,6 +62,36 @@ export function EventstreamComponent({ eventstreamDisplayName, eventstreamItemId
             <Divider alignContent="start" className="divider">
                 <b>Events generator</b>
             </Divider>
+            {DataGeneratorUI}
+            {hasRows() && (
+                <>
+                    <Divider alignContent="start" className="divider">
+                        <b>Events ingestion</b>
+                    </Divider>
+                    <div className="events-ingestion">
+                        <Button
+                            className={`send-button ${isSendInProgress ? 'disabled' : ''}`}
+                            onClick={onSendButtonClick}
+                            disabled={isDisabledSendButton()}>
+                            {isSendInProgress ? 'Sending...' : 'Send Events'}
+                        </Button>
+                    </div>
+                </>
+            )}
+            {sendSuccess !== null && (
+                <div className="message-bar-container">
+                    <MessageBar
+                        messageBarType={sendSuccess ? MessageBarType.success : MessageBarType.error}
+                        isMultiline={true}
+                        onDismiss={() => setSendSuccess(null)}
+                    >
+                        {sendSuccess ?
+                            `Events sent successfully to Eventstream! Query ${targetTable} to see the new records in the table, note, it may take a few minutes to see the new records.`
+                            : "Error sending events."
+                        }
+                    </MessageBar>
+                </div>
+            )}
         </div>
     );
 }

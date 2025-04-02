@@ -393,6 +393,10 @@
         padding: 0 0 0 0px;
     }
 
+    .message-bar-container {
+        padding: 20 0 0 0px;
+    }
+
     .description-label {
         font-weight: bold;
     }
@@ -406,9 +410,33 @@
         font-weight: normal;
         color: #242424;
     }
+
+    .events-ingestion {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .send-button {
+            background-color: #127865;
+            color: #ddd;
+            transition: background-color 0.3s ease;
+            margin-right: auto;
+        }
+
+        .send-button:hover {
+            color: #f2f2f2;
+            background-color: #0a5a4a;
+        }
+
+        .send-button.disabled {
+            background-color: #f3f2f1;
+            color: #a19f9d;
+            cursor: not-allowed;
+        }
+    }
 }
 
-.data-generator{
+.data-generator {
     .input-container {
         display: flex;
         gap: 20px;
