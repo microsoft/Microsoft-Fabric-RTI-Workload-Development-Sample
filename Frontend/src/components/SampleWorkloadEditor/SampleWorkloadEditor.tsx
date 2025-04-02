@@ -277,7 +277,7 @@ export function SampleWorkloadEditor(props: PageProps) {
           selectedTab == "eventStream" && (
             <span>
               <div className="section">
-                <EventstreamComponent />
+                <EventstreamComponent workloadClient={workloadClient} eventstreamDisplayName={eventstreamDisplayName} eventstreamItemId={eventhouseItemId} />
               </div>
             </span>
           )
@@ -300,7 +300,6 @@ export function SampleWorkloadEditor(props: PageProps) {
             </span>
           )
         }
-        
         {
           selectedTab == "activator" && (
             <span>
