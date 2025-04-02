@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Fabric.Rti.workload.Backend.Constants;
 using Fabric.Rti.workload.Backend.Contracts.RtiContracts;
 using Microsoft.Fabric.Api.Core.Models;
 using Microsoft.Fabric.Api.Eventstream.Models;
@@ -25,12 +24,14 @@ public static class EventstreamUtils
         string eventstreamName,
         Guid kqlDatabaseWorkspaceId,
         Guid kqlDatabaseItemId,
+        string kqlDatabaseName,
         string kqlTableName)
     {
         var payload = CreateEventstreamConfigWithEventhouseDataConnection(
             eventstreamName,
             kqlDatabaseWorkspaceId,
             kqlDatabaseItemId,
+            kqlDatabaseName,
             kqlTableName);
 
         var parts = new List<EventstreamDefinitionPart>
@@ -50,65 +51,172 @@ public static class EventstreamUtils
         string eventstreamName,
         Guid kqlDatabaseWorkspaceId,
         Guid kqlDatabaseItemId,
+        string kqlDatabaseName,
         string kqlTableName)
     {
         return new EventstreamConfig
         {
-            Sources =
-            [
+            Sources = new List<EventstreamSource>
+            {
                 new EventstreamSource
                 {
-                    Name = RtiConstants.EventStreamCustomEndpointSourceName,
+                    Name = "customEndpoint1",
                     Type = "CustomEndpoint",
                     Properties = new EmptyProperties()
                 }
-            ],
-            Streams =
-            [
-                new EventstreamStream
-                {
-                    Name = eventstreamName + "-stream",
-                    Type = "DefaultStream",
-                    Properties = new EmptyProperties(),
-                    InputNodes =
-                    [
-                        new EventstreamInputNode
-                        {
-                            Name = RtiConstants.EventStreamCustomEndpointSourceName
-                        }
-                    ]
-                }
-            ],
-            Destinations =
-            [
+            },
+            Destinations = new List<EventstreamDestination>
+            {
                 new EventstreamDestination
                 {
                     Name = "EventhouseDataConnection",
                     Type = "Eventhouse",
                     Properties = new EventhouseDataConnection
                     {
-                        DataIngestionMode = "DirectIngestion",
+                        DataIngestionMode = "ProcessedIngestion",
                         WorkspaceId = kqlDatabaseWorkspaceId,
                         ItemId = kqlDatabaseItemId,
+                        DatabaseName = kqlDatabaseName,
                         TableName = kqlTableName,
-                        ConnectionName = "EventhouseDataConnection",
-                        MappingRuleName = RtiConstants.KustoIotDataTableIngestionMappingName
+                        InputSerialization = new EventhouseInputSerialization
+                        {
+                            Type = "Json",
+                            Properties = new JsonSerializationProperties
+                            {
+                                Encoding = "UTF8"
+                            }
+                        }
                     },
-                    InputNodes =
-                    [
+                    InputNodes = new List<EventstreamInputNode>
+                    {
+                        new EventstreamInputNode
+                        {
+                            Name = "ManageFields"
+                        }
+                    },
+                    InputSchemas = new List<InputSchema>
+                    {
+                        new InputSchema
+                        {
+                            Name = "ManageFields",
+                            Schema = new Schema
+                            {
+                                Columns = new List<Column>
+                                {
+                                    new Column { Name = "timestamp", Type = "DateTime", Fields = null, Items = null },
+                                    new Column { Name = "name", Type = "Nvarchar(max)", Fields = null, Items = null },
+                                    new Column { Name = "value", Type = "Float", Fields = null, Items = null }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            Streams = new List<EventstreamStream>
+            {
+                new EventstreamStream
+                {
+                    Name = eventstreamName + "-stream",
+                    Type = "DefaultStream",
+                    Properties = new EmptyProperties(),
+                    InputNodes = new List<EventstreamInputNode>
+                    {
+                        new EventstreamInputNode
+                        {
+                            Name = "customEndpoint1"
+                        }
+                    }
+                }
+            },
+            Operators = new List<EventstreamOperator>
+            {
+                new EventstreamOperator
+                {
+                    Name = "ManageFields",
+                    Type = "ManageFields",
+                    InputNodes = new List<EventstreamInputNode>
+                    {
                         new EventstreamInputNode
                         {
                             Name = eventstreamName + "-stream"
                         }
-                    ],
-                    InputSchemas = []
+                    },
+                    Properties = new OperatorProperties
+                    {
+                        Columns = new List<OperatorColumn>
+                        {
+                            new OperatorColumn
+                            {
+                                Type = "Rename",
+                                Properties = new ColumnProperties
+                                {
+                                    Column = new ColumnReference
+                                    {
+                                        ExpressionType = "ColumnReference",
+                                        Node = null,
+                                        ColumnName = "timestamp",
+                                        ColumnPathSegments = new List<object>()
+                                    }
+                                },
+                                Alias = "timestamp"
+                            },
+                            new OperatorColumn
+                            {
+                                Type = "Rename",
+                                Properties = new ColumnProperties
+                                {
+                                    Column = new ColumnReference
+                                    {
+                                        ExpressionType = "ColumnReference",
+                                        Node = null,
+                                        ColumnName = "name",
+                                        ColumnPathSegments = new List<object>()
+                                    }
+                                },
+                                Alias = "name"
+                            },
+                            new OperatorColumn
+                            {
+                                Type = "Rename",
+                                Properties = new ColumnProperties
+                                {
+                                    Column = new ColumnReference
+                                    {
+                                        ExpressionType = "ColumnReference",
+                                        Node = null,
+                                        ColumnName = "value",
+                                        ColumnPathSegments = new List<object>()
+                                    }
+                                },
+                                Alias = "value"
+                            }
+                        }
+                    },
+                    InputSchemas = new List<InputSchema>
+                    {
+                        new InputSchema
+                        {
+                            Name = "es_push-stream",
+                            Schema = new Schema
+                            {
+                                Columns = new List<Column>
+                                {
+                                    new Column { Name = "timestamp", Type = "DateTime", Fields = null, Items = null },
+                                    new Column { Name = "name", Type = "Nvarchar(max)", Fields = null, Items = null },
+                                    new Column { Name = "value", Type = "Float", Fields = null, Items = null },
+                                    new Column { Name = "EventProcessedUtcTime", Type = "DateTime", Fields = null, Items = null },
+                                    new Column { Name = "PartitionId", Type = "BigInt", Fields = null, Items = null },
+                                    new Column { Name = "EventEnqueuedUtcTime", Type = "DateTime", Fields = null, Items = null }
+                                }
+                            }
+                        }
+                    }
                 }
-            ],
-            Operators = [],
+            },
             CompatibilityLevel = "1.0"
         };
     }
-    
+
     private static string Base64Encode(string payload)
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(payload);

@@ -13,7 +13,6 @@ using Fabric.Rti.workload.Backend.Exceptions;
 using Fabric.Rti.workload.Backend.Services;
 using Fabric.Rti.workload.Backend.Utils;
 using Kusto.Data.Common;
-using Kusto.Data.Ingestion;
 using Microsoft.Extensions.Logging;
 using CreateItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.CreateItemPayload;
 using ItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.ItemPayload;
@@ -184,8 +183,7 @@ namespace Fabric.Rti.workload.Backend.Items
                 var tableCreateCommand = CslCommandGenerator.GenerateTableCreateCommand(RtiConstants.KustoIotDataTableName, typeof(KustoIotDataTableRecord), forceNormalizeColumnName: false);
                 await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, tableCreateCommand, kustoClientRequestProperties, default);
                 
-              
-                
+                /* //TODO - ingesting mapping is need for data connection with PULL mode, currently we are using PUSH mode.
                 Logger.LogInformation($"PrepareKqlDatabaseData: creating ingestion mapping {RtiConstants.KustoIotDataTableIngestionMappingName} in kql database {kqlDatabaseItemId}");
                 var ingestionMappingCommand = CslCommandGenerator.GenerateTableMappingCreateCommand(
                     IngestionMappingKind.Json,
@@ -193,13 +191,14 @@ namespace Fabric.Rti.workload.Backend.Items
                     RtiConstants.KustoIotDataTableIngestionMappingName,
                     KustoIotIngestionMapping.Mapping);
                 await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestionMappingCommand, kustoClientRequestProperties, default);
-
+                */
+                
                 Logger.LogInformation($"PrepareKqlDatabaseData: ingesting initial data to table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
                 var records = KustoIotDataTableRecordExtensions.GenerateRandomRecords(3);
                 var csvData = string.Join(Environment.NewLine, records.Select(r => r.ToCsvFormat()));
                 var ingestCommand = CslCommandGenerator.GenerateTableIngestPushCommand(RtiConstants.KustoIotDataTableName, compressed: false, csvData);
                 await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestCommand, kustoClientRequestProperties, default);
-                
+
                 Logger.LogInformation($"PrepareKqlDatabaseData: successfully prepared kql database data for database id {kqlDatabaseItemId}");
             }
             catch (Exception ex)
@@ -216,6 +215,7 @@ namespace Fabric.Rti.workload.Backend.Items
                     metadata.EventstreamDisplayName,
                     WorkspaceObjectId,
                     metadata.KqlDatabaseItemId.Value,
+                    metadata.KqlDatabaseDisplayName,
                     RtiConstants.KustoIotDataTableName);
 
                 await _fabricApiClient.UpdateEventstreamDefinitionAsync(
