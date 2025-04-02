@@ -33,6 +33,8 @@ export interface WorkloadItem<T> extends GenericItem {
 
 // Represents the core metadata for Item1 stored within the system's storage.
 export interface Item1Metadata {
+    eventstreamItemId?: string;
+    eventstreamDisplayName?: string;
     eventhouseItemId?: string;
     eventhouseDisplayName?: string;
     kqlDatabaseItemId?: string;

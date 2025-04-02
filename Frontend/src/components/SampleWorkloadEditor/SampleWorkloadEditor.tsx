@@ -53,6 +53,8 @@ export function SampleWorkloadEditor(props: PageProps) {
   // React state for WorkloadClient APIs
   const [sampleItem, setSampleItem] =
     useState<WorkloadItem<ItemPayload>>(undefined);
+  const [eventstreamItemId, setEventstreamItemId] = useState<string>("");
+  const [eventstreamDisplayName, setEventstreamDisplayName] = useState<string>("");
   const [eventhouseItemId, setEventhouseItemId] = useState<string>("");
   const [eventhouseDisplayName, setEventhouseDisplayName] = useState<string>("");
   const [kqlDatabaseItemId, setKqlDatabaseItemId] = useState<string>("");
@@ -113,6 +115,8 @@ export function SampleWorkloadEditor(props: PageProps) {
         // load extendedMetadata
         const item1Metadata: Item1ClientMetadata =
           item.extendedMetadata.item1Metadata;
+        setEventstreamItemId(item1Metadata?.eventstreamItemId);
+        setEventstreamDisplayName(item1Metadata?.eventstreamDisplayName);
         setEventhouseItemId(item1Metadata?.eventhouseItemId);
         setEventhouseDisplayName(item1Metadata?.eventhouseDisplayName);
         setKqlDatabaseItemId(item1Metadata?.kqlDatabaseItemId);
@@ -234,6 +238,14 @@ export function SampleWorkloadEditor(props: PageProps) {
                 <div className="section" data-testid='item-metadata' >
                   {
                     sampleItem && (
+                      <Label><b>Eventstream display Name:</b> {eventstreamDisplayName}</Label>
+                    )}
+                  {
+                    sampleItem && (
+                      <Label><b>Eventstream display Name:</b> {eventstreamItemId}</Label>
+                    )}
+                  {
+                    sampleItem && (
                       <Label><b>Eventhouse display Name:</b> {eventhouseDisplayName}</Label>
                     )}
                   {
@@ -262,10 +274,10 @@ export function SampleWorkloadEditor(props: PageProps) {
           </span>
         )}
         {
-          selectedTab == "kqlExplorer" && (
+          selectedTab == "eventStream" && (
             <span>
               <div className="section">
-                <KqlExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+                <EventstreamComponent />
               </div>
             </span>
           )
@@ -280,14 +292,15 @@ export function SampleWorkloadEditor(props: PageProps) {
           )
         }
         {
-          selectedTab == "eventStream" && (
+          selectedTab == "kqlExplorer" && (
             <span>
               <div className="section">
-                <EventstreamComponent />
+                <KqlExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
               </div>
             </span>
           )
         }
+        
         {
           selectedTab == "activator" && (
             <span>
