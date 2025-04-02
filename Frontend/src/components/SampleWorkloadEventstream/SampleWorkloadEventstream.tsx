@@ -4,29 +4,30 @@ import React, { useState } from "react";
 import { SampleWorkloadDataGenerator } from "../SampleWorkloadDataGenerator/SampleWorkloadDataGenerator";
 import { MessageBar } from "@fluentui/react";
 import { MessageBarType } from "@fluentui/react";
+import { CallSendEvents } from "../../controller/EventstreamController";
 
-export function EventstreamComponent({ eventstreamDisplayName, eventstreamItemId }: EventstreamComponentProps) {
-    const [sendSuccess, setSendSuccess] = useState<boolean | null>(null);
-    const [isSendInProgress, setIsSendInProgress] = useState<boolean>(false);
+export function EventstreamComponent({ workloadClient, workspaceObjectId, eventstreamDisplayName, eventstreamItemId }: EventstreamComponentProps) {
+    const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const targetTable = "IotData";
 
+    const [sendSuccess, setSendSuccess] = useState<boolean | null>(null);
+    const [isSendInProgress, setIsSendInProgress] = useState<boolean>(false);
+
     const dataGenerator = SampleWorkloadDataGenerator();
-    const { UI: DataGeneratorUI, hasRows, removeAllRows } = dataGenerator;
+    const { UI: DataGeneratorUI, hasRows, removeAllRows, getRows } = dataGenerator;
 
     async function onSendButtonClick() {
         try {
             setSendSuccess(null);
             setIsSendInProgress(true);
-            //const contentToIngest = getRowsAsCSV();
-           /* await CallQueuedIngest(
+            const contentToIngest = getRows();
+            await CallSendEvents(
                 sampleWorkloadBEUrl,
-                kqlDatabaseIngestionUrl,
-                kqlDatabaseItemId,
-                targetTable,
+                workspaceObjectId,
+                eventstreamItemId,
                 contentToIngest,
                 workloadClient
             );
-            */
             setSendSuccess(true);
             removeAllRows();
         }

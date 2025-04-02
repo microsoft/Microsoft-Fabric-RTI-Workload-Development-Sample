@@ -33,7 +33,7 @@ public class EventstreamController : ControllerBase
         _fabricApiClient = fabricApiClient;
     }
 
-    [HttpPost("workspaces/{workspaceId}/eventstreams/{eventstreamId}/SendEvents")]
+    [HttpPost("workspaces/{workspaceId}/eventstreams/{eventstreamId}/sendEvents")]
     public async Task<IActionResult> SendEvents(Guid workspaceId, Guid eventstreamId, [FromBody] EventstreamSendEventsRequest request)
     {
         try

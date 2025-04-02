@@ -8,10 +8,11 @@ import { SampleWorkloadDataGenerator } from "../SampleWorkloadDataGenerator/Samp
 
 export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KqlIngestorComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
+    const targetTable = "IotData";
+
     const [ingestionType, setIngestionType] = useState<string>("streaming");
     const [ingestionSuccess, setIngestionSuccess] = useState<boolean | null>(null);
     const [isIngestionInProgress, setIsIngestionInProgress] = useState<boolean>(false);
-    const targetTable = "IotData";
 
     const dataGenerator = SampleWorkloadDataGenerator();
     const { UI: DataGeneratorUI, hasRows, removeAllRows, getRowsAsCSV } = dataGenerator;
@@ -80,7 +81,7 @@ export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, k
             {hasRows() && (
                 <>
                     <Divider alignContent="start" className="divider">
-                        <b>Data Ingestion</b>
+                        <b>Data ingestion</b>
                     </Divider>
                     <div className="data-ingestion">
                         <Button

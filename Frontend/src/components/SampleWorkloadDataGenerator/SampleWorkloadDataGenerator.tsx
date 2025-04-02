@@ -27,6 +27,10 @@ export function SampleWorkloadDataGenerator() {
         return csvRows.join("\n");
     }
 
+    function getRows(): IotDataTableRow[] {
+        return rows;
+    }
+
     function addRow() {
         if (rows.length < maxRows) {
             setRows([...rows, stagingRow]);
@@ -114,6 +118,7 @@ export function SampleWorkloadDataGenerator() {
         ),
         hasRows,
         removeAllRows,
-        getRowsAsCSV
+        getRowsAsCSV,
+        getRows
     };
 }

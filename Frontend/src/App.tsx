@@ -42,6 +42,7 @@ export interface KqlIngestorComponentProps extends PageProps {
 }
 
 export interface EventstreamComponentProps extends PageProps {
+  workspaceObjectId: string;
   eventstreamDisplayName: string;
   eventstreamItemId: string;
 }
