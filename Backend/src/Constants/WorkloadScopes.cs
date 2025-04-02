@@ -13,6 +13,7 @@ namespace Fabric.Rti.workload.Backend.Constants
         public const string FabricWorkloadControl = "FabricWorkloadControl";
         public const string KQLDatabaseReadAll = "KQLDatabase.Read.All";
         public const string KQLDatabaseReadWriteAll = "KQLDatabase.ReadWrite.All";
+        public const string EventstreamReadWriteAll = "Eventstream.ReadWrite.All";
         public const string FabricEventstreamReadWriteAll = "FabricEventstream.ReadWrite.All";
     }
 }

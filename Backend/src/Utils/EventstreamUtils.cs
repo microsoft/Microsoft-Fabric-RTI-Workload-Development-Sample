@@ -91,7 +91,8 @@ public static class EventstreamUtils
                         WorkspaceId = kqlDatabaseWorkspaceId,
                         ItemId = kqlDatabaseItemId,
                         TableName = kqlTableName,
-                        ConnectionName = "EventhouseDataConnection"
+                        ConnectionName = "EventhouseDataConnection",
+                        MappingRuleName = RtiConstants.KustoIotDataTableIngestionMappingName
                     },
                     InputNodes =
                     [

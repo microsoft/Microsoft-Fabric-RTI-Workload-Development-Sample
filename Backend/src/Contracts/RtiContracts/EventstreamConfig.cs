@@ -89,6 +89,9 @@ public class EventhouseDataConnection
     
     [JsonPropertyName("connectionName")]
     public string ConnectionName { get; set; }
+    
+    [JsonPropertyName("mappingRuleName")]
+    public string MappingRuleName { get; set; }
 }
 
 public class EventhouseInputSerialization

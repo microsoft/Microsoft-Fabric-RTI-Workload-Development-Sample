@@ -13,6 +13,7 @@ using Fabric.Rti.workload.Backend.Exceptions;
 using Fabric.Rti.workload.Backend.Services;
 using Fabric.Rti.workload.Backend.Utils;
 using Kusto.Data.Common;
+using Kusto.Data.Ingestion;
 using Microsoft.Extensions.Logging;
 using CreateItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.CreateItemPayload;
 using ItemPayload = Fabric.Rti.workload.Backend.Contracts.FabricAPI.Workload.ItemPayload;
@@ -22,7 +23,11 @@ namespace Fabric.Rti.workload.Backend.Items
 {
     public class Item1 : ItemBase<Item1, Item1Metadata, Item1ClientMetadata>
     {
-        private static readonly IList<string> FabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.KQLDatabaseReadWriteAll}" };
+        private static readonly IList<string> FabricScopes = new[]
+        {
+            $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.KQLDatabaseReadWriteAll}",
+            $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.EventstreamReadWriteAll}"
+        };
 
         private readonly IAuthenticationService _authenticationService;
 
@@ -178,6 +183,16 @@ namespace Fabric.Rti.workload.Backend.Items
                 Logger.LogInformation($"PrepareKqlDatabaseData: creating table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
                 var tableCreateCommand = CslCommandGenerator.GenerateTableCreateCommand(RtiConstants.KustoIotDataTableName, typeof(KustoIotDataTableRecord), forceNormalizeColumnName: false);
                 await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, tableCreateCommand, kustoClientRequestProperties, default);
+                
+              
+                
+                Logger.LogInformation($"PrepareKqlDatabaseData: creating ingestion mapping {RtiConstants.KustoIotDataTableIngestionMappingName} in kql database {kqlDatabaseItemId}");
+                var ingestionMappingCommand = CslCommandGenerator.GenerateTableMappingCreateCommand(
+                    IngestionMappingKind.Json,
+                    RtiConstants.KustoIotDataTableName,
+                    RtiConstants.KustoIotDataTableIngestionMappingName,
+                    KustoIotIngestionMapping.Mapping);
+                await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestionMappingCommand, kustoClientRequestProperties, default);
 
                 Logger.LogInformation($"PrepareKqlDatabaseData: ingesting initial data to table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
                 var records = KustoIotDataTableRecordExtensions.GenerateRandomRecords(3);
