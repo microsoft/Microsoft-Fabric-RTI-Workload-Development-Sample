@@ -5,6 +5,9 @@ using Microsoft.Fabric.Api.Core.Models;
 using Microsoft.Fabric.Api.Eventstream.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using InputSchema = Fabric.Rti.workload.Backend.Contracts.RtiContracts.InputSchema;
+using JsonSerializationProperties = Fabric.Rti.workload.Backend.Contracts.RtiContracts.JsonSerializationProperties;
+using Schema = Fabric.Rti.workload.Backend.Contracts.RtiContracts.Schema;
 
 namespace Fabric.Rti.workload.Backend.Utils;
 
