@@ -9,6 +9,7 @@ using Fabric.Rti.workload.Backend.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Fabric.Rti.workload.Backend.Controllers.Rti;
 
@@ -87,9 +88,10 @@ public class EventstreamController : ControllerBase
             throw new InvalidOperationException($"Custom endpoint connection for source '{RtiConstants.EventStreamCustomEndpointSourceName}' not found.");
         }
 
-        var connectionString = (customEndpointConnection.AccessKeys as EventstreamCustomEndpointAccessKeys)?.PrimaryConnectionString;
+        var accessKeysAsJson = JsonConvert.SerializeObject(customEndpointConnection.AccessKeys);
+        var eventstreamCustomEndpointAccessKeys = JsonConvert.DeserializeObject<EventstreamCustomEndpointAccessKeys>(accessKeysAsJson);
 
-        return connectionString;
+        return eventstreamCustomEndpointAccessKeys.PrimaryConnectionString;
     }
 }
     

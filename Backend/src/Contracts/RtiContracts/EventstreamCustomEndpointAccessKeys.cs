@@ -10,13 +10,13 @@ public class EventstreamCustomEndpointAccessKeys
     
     /// <summary> The secondary key. </summary>
     [JsonProperty("secondaryKey")]
-    public string SecondaryKey { get; }
+    public string SecondaryKey { get; set; }
     
     /// <summary> The primary connection string. </summary>
     [JsonProperty("primaryConnectionString")]
-    public string PrimaryConnectionString { get; }
+    public string PrimaryConnectionString { get; set;}
     
     /// <summary> The secondary connection string. </summary>
     [JsonProperty("secondaryConnectionString")]
-    public string SecondaryConnectionString { get; }
+    public string SecondaryConnectionString { get; set;}
 }
