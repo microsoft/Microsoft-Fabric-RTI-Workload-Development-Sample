@@ -59,6 +59,14 @@ export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, k
     return (
         <div className='kql-ingestor'>
             <h2>KQL Ingestion Wizard</h2>
+            <div className="message-bar-container">
+                <MessageBar
+                    messageBarType={MessageBarType.info}
+                    isMultiline={true}
+                >
+                    Ingest records directly into the KQL database using either streaming or queued ingestion.
+                </MessageBar>
+            </div>
             <Divider alignContent="start" className="divider">
                 <b>Ingestion target</b>
             </Divider>
