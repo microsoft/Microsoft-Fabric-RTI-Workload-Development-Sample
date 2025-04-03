@@ -46,8 +46,13 @@ export function EventstreamComponent({ workloadClient, workspaceObjectId, events
     return (
         <div className='eventstream-editor'>
             <h2>Eventstream</h2>
-            <div>
-                <label className="description-label">Ingest events into the EventStream to be processed and ingested into the KQL database</label>
+            <div className="message-bar-container">
+                <MessageBar
+                    messageBarType={MessageBarType.info}
+                    isMultiline={true}
+                >
+                    Ingest events into Eventstream to be processed and ingested into the KQL database
+                </MessageBar>
             </div>
             <Divider alignContent="start" className="divider">
                 <b>Eventstream details</b>

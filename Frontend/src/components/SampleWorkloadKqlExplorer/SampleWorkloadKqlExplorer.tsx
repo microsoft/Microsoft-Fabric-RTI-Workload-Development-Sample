@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Image } from "@fluentui/react-components";
+import { Image, Divider } from "@fluentui/react-components";
 import { KqlExplorerComponentProps } from "../../App";
 import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/KqlExplorerController";
 import { KqlQueryResultComponent } from "./KqlQueryResult";
-import { Spinner, SpinnerSize } from "@fluentui/react";
+import { Spinner, SpinnerSize, MessageBar, MessageBarType } from "@fluentui/react";
 
 export function KqlExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KqlExplorerComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
@@ -66,6 +66,17 @@ export function KqlExplorerComponent({ workloadClient, kqlDatabaseDisplayName, k
     return (
         <div className='kql-explorer'>
             <h2>KQL Explorer</h2>
+            <div className="message-bar-container">
+                <MessageBar
+                    messageBarType={MessageBarType.info}
+                    isMultiline={true}
+                >
+                    Execute KQL queries on the KQL database and explore the ingested data.
+                </MessageBar>
+            </div>
+            <Divider alignContent="start" className="divider">
+                <b>KQL Database details</b>
+            </Divider>
             <div>
                 <label className='label-key'>KQL Database name:</label>
                 <label className='label-value'>{kqlDatabaseDisplayName}</label>
