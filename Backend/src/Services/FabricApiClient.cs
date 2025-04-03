@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Fabric.Rti.workload.Backend.Constants;
-using Fabric.Rti.workload.Backend.Contracts.FabricAPIPreview;
 using Microsoft.Fabric.Api;
 using Microsoft.Fabric.Api.Eventhouse.Models;
 using Microsoft.Fabric.Api.Eventstream.Models;
@@ -13,13 +11,7 @@ namespace Fabric.Rti.workload.Backend.Services;
 public class FabricApiClient : IFabricApiClient
 {
     private readonly Uri _fabricBaseUri = new(EnvironmentConstants.FabricApiBaseUrl);
-    private readonly IHttpClientService _httpClientService;
     
-    public FabricApiClient(IHttpClientService httpClientService)
-    {
-        _httpClientService = httpClientService;
-    }
-
     public async Task<Eventhouse> CreateEventhouseAsync(Guid workspaceId, string displayName, string token)
     {
         var fabricClient = new FabricClient(token, _fabricBaseUri);
@@ -49,7 +41,7 @@ public class FabricApiClient : IFabricApiClient
         {
             DisplayName = newDisplayName
         };
-        
+
         return await fabricClient.KQLDatabase.Items.UpdateKQLDatabaseAsync(workspaceId, kqlDatabaseId, updateRequest);
     }
 
@@ -60,7 +52,7 @@ public class FabricApiClient : IFabricApiClient
 
         return await fabricClient.Eventstream.Items.CreateEventstreamAsync(workspaceId, createEventstreamRequest);
     }
-    
+
     public async Task UpdateEventstreamDefinitionAsync(Guid workspaceId, Guid eventstreamId, EventstreamDefinition eventstreamDefinition, string token)
     {
         var fabricClient = new FabricClient(token, _fabricBaseUri);
@@ -69,27 +61,15 @@ public class FabricApiClient : IFabricApiClient
         await fabricClient.Eventstream.Items.UpdateEventstreamDefinitionAsync(workspaceId, eventstreamId, updateDefinitionRequest);
     }
 
-    // TODO - temp till available in Microsoft.Fabric.Api
     public async Task<EventstreamTopologyResponse> GetEventstreamTopologyAsync(Guid workspaceId, Guid eventstreamId, string token)
     {
-        var eventstreamTopologyUrl = $"{_fabricBaseUri}/v1/workspaces/{workspaceId}/eventstreams/{eventstreamId}/topology";
-
-        var response = await _httpClientService.GetAsync(eventstreamTopologyUrl, token);
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var topologyResponse = JsonSerializer.Deserialize<EventstreamTopologyResponse>(responseContent);
-        
-        return topologyResponse;
+        var fabricClient = new FabricClient(token, _fabricBaseUri);
+        return await fabricClient.Eventstream.Topology.GetEventstreamTopologyAsync(workspaceId, eventstreamId);
     }
-    
-    // TODO - temp till available in Microsoft.Fabric.Api
+
     public async Task<SourceConnectionResponse> GetEventstreamSourceConnectionAsync(Guid workspaceId, Guid eventstreamId, Guid sourceId, string token)
     {
-        var eventstreamSourceConnectionUrl = $"{_fabricBaseUri}/v1/workspaces/{workspaceId}/eventstreams/{eventstreamId}/sources/{sourceId}/connection";
-
-        var response = await _httpClientService.GetAsync(eventstreamSourceConnectionUrl, token);
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var sourceConnectionResponse = JsonSerializer.Deserialize<SourceConnectionResponse>(responseContent);
-        
-        return sourceConnectionResponse;
+        var fabricClient = new FabricClient(token, _fabricBaseUri);
+        return await fabricClient.Eventstream.Topology.GetEventstreamSourceConnectionAsync(workspaceId, eventstreamId, sourceId);
     }
 }

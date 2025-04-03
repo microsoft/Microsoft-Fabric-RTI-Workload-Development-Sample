@@ -63,7 +63,7 @@ public class EventstreamController : ControllerBase
     private async Task<EventHubClient> CreateEventHubClient(Guid workspaceId, Guid eventStreamItemId, string fabricToken)
     {
         var connectionString = await GetEventStreamCustomEndpointConnectionString(workspaceId, eventStreamItemId, fabricToken);
-     
+
         return new EventHubClient(connectionString);
     }
 
@@ -80,14 +80,14 @@ public class EventstreamController : ControllerBase
             throw new InvalidOperationException($"Custom endpoint source '{RtiConstants.EventStreamCustomEndpointSourceName}' not found in event stream topology.");
         }
 
-        var customEndpointConnection = await _fabricApiClient.GetEventstreamSourceConnectionAsync(workspaceId, eventStreamItemId, Guid.Parse(customEndpointSourceId), fabricToken);
+        var customEndpointConnection = await _fabricApiClient.GetEventstreamSourceConnectionAsync(workspaceId, eventStreamItemId, customEndpointSourceId.Value, fabricToken);
 
         if (customEndpointConnection == null)
         {
             throw new InvalidOperationException($"Custom endpoint connection for source '{RtiConstants.EventStreamCustomEndpointSourceName}' not found.");
         }
 
-        var connectionString = customEndpointConnection.AccessKeys.PrimaryConnectionString;
+        var connectionString = (customEndpointConnection.AccessKeys as EventstreamCustomEndpointAccessKeys)?.PrimaryConnectionString;
 
         return connectionString;
     }
