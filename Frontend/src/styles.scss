@@ -179,14 +179,6 @@
     }
 }
 
-.hidden-explorer {
-    width: max-content;
-    min-width: auto;
-}
-
-.vertical-text {
-    writing-mode: vertical-lr;
-}
 
 .tree {
     .lvl1 {
@@ -346,6 +338,10 @@
         padding: 0 0 0 0px;
     }
 
+    .message-bar-container {
+        padding: 20 0 0 0px;
+    }
+
     .label-key {
         color: #707070;
         margin-right: 8px;
@@ -354,6 +350,107 @@
     .label-value {
         font-weight: normal;
         color: #242424;
+    }
+
+    .data-ingestion {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .ingest-button {
+            background-color: #127865;
+            color: #ddd;
+            transition: background-color 0.3s ease;
+            margin-right: auto;
+        }
+
+        .ingest-button:hover {
+            color: #f2f2f2;
+            background-color: #0a5a4a;
+        }
+
+        .ingest-button.disabled {
+            background-color: #f3f2f1;
+            color: #a19f9d;
+            cursor: not-allowed;
+        }
+
+        .ingestion-type-radio-group {
+            margin-left: 10px;
+            margin-top: 10px;
+            margin-left: auto;
+            width: 200px;
+
+            .label {
+                margin-left: 8px;
+            }
+        }
+    }
+}
+
+.eventstream-editor {
+    h2 {
+        padding: 0 0 0 0px;
+    }
+
+    .message-bar-container {
+        padding: 20 0 0 0px;
+    }
+
+    .description-label {
+        font-weight: bold;
+    }
+
+    .label-key {
+        color: #707070;
+        margin-right: 8px;
+    }
+
+    .label-value {
+        font-weight: normal;
+        color: #242424;
+    }
+
+    .events-ingestion {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .send-button {
+            background-color: #127865;
+            color: #ddd;
+            transition: background-color 0.3s ease;
+            margin-right: auto;
+        }
+
+        .send-button:hover {
+            color: #f2f2f2;
+            background-color: #0a5a4a;
+        }
+
+        .send-button.disabled {
+            background-color: #f3f2f1;
+            color: #a19f9d;
+            cursor: not-allowed;
+        }
+    }
+}
+
+.data-generator {
+    .input-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .input-container input {
+        width: 180px;
+    }
+
+    .rows-container {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-top: 20px;
     }
 
     table {
@@ -421,56 +518,5 @@
     .remove-row-button:hover {
         background-color: rgb(240, 94, 94);
         color: f2f2f2;
-    }
-
-    .rows-container {
-        max-height: 250px;
-        overflow-y: auto;
-        margin-top: 20px;
-    }
-
-    .input-container {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-    }
-
-    .input-container input {
-        width: 180px;
-    }
-
-    .data-ingestion {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .ingest-button {
-            background-color: #127865;
-            color: #ddd;
-            transition: background-color 0.3s ease;
-            margin-right: auto;
-        }
-
-        .ingest-button:hover {
-            color: #f2f2f2;
-            background-color: #0a5a4a;
-        }
-
-        .ingest-button.disabled {
-            background-color: #f3f2f1;
-            color: #a19f9d;
-            cursor: not-allowed;
-        }
-
-        .ingestion-type-radio-group {
-            margin-left: 10px;
-            margin-top: 10px;
-            margin-left: auto;
-            width: 200px;
-
-            .label {
-                margin-left: 8px;
-            }
-        }
     }
 }

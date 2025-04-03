@@ -52,6 +52,7 @@ $FabricLakehouseReadAllGuid = (New-Guid).ToString()
 $FabricLakehouseReadWriteAllGuid = (New-Guid).ToString()
 $KQLDatabaseReadWriteAllGuid = (New-Guid).ToString()
 $FabricEventhouseReadWriteAllGuid = (New-Guid).ToString()
+$FabricEventstreamReadWriteAllGuid = (New-Guid).ToString()
 
 ## Generate URI
 
@@ -141,13 +142,21 @@ $application = @{
                 id = $FabricEventhouseReadWriteAllGuid
                 isEnabled = $true
                 type = "User"
+            },
+            @{
+                adminConsentDisplayName = "FabricEventstream.ReadWrite.All"
+                adminConsentDescription = "FabricEventstreamReadWrite.All"
+                value = "FabricEventstream.ReadWrite.All"
+                id = $FabricEventstreamReadWriteAllGuid
+                isEnabled = $true
+                type = "User"
             }
         )
         preAuthorizedApplications = @( # Preauthorize
             @{
                 appId = "871c010f-5e61-4fb1-83ac-98610a7e9110"
                 delegatedPermissionIds = @(
-                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid, $KQLDatabaseReadWriteAllGuid, $FabricEventhouseReadWriteAllGuid
+                    $Item1ReadAllGuid, $Item1ReadWriteAllGuid, $FabricLakehouseReadAllGuid, $FabricLakehouseReadWriteAllGuid, $KQLDatabaseReadWriteAllGuid, $FabricEventhouseReadWriteAllGuid, $FabricEventstreamReadWriteAllGuid
                 )
             },
              @{
@@ -229,6 +238,10 @@ $application = @{
                     },
                     @{
                         id = "726667b1-01a6-4be4-b04c-e95eae4023a8" # KQLDatabase.ReadWrite.All
+                        type = "Scope"
+                    },
+                    @{
+                        id = "bd305576-f504-4e9a-81d4-d16c7eb5334b" # Eventstream.ReadWrite.All
                         type = "Scope"
                     }
                 )

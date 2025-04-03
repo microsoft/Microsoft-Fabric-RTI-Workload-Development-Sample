@@ -41,6 +41,12 @@ export interface KqlIngestorComponentProps extends PageProps {
   kqlDatabaseIngestionUrl: string;
 }
 
+export interface EventstreamComponentProps extends PageProps {
+  workspaceObjectId: string;
+  eventstreamDisplayName: string;
+  eventstreamItemId: string;
+}
+
 export function App({ history, workloadClient }: AppProps) {
   return (
     <Router history={history}>

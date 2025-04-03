@@ -22,7 +22,11 @@ namespace Fabric.Rti.workload.Backend.Items
 {
     public class Item1 : ItemBase<Item1, Item1Metadata, Item1ClientMetadata>
     {
-        private static readonly IList<string> FabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/Lakehouse.Read.All" };
+        private static readonly IList<string> FabricScopes = new[]
+        {
+            $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.KQLDatabaseReadWriteAll}",
+            $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.EventstreamReadWriteAll}"
+        };
 
         private readonly IAuthenticationService _authenticationService;
 
@@ -112,25 +116,40 @@ namespace Fabric.Rti.workload.Backend.Items
             {
                 var eventhouseDisplayName = $"{DisplayName}_Eventhouse";
                 var kqlDatabaseDisplayName = $"{DisplayName}_KQLDatabase";
-                var eventhouseItem = await _fabricApiClient.CreateEventhouse(WorkspaceObjectId, eventhouseDisplayName, fabricToken);
-                eventhouseItem = await _fabricApiClient.GetEventhouse(WorkspaceObjectId, eventhouseItem.Id.Value, fabricToken);
+                var eventstreamDisplayName = $"{DisplayName}_Eventstream";
+                
+                var eventhouseItemTask = _fabricApiClient.CreateEventhouseAsync(WorkspaceObjectId, eventhouseDisplayName, fabricToken);
+                var eventstreamItemTask =  _fabricApiClient.CreateEventstreamAsync(WorkspaceObjectId, eventstreamDisplayName, fabricToken);
+                
+                var itemsCreationTasks = new List<Task>
+                {
+                    eventhouseItemTask,
+                    eventstreamItemTask
+                };
+
+                await Task.WhenAll(itemsCreationTasks);
+                
+                var eventhouseItem = await _fabricApiClient.GetEventhouseAsync(WorkspaceObjectId, eventhouseItemTask.Result.Id.Value, fabricToken);
 
                 var defaultKqlDatabaseId = eventhouseItem.Properties.DatabasesItemIds.FirstOrDefault();
-                await _fabricApiClient.UpdateKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, kqlDatabaseDisplayName, fabricToken);
-                var kqlDatabaseItem = await _fabricApiClient.GetKqlDatabase(WorkspaceObjectId, defaultKqlDatabaseId, fabricToken);
-
+                await _fabricApiClient.UpdateKqlDatabaseAsync(WorkspaceObjectId, defaultKqlDatabaseId, kqlDatabaseDisplayName, fabricToken);
+                var kqlDatabaseItem = await _fabricApiClient.GetKqlDatabaseAsync(WorkspaceObjectId, defaultKqlDatabaseId, fabricToken);
+                
                 metadata.EventhouseItemId = eventhouseItem.Id;
                 metadata.EventhouseDisplayName = eventhouseItem.DisplayName;
                 metadata.KqlDatabaseItemId = kqlDatabaseItem.Id;
                 metadata.KqlDatabaseDisplayName = kqlDatabaseItem.DisplayName;
                 metadata.KqlDatabaseQueryUrl = kqlDatabaseItem.Properties.QueryServiceUri;
                 metadata.KqlDatabaseIngestionUrl = kqlDatabaseItem.Properties.IngestionServiceUri;
+                metadata.EventstreamItemId = eventstreamItemTask.Result.Id;
+                metadata.EventstreamDisplayName = eventstreamItemTask.Result.DisplayName;
 
                 _metadata = metadata;
 
-                // fire and forget, prepare initial data on kusto side
-                _ = PrepareKqlDatabaseData(metadata.KqlDatabaseQueryUrl, metadata.KqlDatabaseItemId.ToString());
-                Logger.LogInformation($"CreateAdditionalResources: successfully create Eventhouse {eventhouseItem.Id} with default KQL database {defaultKqlDatabaseId}");
+                // fire and forget, prepare and setup additional resources in the background
+                _ = PrepareAdditionalResourcesAsync(metadata, fabricToken);
+                Logger.LogInformation($"CreateAdditionalResources: successfully create Eventhouse {eventhouseItem.Id} with default KQL database {defaultKqlDatabaseId}" +
+                    $" and Eventstream {eventstreamItemTask.Result.Id} in workspace {WorkspaceObjectId}");
             }
             catch (Exception ex)
             {
@@ -139,8 +158,17 @@ namespace Fabric.Rti.workload.Backend.Items
             }
         }
 
-        private async Task PrepareKqlDatabaseData(string kqlDatabaseQueryUrl, string kqlDatabaseItemId)
+        private async Task PrepareAdditionalResourcesAsync(Item1Metadata metadata, string fabricToken)
         {
+            await PrepareKqlDatabaseData(metadata);
+            await SetupEventStreamDataConnectionAsync(metadata, fabricToken);
+        }
+
+        private async Task PrepareKqlDatabaseData(Item1Metadata metadata)
+        {
+            var kqlDatabaseQueryUrl = metadata.KqlDatabaseQueryUrl;
+            var kqlDatabaseItemId = metadata.KqlDatabaseItemId.ToString();
+
             try
             {
                 Logger.LogInformation($"PrepareKqlDatabaseData: getting kusto data plane token for kql query url: {kqlDatabaseQueryUrl}");
@@ -154,18 +182,52 @@ namespace Fabric.Rti.workload.Backend.Items
                 Logger.LogInformation($"PrepareKqlDatabaseData: creating table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
                 var tableCreateCommand = CslCommandGenerator.GenerateTableCreateCommand(RtiConstants.KustoIotDataTableName, typeof(KustoIotDataTableRecord), forceNormalizeColumnName: false);
                 await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, tableCreateCommand, kustoClientRequestProperties, default);
-
+                
+                /* //TODO - ingesting mapping is need for data connection with PULL mode, currently we are using PUSH mode.
+                Logger.LogInformation($"PrepareKqlDatabaseData: creating ingestion mapping {RtiConstants.KustoIotDataTableIngestionMappingName} in kql database {kqlDatabaseItemId}");
+                var ingestionMappingCommand = CslCommandGenerator.GenerateTableMappingCreateCommand(
+                    IngestionMappingKind.Json,
+                    RtiConstants.KustoIotDataTableName,
+                    RtiConstants.KustoIotDataTableIngestionMappingName,
+                    KustoIotIngestionMapping.Mapping);
+                await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestionMappingCommand, kustoClientRequestProperties, default);
+                */
+                
                 Logger.LogInformation($"PrepareKqlDatabaseData: ingesting initial data to table {RtiConstants.KustoIotDataTableName} in kql database {kqlDatabaseItemId}");
                 var records = KustoIotDataTableRecordExtensions.GenerateRandomRecords(3);
                 var csvData = string.Join(Environment.NewLine, records.Select(r => r.ToCsvFormat()));
                 var ingestCommand = CslCommandGenerator.GenerateTableIngestPushCommand(RtiConstants.KustoIotDataTableName, compressed: false, csvData);
                 await _kustoClientService.ExecuteControlCommandAsync(kqlDatabaseQueryUrl, kqlDatabaseItemId, ingestCommand, kustoClientRequestProperties, default);
-                
+
                 Logger.LogInformation($"PrepareKqlDatabaseData: successfully prepared kql database data for database id {kqlDatabaseItemId}");
             }
             catch (Exception ex)
             {
                 Logger.LogError($"Failed preparing kql database data for database id {kqlDatabaseItemId}. Error: {ex.Message}");
+            }
+        }
+
+        private async Task SetupEventStreamDataConnectionAsync(Item1Metadata metadata, string fabricToken)
+        {
+            try
+            {
+                var eventstreamDefinition = EventstreamUtils.CreateEventstreamDefinitionWithEventhouseDataConnection(
+                    metadata.EventstreamDisplayName,
+                    WorkspaceObjectId,
+                    metadata.KqlDatabaseItemId.Value,
+                    metadata.KqlDatabaseDisplayName,
+                    RtiConstants.KustoIotDataTableName);
+
+                await _fabricApiClient.UpdateEventstreamDefinitionAsync(
+                    WorkspaceObjectId,
+                    metadata.EventstreamItemId.Value,
+                    eventstreamDefinition,
+                    fabricToken);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Failed to set up event stream data connection. Error: {ex.Message}");
+                throw;
             }
         }
 
