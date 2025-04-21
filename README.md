@@ -57,3 +57,11 @@ The overall flow is as follows:
 4. **Eventstream** - Once the Eventstream receives the events, it processes and ingests them as records into the KQL database.
 
 Note: There may be a delay between the time events are sent to the Eventstream and when they are ingested into the KQL database and become available for querying.
+
+### Useful Links
+
+Here are some helpful resources for working with Eventstream and related components:
+
+- [Create Eventstream](https://learn.microsoft.com/en-us/rest/api/fabric/eventstream/items/create-eventstream?tabs=HTTP) - Learn how to create an Eventstream using the REST API.
+- [Eventstream Topology](https://learn.microsoft.com/en-us/rest/api/fabric/eventstream/topology) - Understand the topology and structure of an Eventstream.
+- [Eventhouse Destination](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/add-destination-kql-database?pivots=enhanced-capabilities) - Guide to adding an Eventhouse as a destination for Eventstream.
