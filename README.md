@@ -9,6 +9,7 @@ Welcome to the Microsoft Fabric RTI Sample Workload repository. This repository 
 - [Quick Start](#quick-start---running-the-sample-workload-in-a-local-development-environment)
 - [Sample Item Creation](#sample-item-creation)
 - [Eventstream](#eventstream)
+- [Eventhouse and KQL database](#eventhouse-and-kql-database)
 - [Trademarks](#trademarks)
 
 ## Features
@@ -16,7 +17,7 @@ Welcome to the Microsoft Fabric RTI Sample Workload repository. This repository 
 The sample demonstrates the following Microsoft Fabric RTI capabilities:
 
 - **Eventhouse and KQL Database**: Real-time data ingestion and querying
-- **Eventstream**: Real-time data streaming and processing engine (coming soon)
+- **Eventstream**: Real-time data streaming and processing engine
 - **Activator**: Real-time data processing and alerting engine (coming soon)
 
 Our repo is based on the [Microsoft-Fabric-workload-development-sample](https://github.com/microsoft/Microsoft-Fabric-workload-development-sample) repository and the official documentation [Microsoft Fabric Workload Development Kit](https://learn.microsoft.com/en-us/fabric/workload-development-kit/development-kit-overview).
@@ -63,6 +64,12 @@ Here are some helpful resources for working with Eventstream and related compone
 - [Eventstream Topology](https://learn.microsoft.com/en-us/rest/api/fabric/eventstream/topology) - Understand the topology and structure of an Eventstream
 - [Eventhouse Destination](https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/add-destination-kql-database?pivots=enhanced-capabilities) - Guide to adding an Eventhouse as a destination for Eventstream
 - [Microsoft Fabric Documentation](https://learn.microsoft.com/en-us/fabric/) - Official Microsoft Fabric documentation
+
+## Eventhouse and KQL Database
+
+In our sample, the Eventhouse and its KQL database provide real-time data ingestion and querying capabilities. During sample item creation, the Eventhouse is created via the Fabric API, and a KQL database is automatically provisioned with it. Using the data plane API, a table is created and populated with sample records.
+
+The frontend application includes multiple tabs that demonstrate key data plane operations for the KQL database, including data querying, exploration, and management capabilities. These demonstrations showcase how to effectively interact with and utilize KQL databases in your Fabric RTI applications.
 
 ## Trademarks
 
