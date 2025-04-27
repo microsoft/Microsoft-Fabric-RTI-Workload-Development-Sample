@@ -81,6 +81,25 @@ This sample demonstrates various data plane operations on KQL databases, includi
 
 All these operations are triggered using the [Kusto REST API](https://learn.microsoft.com/en-us/kusto/api/rest/?view=microsoft-fabric) either in its pure REST form or via one of the available SDKs, such as the [.NET SDK](https://learn.microsoft.com/en-us/kusto/api/netfx/about-the-sdk?view=microsoft-fabric) used in our backend implementation.
 
+### Required Delegate Permissions
+
+To utilize the Kusto REST API, a token with valid Kusto scope is required. This requires the backend to exchange the user's Fabric token for a Kusto token. To enable this process:
+
+1. During workload application [authentication setup](https://learn.microsoft.com/en-us/fabric/workload-development-kit/authentication-tutorial), add the **user_impersonation** delegated permission for 'Azure Data Explorer'.
+1. When users interact with the workload and consent to the application, they must also accept the user impersonation permission for Azure Data Explorer.
+
+### Authorization and Permissions
+
+In addition to token exchange with the Kusto audience, the original caller must have appropriate permissions on the database to execute queries or management operations. For more details, please refer to [Security roles overview](https://learn.microsoft.com/en-us/kusto/management/security-roles?view=microsoft-fabric).
+
+In the context of Fabric, permissions operate at two levels:
+
+* **Security Role on Cluster/Database/Table**: The user is listed as a principal (or a member of a security group) with an appropriate security role on the cluster, database, or table.
+
+* **Fabric Workspace Permissions**: The user has permission on the Fabric Workspace containing the Eventhouse or KQL database item:
+  - Users with Viewer access on the workspace receive reader permission on the Eventhouse/KQL database
+  * Users with Admin access on the workspace receive Admin permission on the Eventhouse/KQL database
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
