@@ -9,7 +9,16 @@ Welcome to the Microsoft Fabric RTI Sample Workload repository. This repository 
 - [Quick Start](#quick-start---running-the-sample-workload-in-a-local-development-environment)
 - [Sample Item Creation](#sample-item-creation)
 - [Eventstream](#eventstream)
-- [Eventhouse and KQL database](#eventhouse-and-kql-database)
+  - [Data Flow Process](#data-flow-process)
+  - [Useful Links](#useful-links)
+- [Eventhouse and KQL Database](#eventhouse-and-kql-database)
+  - [KQL Database Data Plane API](#kql-database-data-plane-api)
+  - [Required Delegate Permissions](#required-delegate-permissions)
+  - [Authorization and Permissions](#authorization-and-permissions)
+  - [KQL Query](#kql-query)
+  - [KQL Management Command Execution](#kql-management-command-execution)
+  - [Queued Ingestion](#queued-ingestion)
+  - [Streaming Ingestion](#streaming-ingestion)
 - [Trademarks](#trademarks)
 
 ## Features
