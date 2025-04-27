@@ -94,11 +94,23 @@ In addition to token exchange with the Kusto audience, the original caller must 
 
 In the context of Fabric, permissions operate at two levels:
 
-* **Security Role on Cluster/Database/Table**: The user is listed as a principal (or a member of a security group) with an appropriate security role on the cluster, database, or table.
+- **Security Role on Cluster/Database/Table**: The user is listed as a principal (or a member of a security group) with an appropriate security role on the cluster, database, or table.
 
-* **Fabric Workspace Permissions**: The user has permission on the Fabric Workspace containing the Eventhouse or KQL database item:
+- **Fabric Workspace Permissions**: The user has permission on the Fabric Workspace containing the Eventhouse or KQL database item:
   - Users with Viewer access on the workspace receive reader permission on the Eventhouse/KQL database
-  * Users with Admin access on the workspace receive Admin permission on the Eventhouse/KQL database
+  - Users with Admin access on the workspace receive Admin permission on the Eventhouse/KQL database
+
+### KQL Query
+
+Below is an overview of the KQL query execution flow, demonstrating how user-initiated queries in the frontend are processed through the application layers and executed against the Eventhouse KQL database:
+
+1. **Frontend** interacts with the frontend page, types in a query, and clicks the execute button.
+1. **Frontend** sends an HTTP POST request to the 'KqlDatabases/query' endpoint on the Backend's **KqlDatabaseController**.
+1. **KqlDatabaseController** validates the user token and exchanges it for a Kusto audience token.
+1. Backend executes a KQL query request on the Eventhouse using **KustoClientService**.cs targeting the KQL Database query URI.
+1. Eventhouse processes the query and returns the dataset results.
+1. **KqlDatabaseController** formats the results and sends them back to the **frontend**.
+1. **Frontend** displays the results in a table format.
 
 ## Trademarks
 
