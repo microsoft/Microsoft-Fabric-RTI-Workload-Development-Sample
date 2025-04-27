@@ -189,6 +189,12 @@ Before using queued ingestion, you must:
 1. **Frontend** displays indication for successful or failed ingestion.
 1. After successful ingestion, the data becomes available for querying. Note that there may be a delay until the data appears in query results, depending on your configured ingestion batching policy.
 
+#### Additional Resources
+
+- **[Creating Applications with Queued Ingestion](https://learn.microsoft.com/en-us/kusto/api/get-started/app-queued-ingestion?view=azure-data-explorer&tabs=app%2Ccsharp)** - Step-by-step guide to building applications that use queued ingestion
+- **[Supported Data Formats](https://learn.microsoft.com/en-us/azure/data-explorer/ingestion-supported-formats)** - Comprehensive list of file formats supported by KQL database ingestion
+- **[Ingestion Property Reference](https://learn.microsoft.com/en-us/kusto/ingestion-properties?view=azure-data-explorer&preserve-view=true)** - Detailed documentation of all available ingestion properties and their usage
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
