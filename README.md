@@ -117,6 +117,35 @@ Below is an overview of the KQL query execution flow, demonstrating how user-ini
 > 1. If token exchange fails due to "AADSTS65001: The user or administrator has not consented to use the application with ID xxxxx", make sure the user consented to the required scope of 'Azure Data Explorer'.  
 > 2. The above query flow represents queries that complete within 30 seconds. For longer-running queries, an additional Long Running Operations (LRO) implementation is required.
 
+### KQL Management Command Execution
+
+Executing a KQL management command follows a similar flow to the query execution process described above:
+
+1. **Frontend** interacts with the frontend page, types in a control command, and clicks the execute button.
+1. **Frontend** sends an HTTP POST request to the 'KqlDatabases/mgmt' endpoint on the Backend's **KqlDatabaseController**.
+1. **KqlDatabaseController** validates the user token and exchanges it for a Kusto audience token.
+1. Backend executes a KQL management command on the Eventhouse using **KustoClientService**.cs targeting the KQL Database query URI.
+1. Eventhouse processes the command and returns the results.
+1. **KqlDatabaseController** formats the results and sends them back to the **Frontend**.
+1. **Frontend** displays the results in a table format.
+
+#### Key Differences Between KQL Queries and Management Commands
+
+1. **Syntax**: Management commands always begin with a dot (.)  
+   Examples:  
+   - `.show tables`  
+   - `.create table MyLogs (Level:string, Timestamp:datetime)`
+
+2. **API Endpoint**: The [Kusto REST API](https://learn.microsoft.com/en-us/kusto/api/rest/?view=microsoft-fabric) uses different endpoints:
+   - `/query` for executing queries
+   - `/mgmt` for executing management commands
+
+3. **Permission Requirements**: Different operations require different permission levels:
+   - Queries typically require reader permission
+   - Management operations vary by command type:
+     - `.show` operations require reader permission
+     - `.create`, `.alter`, and other modification operations require admin-level permissions
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
