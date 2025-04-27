@@ -71,6 +71,16 @@ In our sample, the Eventhouse and its KQL database provide real-time data ingest
 
 The frontend application includes multiple tabs that demonstrate key data plane operations for the KQL database, including data querying, exploration, and management capabilities. These demonstrations showcase how to effectively interact with and utilize KQL databases in your Fabric RTI applications.
 
+### KQL Database Data Plane API
+
+This sample demonstrates various data plane operations on KQL databases, including:
+
+- Querying data
+- Ingesting data
+- Executing control commands (configuring tables, schemas, update policies, retention settings, etc.)
+
+All these operations are triggered using the [Kusto REST API](https://learn.microsoft.com/en-us/kusto/api/rest/?view=microsoft-fabric) either in its pure REST form or via one of the available SDKs, such as the [.NET SDK](https://learn.microsoft.com/en-us/kusto/api/netfx/about-the-sdk?view=microsoft-fabric) used in our backend implementation.
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
