@@ -153,7 +153,6 @@ Queued ingestion provides a direct data ingestion into a KQL database without re
 - **High Throughput**: Optimized for efficient data processing by batching data based on ingestion properties
 - **Data Optimization**: Small batches are automatically merged and optimized to enable fast query performance
 - **Reliability**: Built-in retry mechanisms protect against transient failures
-- **Data Consistency**: Uses 'at least once' messaging semantics to ensure no data is lost during ingestion
 
 By default, queued ingestion batches data until one of these thresholds is reached:
 
@@ -163,7 +162,7 @@ By default, queued ingestion batches data until one of these thresholds is reach
 
 The maximum data size for a single queued ingestion command is 6 GB.
 
-#### Data Source Options
+#### Data Source Options for queued ingestion
 
 You can provide data for ingestion through several methods:
 
@@ -171,7 +170,7 @@ You can provide data for ingestion through several methods:
 - A link to an external file (such as an Azure blob with public access or a SAS token)
 - A direct string containing the content to ingest.
 
-#### Prerequisites
+#### Prerequisites for queued ingestion
 
 Before using queued ingestion, you must:
 
@@ -194,6 +193,42 @@ Before using queued ingestion, you must:
 - **[Creating Applications with Queued Ingestion](https://learn.microsoft.com/en-us/kusto/api/get-started/app-queued-ingestion?view=azure-data-explorer&tabs=app%2Ccsharp)** - Step-by-step guide to building applications that use queued ingestion
 - **[Supported Data Formats](https://learn.microsoft.com/en-us/azure/data-explorer/ingestion-supported-formats)** - Comprehensive list of file formats supported by KQL database ingestion
 - **[Ingestion Property Reference](https://learn.microsoft.com/en-us/kusto/ingestion-properties?view=azure-data-explorer&preserve-view=true)** - Detailed documentation of all available ingestion properties and their usage
+
+### Streaming Ingestion
+
+Streaming ingestion provides a real-time data ingestion path into a KQL database without requiring an Eventstream. This method is specifically optimized for:
+
+- **Low Latency**: Delivers data with latency under a few seconds
+- **Smaller Data Volumes**: Best suited for scenarios with moderate throughput (a few records per second per table)
+
+**Prerequisites:**
+
+- Create a table that will receive the ingested data
+- Enable the streaming ingestion policy on the table
+- (Optional) Set up ingestion mapping to define how source data maps to table columns
+
+**Data Sources:**
+You can provide data for streaming ingestion through several methods:
+
+- A file path in a local directory
+- A link to an external file (such as an Azure blob with public access or a SAS token)
+- A direct string containing the content to ingest
+
+**Implementation Flow:**
+
+1. **Frontend** interacts with the frontend page, generating data to be ingested into the KQL database.
+1. **Frontend** sends an HTTP POST request to the 'KqlDatabases/streamingIngest' endpoint on the Backend's **KqlDatabaseController**.
+1. **KqlDatabaseController** validates the user token and exchanges it for a Kusto audience token.
+1. Backend sends a streaming ingestion request to the Eventhouse using **KustoClientService**.cs targeting the KQL Database ingestion URI.
+1. Eventhouse processes the request and ingests the data.
+1. **Frontend** displays indication for successful or failed ingestion.
+1. After successful ingestion, the data becomes available for querying. Note that there may be a minor delay until the data appears in query results.
+
+**Additional Resources:**
+
+- [Streaming ingestion policy](https://learn.microsoft.com/en-us/kusto/management/streaming-ingestion-policy?view=azure-data-explorer)
+- [Streaming ingestion sample](https://github.com/Azure/azure-kusto-samples-dotnet/blob/master/client/StreamingIngestionSample/Program.cs)
+- [Data ingestion properties](https://learn.microsoft.com/en-us/kusto/ingestion-properties?view=azure-data-explorer&preserve-view=true)
 
 ## Trademarks
 
