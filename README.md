@@ -146,6 +146,49 @@ Executing a KQL management command follows a similar flow to the query execution
      - `.show` operations require reader permission
      - `.create`, `.alter`, and other modification operations require admin-level permissions
 
+### Queued Ingestion
+
+Queued ingestion provides a direct data ingestion into a KQL database without requiring an Eventstream. This method offers several advantages:
+
+- **High Throughput**: Optimized for efficient data processing by batching data based on ingestion properties
+- **Data Optimization**: Small batches are automatically merged and optimized to enable fast query performance
+- **Reliability**: Built-in retry mechanisms protect against transient failures
+- **Data Consistency**: Uses 'at least once' messaging semantics to ensure no data is lost during ingestion
+
+By default, queued ingestion batches data until one of these thresholds is reached:
+
+- 5 minutes elapsed time
+- 1000 items collected
+- 1 GB total size accumulated
+
+The maximum data size for a single queued ingestion command is 6 GB.
+
+#### Data Source Options
+
+You can provide data for ingestion through several methods:
+
+- A file path in a local directory
+- A link to an external file (such as an Azure blob with public access or a SAS token)
+- A direct string containing the content to ingest.
+
+#### Prerequisites
+
+Before using queued ingestion, you must:
+
+- [Create a table](https://learn.microsoft.com/en-us/kusto/management/create-table-command?view=microsoft-fabric) that will receive the ingested data
+- (Optional) Configure an [ingestion batching policy](https://learn.microsoft.com/en-us/kusto/management/batching-policy?view=microsoft-fabric)
+- (Optional) Set up [ingestion mapping](https://learn.microsoft.com/en-us/kusto/management/mappings?view=microsoft-fabric) to define how source data maps to table columns
+
+#### Flow Overview
+
+1. **Frontend** interacts with the frontend page, generating data to be ingested into the KQL database.
+1. **Frontend** sends an HTTP POST request to the 'KqlDatabases/queuedIngest' endpoint on the Backend's **KqlDatabaseController**.
+1. **KqlDatabaseController** validates the user token and exchanges it for a Kusto audience token.
+1. Backend sends a queued ingestion request to the Eventhouse using **KustoClientService**.cs targeting the KQL Database ingestion URI.
+1. Eventhouse processes the request and ingests the data.
+1. **Frontend** displays indication for successful or failed ingestion.
+1. After successful ingestion, the data becomes available for querying. Note that there may be a delay until the data appears in query results, depending on your configured ingestion batching policy.
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
