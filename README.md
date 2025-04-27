@@ -112,6 +112,11 @@ Below is an overview of the KQL query execution flow, demonstrating how user-ini
 1. **KqlDatabaseController** formats the results and sends them back to the **frontend**.
 1. **Frontend** displays the results in a table format.
 
+> **Notice:**  
+>
+> 1. If token exchange fails due to "AADSTS65001: The user or administrator has not consented to use the application with ID xxxxx", make sure the user consented to the required scope of 'Azure Data Explorer'.  
+> 2. The above query flow represents queries that complete within 30 seconds. For longer-running queries, an additional Long Running Operations (LRO) implementation is required.
+
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
