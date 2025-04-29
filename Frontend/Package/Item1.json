@@ -6,10 +6,10 @@
       "path": "/sample-workload-editor"
     },
     "icon": {
-      "name": "assets/images/execute.png"
+      "name": "assets/images/giftbox.png"
     },
     "activeIcon": {
-      "name": "assets/images/execute.png"
+      "name": "assets/images/giftbox.png"
     },
     "contextMenuItems": [
     ],
