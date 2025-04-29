@@ -3,9 +3,9 @@
     "displayName": "Workload_Display_Name",
     "fullDisplayName": "Workload_Full_Display_Name",
     "description": "Workload_Description",
-    "favicon": "assets/images/briefcase.png",
+    "favicon": "assets/images/giftbox.png",
     "icon": {
-    "name": "assets/images/briefcase.png"
+    "name": "assets/images/giftbox.png"
     },
     "homePage": {
       "learningMaterials": [
@@ -22,7 +22,7 @@
             {
                 "title": "NewSection_Custom_Action_Title",
                 "icon": {
-                  "name": "assets/images/briefcase.png"
+                  "name": "assets/images/giftbox.png"
                 },
                 "onClick": {
                   "action": "open.createSampleWorkloadFrontendOnly"
@@ -40,10 +40,10 @@
           "title": "CreateHub_Card_1_Title",
           "description": "CreateHub_Card_1_Description",
           "icon": {
-            "name": "assets/images/dial.png"
+            "name": "assets/images/giftbox.png"
           },
           "icon_small": {
-            "name": "assets/images/dial.png"
+            "name": "assets/images/giftbox.png"
           },
           "onClick": {
             "action": "open.createSampleWorkload"
@@ -64,7 +64,7 @@
       "description": "Workload_Hub_Workload_Description",
       "image": {
         "mediaType": 0,
-        "source": "assets/images/BannerMedium.png"
+        "source": "assets/images/Banner.png"
       },
       "slideMedia": [
         {
@@ -74,6 +74,10 @@
         {
           "mediaType": 0,
           "source": "assets/images/SampleWorkload2.png"
+        },
+        {
+          "mediaType": 0,
+          "source": "assets/images/SampleWorkload3.png"
         }
       ],
         "supportLink": {

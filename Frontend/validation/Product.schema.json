@@ -237,7 +237,7 @@
             "source": {
               "type": "string",
               "description": "The source of the image",
-              "examples": ["assets/BannerMedium.png"]
+              "examples": ["assets/Banner.png"]
             }
           },
           "required": ["mediaType", "source"],
@@ -255,7 +255,7 @@
               "source": {
                 "type": "string",
                 "description": "The source of the slide",
-                "examples": ["assets/SampleWorkload1.png", "assets/SampleWorkload2.png"]
+                "examples": ["assets/SampleWorkload1.png", "assets/SampleWorkload2.png", "assets/SampleWorkload3.png"]
               }
             },
             "required": ["mediaType", "source"],
