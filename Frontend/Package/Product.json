@@ -3,9 +3,9 @@
     "displayName": "Workload_Display_Name",
     "fullDisplayName": "Workload_Full_Display_Name",
     "description": "Workload_Description",
-    "favicon": "assets/images/giftbox.png",
+    "favicon": "assets/images/intuigence-logo.png",
     "icon": {
-    "name": "assets/images/giftbox.png"
+    "name": "assets/images/intuigence-logo.png"
     },
     "homePage": {
       "learningMaterials": [
@@ -22,7 +22,7 @@
             {
                 "title": "NewSection_Custom_Action_Title",
                 "icon": {
-                  "name": "assets/images/giftbox.png"
+                  "name": "assets/images/intuigence-logo.png"
                 },
                 "onClick": {
                   "action": "open.createSampleWorkloadFrontendOnly"
@@ -40,10 +40,10 @@
           "title": "CreateHub_Card_1_Title",
           "description": "CreateHub_Card_1_Description",
           "icon": {
-            "name": "assets/images/giftbox.png"
+            "name": "assets/images/intuigence-logo.png"
           },
           "icon_small": {
-            "name": "assets/images/giftbox.png"
+            "name": "assets/images/intuigence-logo.png"
           },
           "onClick": {
             "action": "open.createSampleWorkload"
@@ -59,7 +59,7 @@
       ]
     },
     "productDetail": {
-      "publisher": "Contoso",
+      "publisher": "Intuigence.ai",
       "slogan": "Workload_Hub_Workload_Slogan",
       "description": "Workload_Hub_Workload_Description",
       "image": {
@@ -69,15 +69,7 @@
       "slideMedia": [
         {
           "mediaType": 0,
-          "source": "assets/images/SampleWorkload1.png"
-        },
-        {
-          "mediaType": 0,
-          "source": "assets/images/SampleWorkload2.png"
-        },
-        {
-          "mediaType": 0,
-          "source": "assets/images/SampleWorkload3.png"
+          "source": "assets/images/IntuigenceWorkload1.png"
         }
       ],
         "supportLink": {

@@ -6,10 +6,10 @@
       "path": "/sample-workload-editor"
     },
     "icon": {
-      "name": "assets/images/giftbox.png"
+      "name": "assets/images/intuigence-logo.png"
     },
     "activeIcon": {
-      "name": "assets/images/giftbox.png"
+      "name": "assets/images/intuigence-logo.png"
     },
     "contextMenuItems": [
     ],
