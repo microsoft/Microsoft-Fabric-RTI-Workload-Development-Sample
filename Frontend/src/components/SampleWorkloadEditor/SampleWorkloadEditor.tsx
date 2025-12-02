@@ -55,8 +55,8 @@ export function SampleWorkloadEditor(props: PageProps) {
     useState<WorkloadItem<ItemPayload>>(undefined);
   const [eventstreamItemId, setEventstreamItemId] = useState<string>("");
   const [eventstreamDisplayName, setEventstreamDisplayName] = useState<string>("");
-  const [eventhouseItemId, setEventhouseItemId] = useState<string>("");
-  const [eventhouseDisplayName, setEventhouseDisplayName] = useState<string>("");
+  const [, setEventhouseItemId] = useState<string>("");
+  const [, setEventhouseDisplayName] = useState<string>("");
   const [kqlDatabaseItemId, setKqlDatabaseItemId] = useState<string>("");
   const [kqlDatabaseDisplayName, setKqlDatabaseDisplayName] = useState<string>("");
   const [kqlDatabaseQueryUrl, setKqlDatabaseQueryUrl] = useState<string>("");
@@ -198,7 +198,7 @@ export function SampleWorkloadEditor(props: PageProps) {
       <Stack className="main">
         {["home"].includes(selectedTab as string) && (
           <span>
-            <h2>RTI Sample Item</h2>
+            <img src="../../internalAssets/intuigence-full-logo.png" alt="Intuigence Logo" style={{ maxWidth: '300px', marginBottom: '20px' }} />
             {/* Crud item API usage example */}
             {itemEditorErrorMessage && (
               <MessageBar intent="error">
@@ -217,56 +217,85 @@ export function SampleWorkloadEditor(props: PageProps) {
             )}
             {!itemEditorErrorMessage && (
               <div>
-                <Divider alignContent="start" className="divider">
-                  <b>Item Details</b>
-                </Divider>
-                <div className="section" data-testid='item-editor-metadata' >
-                  {sampleItem && (
-                    <Label><b>WorkspaceId Id:</b> {sampleItem?.workspaceId}</Label>
-                  )}
-                  {sampleItem && <Label><b>Item Id:</b> {sampleItem?.id}</Label>}
-                  {sampleItem && (
-                    <Label><b>Item Display Name:</b> {sampleItem?.displayName}</Label>
-                  )}
-                  {sampleItem && (
-                    <Label><b>Item Description:</b> {sampleItem?.description}</Label>
-                  )}
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '40px', maxWidth: '1200px' }}>
+                  <div style={{ 
+                    width: '350px', 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: '8px', 
+                    padding: '24px',
+                    backgroundColor: '#fafafa',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                  }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '18px' }}>Find & understand information</h3>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Onboard</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>into new projects, assets, or systems</Label>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Explore</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>documents, graphs, and historical insights</Label>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Search</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>across data, drawings, procedures, and people</Label>
+                    </div>
+                  </div>
+                  <div style={{ 
+                    width: '350px', 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: '8px', 
+                    padding: '24px',
+                    backgroundColor: '#fafafa',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                  }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '18px' }}>Automate your work</h3>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Orchestrate</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>industrial workflow processes</Label>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Automate</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>repetitive tasks and workflows</Label>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Respond</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>to requests, and changes—automatically</Label>
+                    </div>
+                  </div>
+                  <div style={{ 
+                    width: '350px', 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: '8px', 
+                    padding: '24px',
+                    backgroundColor: '#fafafa',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                  }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '18px' }}>Create documents and content</h3>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Create</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>SOPs, reports, updates, and deliverables</Label>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Summarize</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>docs, threads, and engineering meetings</Label>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <Label style={{ display: 'block', fontWeight: 600 }}>Analyze</Label>
+                      <Label style={{ display: 'block', color: '#666' }}>data and context to surface insights</Label>
+                    </div>
+                  </div>
                 </div>
                 <Divider alignContent="start" className="divider">
-                  <b>Related RTI Items</b>
+                  <b>Connection Details</b>
                 </Divider>
                 <div className="section" data-testid='item-metadata' >
                   {
                     sampleItem && (
-                      <Label><b>Eventstream display Name:</b> {eventstreamDisplayName}</Label>
+                      <Label><b>KQL query url:</b> {kqlDatabaseQueryUrl}</Label>
                     )}
                   {
                     sampleItem && (
-                      <Label><b>Eventstream display Name:</b> {eventstreamItemId}</Label>
-                    )}
-                  {
-                    sampleItem && (
-                      <Label><b>Eventhouse display Name:</b> {eventhouseDisplayName}</Label>
-                    )}
-                  {
-                    sampleItem && (
-                      <Label><b>Eventhouse item id:</b> {eventhouseItemId}</Label>
-                    )}
-                  {
-                    sampleItem && (
-                      <Label><b>Kql database display Name:</b> {kqlDatabaseDisplayName}</Label>
-                    )}
-                  {
-                    sampleItem && (
-                      <Label><b>KQL database item id:</b> {kqlDatabaseItemId}</Label>
-                    )}
-                  {
-                    sampleItem && (
-                      <Label><b>KQL database query url:</b> {kqlDatabaseQueryUrl}</Label>
-                    )}
-                  {
-                    sampleItem && (
-                      <Label><b>KQL database ingestion url:</b> {kqlDatabaseIngestionUrl}</Label>
+                      <Label><b>KQL ingestion url:</b> {kqlDatabaseIngestionUrl}</Label>
                     )}
                 </div>
               </div>
