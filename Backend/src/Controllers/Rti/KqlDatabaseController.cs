@@ -16,6 +16,7 @@ using Kusto.Ingest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Fabric.Api.KQLDatabase.Models;
 
 namespace Fabric.Rti.workload.Backend.Controllers.Rti;
 
@@ -47,28 +48,42 @@ public class KqlDatabaseController : ControllerBase
     [HttpPost("KqlDatabases/query")]
     public async Task<IActionResult> ExecuteKqlQuery([FromBody] KqlQueryRequest request)
     {
+        if (!ModelState.IsValid || request == null || request.WorkspaceId == Guid.Empty || request.KqlDatabaseItemId == Guid.Empty)
+        {
+            _logger.LogWarning("ExecuteKqlQuery: Missing or invalid workspace or KQL database ID.");
+            return BadRequest("Valid workspace and KQL database IDs are required.");
+        }
+
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
                 _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
-            var scopes = new[] { $"{request.KqlDatabaseQueryUrl}/.default" };
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var queryUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.QueryServiceUri);
+            var scopes = new[] { $"{queryUri.GetLeftPart(UriPartial.Authority)}/.default" };
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
 
             var clientRequestProperties = GenerateClientRequestProperties(token);
             var dataReader = await _kustoClientService.ExecuteQueryAsync(
-                request.KqlDatabaseQueryUrl, request.KqlDatabaseItemId, request.Query, clientRequestProperties, default);
+                queryUri.AbsoluteUri, request.KqlDatabaseItemId.ToString(), request.Query, clientRequestProperties, default);
 
             var stream = KustoJsonDataStream.GetReaderDataAsStream(dataReader);
             return Ok(stream);
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Authentication failed for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlQuery: Authentication failed for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Unauthorized();
+        }
+        catch (RequestFailedException ex) when (ex.Status == StatusCodes.Status401Unauthorized ||
+            ex.Status == StatusCodes.Status403Forbidden || ex.Status == StatusCodes.Status404NotFound)
+        {
+            _logger.LogWarning($"ExecuteKqlQuery: Database access failed for {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
+            return StatusCode(ex.Status);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Error executing KQL query for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlQuery: Error executing KQL query for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return BadRequest();
         }
     }
@@ -76,28 +91,42 @@ public class KqlDatabaseController : ControllerBase
     [HttpPost("KqlDatabases/mgmt")]
     public async Task<IActionResult> ExecuteKqlManagementCommand([FromBody] KqlManagementCommandRequest request)
     {
+        if (!ModelState.IsValid || request == null || request.WorkspaceId == Guid.Empty || request.KqlDatabaseItemId == Guid.Empty)
+        {
+            _logger.LogWarning("ExecuteKqlManagementCommand: Missing or invalid workspace or KQL database ID.");
+            return BadRequest("Valid workspace and KQL database IDs are required.");
+        }
+
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
                 _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
-            var scopes = new[] { $"{request.KqlDatabaseQueryUrl}/.default" };
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var queryUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.QueryServiceUri);
+            var scopes = new[] { $"{queryUri.GetLeftPart(UriPartial.Authority)}/.default" };
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
 
             var clientRequestProperties = GenerateClientRequestProperties(token);
             var dataReader = await _kustoClientService.ExecuteControlCommandAsync(
-                request.KqlDatabaseQueryUrl, request.KqlDatabaseItemId, request.Command, clientRequestProperties, default);
+                queryUri.AbsoluteUri, request.KqlDatabaseItemId.ToString(), request.Command, clientRequestProperties, default);
 
             var stream = KustoJsonDataStream.GetReaderDataAsStream(dataReader);
             return Ok(stream);
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Authentication failed for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlManagementCommand: Authentication failed for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Unauthorized();
+        }
+        catch (RequestFailedException ex) when (ex.Status == StatusCodes.Status401Unauthorized ||
+            ex.Status == StatusCodes.Status403Forbidden || ex.Status == StatusCodes.Status404NotFound)
+        {
+            _logger.LogWarning($"ExecuteKqlManagementCommand: Database access failed for {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
+            return StatusCode(ex.Status);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Error executing KQL query for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlManagementCommand: Error executing KQL command for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return BadRequest();
         }
     }
@@ -115,7 +144,8 @@ public class KqlDatabaseController : ControllerBase
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
                 _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.KQLDatabaseReadWriteAll });
-            var ingestionUri = await GetIngestionServiceUriAsync(request, authorizationContext);
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var ingestionUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.IngestionServiceUri);
             var scopes = new[] { $"{ingestionUri.GetLeftPart(UriPartial.Authority)}/.default" };
 
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
@@ -164,7 +194,8 @@ public class KqlDatabaseController : ControllerBase
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
                 _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.KQLDatabaseReadWriteAll });
-            var ingestionUri = await GetIngestionServiceUriAsync(request, authorizationContext);
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var ingestionUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.IngestionServiceUri);
             var scopes = new[] { $"{ingestionUri.GetLeftPart(UriPartial.Authority)}/.default" };
 
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
@@ -200,23 +231,25 @@ public class KqlDatabaseController : ControllerBase
         }
     }
 
-    private async Task<Uri> GetIngestionServiceUriAsync(KqlIngestRequest request, AuthorizationContext authorizationContext)
+    private async Task<KQLDatabase> GetKqlDatabaseAsync(Guid workspaceId, Guid kqlDatabaseItemId, AuthorizationContext authorizationContext)
     {
         var fabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.KQLDatabaseReadAll}" };
         var fabricToken = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, fabricScopes);
-        var kqlDatabase = await _fabricApiClient.GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, fabricToken);
-        var ingestionUrl = kqlDatabase?.Properties?.IngestionServiceUri;
+        return await _fabricApiClient.GetKqlDatabaseAsync(workspaceId, kqlDatabaseItemId, fabricToken);
+    }
 
-        if (!Uri.TryCreate(ingestionUrl, UriKind.Absolute, out var ingestionUri) ||
-            ingestionUri.Scheme != Uri.UriSchemeHttps || ingestionUri.HostNameType != UriHostNameType.Dns ||
-            !ingestionUri.Host.EndsWith(".kusto.fabric.microsoft.com", StringComparison.OrdinalIgnoreCase) ||
-            !ingestionUri.IsDefaultPort || ingestionUri.UserInfo.Length != 0 || ingestionUri.AbsolutePath != "/" ||
-            ingestionUri.Query.Length != 0 || ingestionUri.Fragment.Length != 0)
+    private static Uri ValidateKqlDatabaseServiceUri(string serviceUrl)
+    {
+        if (!Uri.TryCreate(serviceUrl, UriKind.Absolute, out var serviceUri) ||
+            serviceUri.Scheme != Uri.UriSchemeHttps || serviceUri.HostNameType != UriHostNameType.Dns ||
+            !serviceUri.Host.EndsWith(".kusto.fabric.microsoft.com", StringComparison.OrdinalIgnoreCase) ||
+            !serviceUri.IsDefaultPort || serviceUri.UserInfo.Length != 0 || serviceUri.AbsolutePath != "/" ||
+            serviceUri.Query.Length != 0 || serviceUri.Fragment.Length != 0)
         {
-            throw new InvalidOperationException("Fabric returned an invalid KQL database ingestion endpoint.");
+            throw new InvalidOperationException("Fabric returned an invalid KQL database service endpoint.");
         }
 
-        return ingestionUri;
+        return serviceUri;
     }
 
     private ClientRequestProperties GenerateClientRequestProperties(string token)

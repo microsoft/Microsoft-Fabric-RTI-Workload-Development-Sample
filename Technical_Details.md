@@ -171,6 +171,7 @@ To query we will be using the [Kusto Rest API](https://learn.microsoft.com/en-us
 To use the Kusto REST API, we need a token that is valid for Kusto scope. This means the backend must exchange the user’s Fabric token for a Kusto token. For this to work:
 1.	Consent to Impersonation: The consumer must agree to Kusto user impersonation.
 2.	Workload application permission: In the Azure portal, when [setting up authentication](https://learn.microsoft.com/en-us/fabric/workload-development-kit/authentication-tutorial) for the workload application, add the ‘user_impersonation’ delegated permission for ‘Azure Data Explorer’.
+3.	Configure and consent to the delegated Fabric KQLDatabase.Read.All permission so the backend can resolve the requested database and its query endpoint using the caller's identity.
 
 #### Authorized principal 
 In addition to being able to exchange a token with the Kusto audience, the original caller must have the appropriate permissions on the database to execute the desired query or management operation. For more details, please refer to Security roles overview.
@@ -185,13 +186,14 @@ In the context of Fabric, there are several levels of permission:
 In this scenario, we’ll demonstrate how the workload backend queries the database and returns the result to the user.
 
 1.	The user will interact with the Frontend page to trigger the flow.
-2.	Frontend extension will call the workload backend with the query request.  
-3.	Backend will validate the Fabric token and the query request.
-4.	Backend will exchange the user Fabric token to a Kusto audience token, specifically for the query Uri of the Eventhouse\KQL database.
-5.	Backend will trigger a KQL query request on the Eventhouse (via Kusto rest API on the query Uri) 
-6.	Eventhouse will execute the query request and will return the dataset result
-7.	Backend will format the result and return it to the frontend.
-8.	Frontend will visualize the result. 
+2.	Frontend extension will call the workload backend with the workspace ID, database item ID, and query, not a query URL.
+3.	Backend will validate the Fabric token and the non-empty workspace/database UUIDs.
+4.	Backend will request a token for the fixed Fabric KQLDatabase.Read.All scope and retrieve the database using the caller's identity.
+5.	Backend will validate the Fabric-provided query endpoint before requesting a Kusto token for that endpoint.
+6.	Backend will trigger a KQL query request on the validated endpoint.
+7.	Eventhouse will execute the query request and return the dataset result.
+8.	Backend will stream the result back to the frontend.
+9.	Frontend will visualize the result.
 
 #### Code example
 In the RTI Sample app you can execute queries and see the results inside the KQL Database that you provisioned when creating the app.
@@ -202,11 +204,10 @@ In the following code example, we will demonstrate how this is accomplished usin
 
 This is the class representing the request body
 ```
-public class QueryKqlDatabaseRequest
+public class KqlQueryRequest
 {
-    public string QueryServiceUri { set; get; }
- 
-    public string DatabaseId { set; get; }
+    public Guid WorkspaceId { set; get; }
+    public Guid KqlDatabaseItemId { set; get; }
  
     public string Query { set; get; }
 }
@@ -215,56 +216,23 @@ public class QueryKqlDatabaseRequest
 An example of a request
 ```
 {
-    "QueryServiceUri": "https://trd-56z2kxu7mxbddgjqk4.z1.kusto.fabric.microsoft.com",
-    "DatabaseId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
+    "WorkspaceId": "cfafbeb1-8037-4d0c-896e-a46fb27ff229",
+    "KqlDatabaseItemId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
     "Query": "MyTable| take 10"
 }
 ```
-```
 
-[HttpPost("KqlDatabases/query")]
-public async Task<IActionResult> QueryKqlDatabase([FromBody] QueryKqlDatabaseRequest request)
- {
-     try
-     {
-         var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-             _httpContextAccessor.HttpContext, allowedScopes: new string[] { WorkloadScopes.KQLDatabaseReadAll });
-         var scopes = new[] { $"{request.QueryServiceUri}/.default" };
-         var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
- 
-        var clientRequestProperties = GenerateClientRequestProperties(token);
-        var dataReader = await _kustoClientService.ExecuteQueryAsync(
-            request.QueryServiceUri, request.DatabaseId, request.Query, clientRequestProperties, default);
- 
-        var dataTable = new DataTable();
-        dataTable.Load(dataReader);
- 
-        var serializedDataTable = JsonConvert.SerializeObject(dataTable);
-        var jsonTable = JArray.Parse(serializedDataTable);
- 
-        return Ok(jsonTable);
- 
-        // An alternative method will be to return the result as a stream, it will be more      efficient in terms of performance,
-        // but will require additional processing on the client side. 
-        //var stream = KustoJsonDataStream.GetReaderDataAsStream(dataReader);
- 
-        //return Ok(stream);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError($"QueryKqlDatabase: Query execution failed for cluster {request.QueryServiceUri}" +
-                         $" Error: {ex.Message}");
-        return Problem();
-    }
-}
-```  
+The implementation is `ExecuteKqlQuery` in `Backend\src\Controllers\Rti\KqlDatabaseController.cs`. It shares the Fabric lookup and service-URI validation helpers with management and ingestion, so a stored item URL cannot select the destination or token resource.
+
 1.	The backend controller implements a Query endpoint as a POST request.
-2.	Validate the user token is allowed for scope KQLDatabase.ReadWrite.All
-3.	Exchange the token for the Eventhouse\database query Uri scope.
-The query URI can be obtained by send a GET request for a [KQL database](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties) or an [Eventhouse](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties).
-4.	Next we create a [ClientRequestProperties](https://learn.microsoft.com/en-us/kusto/api/netfx/client-request-properties?view=microsoft-fabric) this is object is going to be one of the parameters for the query request sent to the Kusto service query endpoint. It allows various configuration for the KQL query, as well as the auth token.  
-5.	Send the query request via KustoClientService
-6.	Once the query request is completed, the controller end point will serialize and return it. 
+2.	Validate the workspace/database UUIDs and authenticate a token with KQLDatabase.Read.All or KQLDatabase.ReadWrite.All.
+3.	Retrieve the database through Fabric using the caller's identity. Fabric enforces access to the requested database.
+4.	Read QueryServiceUri from that response. Require HTTPS, a host under `.kusto.fabric.microsoft.com`, the default port, and no credentials, extra path, query string, or fragment.
+5.	Request a Kusto OBO token only for that validated endpoint.
+6.	Create [ClientRequestProperties](https://learn.microsoft.com/en-us/kusto/api/netfx/client-request-properties?view=microsoft-fabric), preserving the request ID and 30-second timeout.
+7.	Send the query through KustoClientService and stream the result to the frontend.
+
+Deploy frontend and backend together. Requests using the previous URL-based contract without WorkspaceId are rejected.
 > [!NOTE]  
 > There are many ways and formats to return results, each with its own pros and cons.
 ```
@@ -329,11 +297,10 @@ Similarly to executing a query, you can execute a KQL management command. We wil
 
 This is the class representing the request body sent to the backend controller
 ```
-public class KqlDatabaseManagementRequest
+public class KqlManagementCommandRequest
 {
-    public string QueryServiceUri { set; get; }
- 
-    public string DatabaseId { set; get; }
+    public Guid WorkspaceId { set; get; }
+    public Guid KqlDatabaseItemId { set; get; }
  
     public string Command { set; get; }
 }
@@ -341,56 +308,20 @@ public class KqlDatabaseManagementRequest
 And here is an example of a request to create a table
 ```
 {
-    "QueryServiceUri": "https://trd-56z2kxu7mxbddgjqk4.z1.kusto.fabric.microsoft.com",
-    "DatabaseId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
+    "WorkspaceId": "cfafbeb1-8037-4d0c-896e-a46fb27ff229",
+    "KqlDatabaseItemId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
     "Command": ".create table MyLogs ( Level:string, Timestamp:datetime, UserId:string )"
 }
 ```
-The conntroller handling the request is very similar to the query flow we showed above.
-```
- [HttpPost("KqlDatabases/mgmt")]
- public async Task<IActionResult> ExecuteManagementCommandKqlDatabase([FromBody] KqlDatabaseManagementRequest request)
- {
-     try
-     {
-         var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-             _httpContextAccessor.HttpContext, allowedScopes: new string[] { WorkloadScopes.KQLDatabaseReadWriteAll });
-         var scopes = new[] { $"{request.QueryServiceUri}/.default" };
-         var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
- 
-        var clientRequestProperties = GenerateClientRequestProperties(token);
-        var dataReader = await _kustoClientService.ExecuteControlCommandAsync(
-            request.QueryServiceUri, request.DatabaseId, request.Command, clientRequestProperties, default);
- 
-        var dataTable = new DataTable();
-        dataTable.Load(dataReader);
- 
-        var serializedDataTable = JsonConvert.SerializeObject(dataTable);
-        var jsonTable = JArray.Parse(serializedDataTable);
- 
-        return Ok(jsonTable);
- 
-        // An alternative method will be to return the result as a stream, it will be more efficient in terms of performance,
-        // but will require additional processing on the client side. 
-        //var stream = KustoJsonDataStream.GetReaderDataAsStream(dataReader);
- 
-        //return Ok(stream);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError($"ExecuteManagementCommandKqlDatabase: management command execution " +
-                         $"failed for cluster {request.QueryServiceUri} Error: {ex.Message}");
-        return Problem();
-    }
-}
-``` 
+`ExecuteKqlManagementCommand` in `Backend\src\Controllers\Rti\KqlDatabaseController.cs` uses the same authorized database lookup, endpoint validation, and token-resource binding as queries.
+
 1.	The backend controller implements a POST request endpoint handling management KQL command execution on KQL databases.
-2.	Validate the user token is allowed for scope KQLDatabase.ReadWrite.All
-3.	Exchange the token for the Eventhouse\database query Uri scope. 
-The query URI can be obtained by send a GET request for a [KQL database](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties) or an [Eventhouse](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties).
-4.	Next we create a [ClientRequestProperties](https://learn.microsoft.com/en-us/kusto/api/netfx/client-request-properties?view=microsoft-fabric) this is object is going to be one of the parameters for the management request sent to the Kusto service query endpoint. It allows various configuration for the KQL query, as well as the auth token.  
-5.	Send the management command request via KustoClientService
-6.	Once the management request is completed, the controller will serialize and return it. 
+2.	Validate workspace/database UUIDs and authenticate a token with KQLDatabase.Read.All or KQLDatabase.ReadWrite.All, retaining support for read-only commands such as `.show tables`.
+3.	Resolve the database using the fixed Fabric KQLDatabase.Read.All scope and the caller's identity.
+4.	Validate the Fabric-provided QueryServiceUri before acquiring a Kusto token for that endpoint.
+5.	Create ClientRequestProperties with the user's Kusto token, request ID, and timeout.
+6.	Send the command through KustoClientService. Kusto enforces the caller's permissions for the command.
+7.	Stream the result back to the frontend.
 Note that there are many ways and formats to return results, each with its own pros and cons.
 
 Difference Between KQL Query & management commands
@@ -533,8 +464,8 @@ In order to execute such an ingestion command we can use the controller shown ab
 Our request will look like this
 ```
 {
-    "QueryServiceUri": "https://trd-56z2kxu7mxbddgjqk4.z1.kusto.fabric.microsoft.com",
-    "DatabaseId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
+    "WorkspaceId": "cfafbeb1-8037-4d0c-896e-a46fb27ff229",
+    "KqlDatabaseItemId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
     "Command": ".ingest inline into table Purchases <| \n Shoes,1000 \n Wide Shoes,50 \n "
 }
 ```  

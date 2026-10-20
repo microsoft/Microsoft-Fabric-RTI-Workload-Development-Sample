@@ -1,8 +1,10 @@
-﻿namespace Fabric.Rti.workload.Backend.Contracts.RtiContracts;
+﻿using System;
+
+namespace Fabric.Rti.workload.Backend.Contracts.RtiContracts;
 
 public class KqlQueryRequest
 {
-    public string KqlDatabaseQueryUrl { set; get; }
-    public string KqlDatabaseItemId { set; get; }
+    public Guid WorkspaceId { set; get; }
+    public Guid KqlDatabaseItemId { set; get; }
     public string Query { set; get; }
 }

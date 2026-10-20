@@ -21,7 +21,7 @@ using Xunit;
 
 namespace Fabric.Rti.workload.Backend.Tests;
 
-public class KqlDatabaseControllerTests
+public partial class KqlDatabaseControllerTests
 {
     private const string IngestionUrl = "https://ingest-sample.z1.kusto.fabric.microsoft.com";
     private const string FabricScope = $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.KQLDatabaseReadAll}";
@@ -148,7 +148,7 @@ public class KqlDatabaseControllerTests
         _fabric.Setup(service => service.GetKqlDatabaseAsync(_request.WorkspaceId, _request.KqlDatabaseItemId, "fabric-token")).ReturnsAsync(database);
 
         Assert.Equal(StatusCodes.Status500InternalServerError, Assert.IsType<ObjectResult>(await IngestAsync(streaming)).StatusCode);
-        VerifyNoIngestionTokenOrRequest();
+        VerifyNoKustoTokenOrRequest();
     }
 
     [Theory]
@@ -159,7 +159,7 @@ public class KqlDatabaseControllerTests
         _fabric.Setup(service => service.GetKqlDatabaseAsync(_request.WorkspaceId, _request.KqlDatabaseItemId, "fabric-token")).ReturnsAsync((KQLDatabase)null!);
 
         Assert.Equal(StatusCodes.Status500InternalServerError, Assert.IsType<ObjectResult>(await IngestAsync(streaming)).StatusCode);
-        VerifyNoIngestionTokenOrRequest();
+        VerifyNoKustoTokenOrRequest();
     }
 
     [Theory]
@@ -175,7 +175,7 @@ public class KqlDatabaseControllerTests
             .ThrowsAsync(new RequestFailedException(status, "Database access denied or item not found."));
 
         Assert.Equal(status, Assert.IsType<StatusCodeResult>(await IngestAsync(streaming)).StatusCode);
-        VerifyNoIngestionTokenOrRequest();
+        VerifyNoKustoTokenOrRequest();
     }
 
     [Theory]
@@ -253,7 +253,7 @@ public class KqlDatabaseControllerTests
         return streaming ? _controller.StreamingIngestToKqlDatabase(_request) : _controller.QueuedIngestToKqlDatabase(_request);
     }
 
-    private void VerifyNoIngestionTokenOrRequest()
+    private void VerifyNoKustoTokenOrRequest()
     {
         _authentication.Verify(service => service.GetAccessTokenOnBehalfOf(It.IsAny<AuthorizationContext>(),
             It.Is<IList<string>>(scopes => !scopes.SequenceEqual(new[] { FabricScope }))), Times.Never);
@@ -261,7 +261,7 @@ public class KqlDatabaseControllerTests
         _fabric.VerifyAll();
     }
 
-    private async Task<KQLDatabase> CreateDatabaseAsync(string? endpoint)
+    private async Task<KQLDatabase> CreateDatabaseAsync(string? endpoint, string? queryEndpoint = null)
     {
         var json = JsonSerializer.Serialize(new
         {
@@ -269,7 +269,7 @@ public class KqlDatabaseControllerTests
             workspaceId = _request.WorkspaceId,
             displayName = "SampleDatabase",
             type = "KQLDatabase",
-            properties = new { ingestionServiceUri = endpoint }
+            properties = new { ingestionServiceUri = endpoint, queryServiceUri = queryEndpoint }
         });
         using var httpClient = new HttpClient(new JsonResponseHandler(json));
         var credential = new Mock<TokenCredential>();

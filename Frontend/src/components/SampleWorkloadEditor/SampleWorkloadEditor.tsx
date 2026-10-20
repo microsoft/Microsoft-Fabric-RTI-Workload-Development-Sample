@@ -295,7 +295,7 @@ export function SampleWorkloadEditor(props: PageProps) {
           selectedTab == "kqlExplorer" && (
             <span>
               <div className="section">
-                <KqlExplorerComponent workloadClient={workloadClient} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
+                <KqlExplorerComponent workloadClient={workloadClient} workspaceObjectId={sampleItem?.workspaceId} kqlDatabaseDisplayName={kqlDatabaseDisplayName} kqlDatabaseItemId={kqlDatabaseItemId} kqlDatabaseQueryUrl={kqlDatabaseQueryUrl} />
               </div>
             </span>
           )

@@ -5,7 +5,7 @@ import { CallExecuteControlCommand, CallExecuteQuery } from "../../controller/Kq
 import { KqlQueryResultComponent } from "./KqlQueryResult";
 import { Spinner, SpinnerSize, MessageBar, MessageBarType } from "@fluentui/react";
 
-export function KqlExplorerComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KqlExplorerComponentProps) {
+export function KqlExplorerComponent({ workloadClient, workspaceObjectId, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseQueryUrl }: KqlExplorerComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const [queryResult, setQueryResult] = useState<object[]>();
     const [queryToExecute, setQueryToExecute] = useState<string>("");
@@ -19,7 +19,7 @@ export function KqlExplorerComponent({ workloadClient, kqlDatabaseDisplayName, k
             if (trimmedQuery.startsWith(".")) {
                 result = await CallExecuteControlCommand(
                     sampleWorkloadBEUrl,
-                    kqlDatabaseQueryUrl,
+                    workspaceObjectId,
                     kqlDatabaseItemId,
                     queryToExecute,
                     workloadClient
@@ -28,7 +28,7 @@ export function KqlExplorerComponent({ workloadClient, kqlDatabaseDisplayName, k
             else {
                 result = await CallExecuteQuery(
                     sampleWorkloadBEUrl,
-                    kqlDatabaseQueryUrl,
+                    workspaceObjectId,
                     kqlDatabaseItemId,
                     queryToExecute,
                     workloadClient
