@@ -440,53 +440,29 @@ Prerequisites
 -	Setup the [ingestion batching policy](https://learn.microsoft.com/en-us/kusto/management/batching-policy?view=microsoft-fabric) (optional).
 -	Setup [ingestion mapping](https://learn.microsoft.com/en-us/kusto/management/mappings?view=microsoft-fabric) (optional).
 
-Here is a code sample showing the controller handling the queued ingestion request as well as the request body.
+Both streaming and queued ingestion accept workspace and database IDs instead of a caller-supplied ingestion URL. For example:
 
-```
- [HttpPost("KqlDatabases/queuedIngest")]
- public async Task<IActionResult> QueuedIngestToKqlDatabase([FromBody] KqlDatabaseIngestRequest request)
- {
-     try
-     {
-         var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-             _httpContextAccessor.HttpContext, allowedScopes: new string[] { WorkloadScopes.KQLDatabaseReadWriteAll });
-         var scopes = new[] { $"{request.IngestionServiceUri}/.default" };
- 
-        var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
-        var ingestKcsb = new KustoConnectionStringBuilder(request.IngestionServiceUri).WithAadUserTokenAuthentication(token);
- 
-        var ingestProps = CreateQueuedIngestionProperties(request);
- 
-        using (var memoryStream = new MemoryStream())
-        await using (var streamWriter = new StreamWriter(memoryStream))
-        using (var ingestClient = KustoIngestFactory.CreateQueuedIngestClient(ingestKcsb))
-        {
-            await streamWriter.WriteAsync(request.Content);
-            await streamWriter.FlushAsync();
-            memoryStream.Seek(0, SeekOrigin.Begin);
- 
-            await ingestClient.IngestFromStreamAsync(memoryStream, ingestProps);
-        }
- 
-        return Ok();
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError($"QueuedIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} " +
-                         $"Error: {ex.Message}");
-        return Problem();
-    }
+```json
+{
+    "WorkspaceId": "cfafbeb1-8037-4d0c-896e-a46fb27ff229",
+    "KqlDatabaseItemId": "35b3eb82-f902-4549-aad8-00f2c7a195be",
+    "TableName": "IotData",
+    "Content": "device-1,42"
 }
-```  
+```
+
+See `Backend\src\Controllers\Rti\KqlDatabaseController.cs` for the implementation shared by the two ingestion routes.
 
 1.	Our controller implements an endpoint handling queued ingestion requests to a KQL database. 
 2.	Validate the user token is allowed for scope KQLDatabase.ReadWrite.All
-3.	Exchange the token for the Eventhouse\database ingestion Uri scope. 
-The query URI can be obtained by send a GET request for a [KQL database](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties) or an [Eventhouse](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties).
-4.	Create a KustoConnectionStringBuilder for the service ingesting Uri using the OBO token.
-5.	Create KustoQueuedIngestionProperties object containing the in information for the ingestion.
-6.	Create a stream containing the string content provided in the request.
-7.	Ingest the stream. 
+3.	Validate that WorkspaceId and KqlDatabaseItemId are non-empty UUIDs.
+4.	Exchange the caller's token for the fixed Fabric KQLDatabase.Read.All scope and retrieve the database through the Fabric API. This lookup enforces the caller's read access to the requested database. Configure and consent to this delegated permission in the workload application.
+5.	Read the ingestion URI from the Fabric response, not the request. Require HTTPS, a host under `.kusto.fabric.microsoft.com`, the default port, and no credentials, extra path, query string, or fragment.
+6.	Exchange the caller's token for the validated ingestion endpoint's scope.
+7.	Set KustoConnectionStringBuilder.DataSource explicitly from the validated URI, rather than parsing a caller-supplied connection string.
+8.	Create KustoQueuedIngestionProperties and a stream containing the request content, then ingest the stream. Kusto still enforces the caller's ingestion permissions.
+
+Deploy the updated frontend and backend together. Requests using the previous contract without WorkspaceId are rejected.
 
 Note that in this example we presented ingestion of string content, alternative we could provide a link to file and ingest it, calling 
 ```
@@ -498,11 +474,11 @@ Task<IKustoIngestionResult> IngestFromStorageAsync(
 
 We used the following class for the request body
 ```
-public class KqlDatabaseIngestRequest
+public class KqlIngestRequest
 {
-    public string IngestionServiceUri { set; get; }
-    public string DatabaseName { set; get; }
-    public string Table { get; set; }
+    public Guid WorkspaceId { set; get; }
+    public Guid KqlDatabaseItemId { set; get; }
+    public string TableName { get; set; }
     public string IngestionMappingName { get; set; }
     public string Content { set; get; }
 }
@@ -510,13 +486,13 @@ public class KqlDatabaseIngestRequest
 
 And here is the example for the KustoQueuedIngestionProperties
 ```
-private KustoQueuedIngestionProperties CreateQueuedIngestionProperties(KqlDatabaseIngestRequest request)
+private KustoQueuedIngestionProperties CreateQueuedIngestionProperties(KqlIngestRequest request)
  {
-     var ingestProps = new KustoQueuedIngestionProperties(request.DatabaseName, request.Table);
+     var ingestProps = new KustoQueuedIngestionProperties(request.KqlDatabaseItemId.ToString(), request.TableName);
      ingestProps.ReportLevel = IngestionReportLevel.FailuresAndSuccesses;
      ingestProps.ReportMethod = IngestionReportMethod.Queue;
      ingestProps.IngestionMapping.IngestionMappingReference = request.IngestionMappingName;
-     ingestProps.Format = DataSourceFormat.json;
+     ingestProps.Format = DataSourceFormat.csv;
   
      return ingestProps;
  }
@@ -541,90 +517,12 @@ Prerequisites
 -	Setup the [streaming ingestion policy](https://learn.microsoft.com/en-us/kusto/management/streaming-ingestion-policy?view=azure-data-explorer).
 -	Setup [ingestion mapping](https://learn.microsoft.com/en-us/kusto/management/mappings?view=microsoft-fabric) (optional).
 
-Here is a code sample showing the controller handling the streaming ingestion request as well as the request body.
+The sample handles `POST KqlDatabases/streamingIngest` using the same `KqlIngestRequest` contract and endpoint-resolution flow described for queued ingestion above.
 
-```
- [HttpPost("KqlDatabases/streamIngest")]
- public async Task<IActionResult> StreamIngestToKqlDatabase([FromBody] KqlDatabaseIngestRequest request)
- {
-     try
-     {
-5         var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-             _httpContextAccessor.HttpContext, allowedScopes: new string[] { WorkloadScopes.KQLDatabaseReadWriteAll });
-         var scopes = new[] { $"{request.IngestionServiceUri}/.default" };
- 
-        var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
-        var ingestKcsb = new KustoConnectionStringBuilder(request.IngestionServiceUri).WithAadUserTokenAuthentication(token);
- 
-        var ingestProps = CreateKustoIngestionProperties(request);
- 
-        using (var memoryStream = new MemoryStream())
-        await using (var streamWriter = new StreamWriter(memoryStream))
-        using (var ingestClient = KustoIngestFactory.CreateStreamingIngestClient(ingestKcsb))
-        {
-            await streamWriter.WriteAsync(request.Content);
-            await streamWriter.FlushAsync();
-            memoryStream.Seek(0, SeekOrigin.Begin);
- 
-            await ingestClient.IngestFromStreamAsync(memoryStream, ingestProps);
-        }
- 
-        return Ok();
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError($"StreamIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} " +
-                         $"Error: {ex.Message}");
-        return Problem();
-    }
-}
-```  
+The controller validates the workspace/database IDs and the caller's write scope, resolves the database through Fabric using the caller's identity, and validates the returned ingestion URI before requesting a Kusto token. It does not accept an ingestion URL from the client.
 
-1.	Our controller implements an endpoint handling streaming ingestion requests to a KQL database. 
-2.	Validate the user token is allowed for scope KQLDatabase.ReadWrite.All
-3.	Exchange the token for the Eventhouse\database ingestion Uri scope. 
-The query URI can be obtained by send a GET request for a [KQL database](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties) or an [Eventhouse](https://learn.microsoft.com/en-us/rest/api/fabric/kqldatabase/items/get-kql-database?tabs=HTTP#kqldatabaseproperties).
-4.	Create a KustoConnectionStringBuilder for the service ingesting Uri using the OBO token.
-5.	Create KustoIngestionProperties object containing the in information for the ingestion.
-6.	Create a stream containing the string content provided in the request.
-7.	Ingest the stream. 
+`KustoClientService` sets `KustoConnectionStringBuilder.DataSource` from that validated URI and uses `KustoIngestFactory.CreateStreamingIngestClient` to ingest the request content. The implementation is in `StreamingIngestToKqlDatabase` in `Backend\src\Controllers\Rti\KqlDatabaseController.cs`.
 
-Note that in this example we presented ingestion of string content, alternative we could provide a link to file and ingest it, calling 
-```
-Task<IKustoIngestionResult> IngestFromStorageAsync(
-  string uri,
-  KustoIngestionProperties ingestionProperties,
-  StorageSourceOptions sourceOptions = null);
-```
-
-We used the following class for the request body
-```
-public class KqlDatabaseIngestRequest
-{
-    public string IngestionServiceUri { set; get; }
-    public string DatabaseName { set; get; }
-    public string Table { get; set; }
-    public string IngestionMappingName { get; set; }
-    public string Content { set; get; }
-}
-```
-
-And here is the example for the KustoIngestionProperties
-```
-private KustoIngestionProperties CreateKustoIngestionProperties(KqlDatabaseIngestRequest request)
- {
-     var ingestProps = new KustoQueuedIngestionProperties(request.DatabaseName, request.Table)
-     {
-         IngestionMapping =
-                 {
-                     IngestionMappingReference = request IngestionMappingName
-                },
-        Format = DataSourceFormat.json
-    };
-  
-    return ingestProps;
-}
-```
 #### Kusto Inline Ingestion
 [Kusto inline ingestion](https://learn.microsoft.com/en-us/kusto/management/data-ingestion/ingest-inline?view=microsoft-fabric) is a management command allowing data to insert into a table.
 

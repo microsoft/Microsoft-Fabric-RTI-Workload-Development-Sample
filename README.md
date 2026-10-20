@@ -109,6 +109,10 @@ In the context of Fabric, permissions operate at two levels:
   - Users with Viewer access on the workspace receive reader permission on the Eventhouse/KQL database
   - Users with Admin access on the workspace receive Admin permission on the Eventhouse/KQL database
 
+For streaming and queued ingestion, the backend also requests the delegated Fabric **KQLDatabase.Read.All** scope to retrieve the target database using the caller's identity. Configure and consent to this permission in the workload application. The ingestion endpoints require **KQLDatabase.ReadWrite.All** on the incoming token, and Kusto enforces the caller's ingestion permissions.
+
+Ingestion requests must include non-empty UUIDs in **WorkspaceId** and **KqlDatabaseItemId**, together with **TableName**, **Content**, and optionally **IngestionMappingName**. Caller-supplied ingestion URLs are not used. The backend resolves the endpoint from Fabric and accepts only HTTPS endpoints under `.kusto.fabric.microsoft.com` on the default port, without credentials, extra paths, query strings, or fragments. Deploy the updated frontend and backend together because requests without **WorkspaceId** are rejected.
+
 ### KQL Query
 
 Below is an overview of the KQL query execution flow, demonstrating how user-initiated queries in the frontend are processed through the application layers and executed against the Eventhouse KQL database:
@@ -188,7 +192,8 @@ By default, queued ingestion batches data until one of these thresholds is reach
 
 1. **Frontend** interacts with the frontend page, generating data to be ingested into the KQL database.
 1. **Frontend** sends an HTTP POST request to the 'KqlDatabases/queuedIngest' endpoint on the Backend's **KqlDatabaseController**.
-1. **KqlDatabaseController** validates the user token and exchanges it for a Kusto audience token.
+1. **KqlDatabaseController** validates the user token and workspace/database IDs, then calls Fabric to retrieve the database using the caller's identity.
+1. **KqlDatabaseController** validates the Fabric-provided ingestion endpoint and exchanges the user's token for a Kusto token for that endpoint.
 1. Backend sends a queued ingestion request to the Eventhouse using **KustoClientService**.cs targeting the KQL Database ingestion URI.
 1. Eventhouse processes the request and ingests the data.
 1. **Frontend** displays indication for successful or failed ingestion.
@@ -224,7 +229,8 @@ You can provide data for streaming ingestion through several methods:
 
 1. **Frontend** interacts with the frontend page, generating data to be ingested into the KQL database.
 1. **Frontend** sends an HTTP POST request to the 'KqlDatabases/streamingIngest' endpoint on the Backend's **KqlDatabaseController**.
-1. **KqlDatabaseController** validates the user token and exchanges it for a Kusto audience token.
+1. **KqlDatabaseController** validates the user token and workspace/database IDs, then calls Fabric to retrieve the database using the caller's identity.
+1. **KqlDatabaseController** validates the Fabric-provided ingestion endpoint and exchanges the user's token for a Kusto token for that endpoint.
 1. Backend sends a streaming ingestion request to the Eventhouse using **KustoClientService**.cs targeting the KQL Database ingestion URI.
 1. Eventhouse processes the request and ingests the data.
 1. **Frontend** displays indication for successful or failed ingestion.

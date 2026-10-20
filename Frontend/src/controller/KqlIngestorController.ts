@@ -1,7 +1,7 @@
 import { WorkloadClientAPI, AccessToken } from "@ms-fabric/workload-client";
 import { callAuthAcquireAccessToken } from "./SampleWorkloadController";
 
-export async function CallQueuedIngest(workloadBEUrl: string, kqlDatabaseIngestionUrl: string, kqlDatabaseItemId: string, tableName: string, content: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
+export async function CallQueuedIngest(workloadBEUrl: string, workspaceObjectId: string, kqlDatabaseItemId: string, tableName: string, content: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
     try {
         const accessToken: AccessToken = await callAuthAcquireAccessToken(workloadClient);
         const response: Response = await fetch(`${workloadBEUrl}/KqlDatabases/queuedIngest`, {
@@ -11,7 +11,7 @@ export async function CallQueuedIngest(workloadBEUrl: string, kqlDatabaseIngesti
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                'IngestionServiceUri': kqlDatabaseIngestionUrl,
+                'WorkspaceId': workspaceObjectId,
                 'KqlDatabaseItemId': kqlDatabaseItemId,
                 'TableName': tableName,
                 'Content': content
@@ -39,7 +39,7 @@ export async function CallQueuedIngest(workloadBEUrl: string, kqlDatabaseIngesti
 }
 
 
-export async function CallStreamingIngest(workloadBEUrl: string, kqlDatabaseIngestionUrl: string, kqlDatabaseItemId: string, tableName: string, content: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
+export async function CallStreamingIngest(workloadBEUrl: string, workspaceObjectId: string, kqlDatabaseItemId: string, tableName: string, content: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
     try {
         const accessToken: AccessToken = await callAuthAcquireAccessToken(workloadClient);
         const response: Response = await fetch(`${workloadBEUrl}/KqlDatabases/streamingIngest`, {
@@ -49,7 +49,7 @@ export async function CallStreamingIngest(workloadBEUrl: string, kqlDatabaseInge
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                'IngestionServiceUri': kqlDatabaseIngestionUrl,
+                'WorkspaceId': workspaceObjectId,
                 'KqlDatabaseItemId': kqlDatabaseItemId,
                 'TableName': tableName,
                 'Content': content

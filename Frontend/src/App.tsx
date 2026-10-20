@@ -36,6 +36,7 @@ export interface KqlExplorerComponentProps extends PageProps {
 }
 
 export interface KqlIngestorComponentProps extends PageProps {
+  workspaceObjectId: string;
   kqlDatabaseDisplayName: string;
   kqlDatabaseItemId: string,
   kqlDatabaseIngestionUrl: string;

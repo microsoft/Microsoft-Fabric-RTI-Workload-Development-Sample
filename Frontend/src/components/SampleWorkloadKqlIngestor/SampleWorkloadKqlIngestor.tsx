@@ -6,7 +6,7 @@ import { MessageBarType } from "@fluentui/react";
 import { CallQueuedIngest, CallStreamingIngest } from "../../controller/KqlIngestorController";
 import { SampleWorkloadDataGenerator } from "../SampleWorkloadDataGenerator/SampleWorkloadDataGenerator";
 
-export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KqlIngestorComponentProps) {
+export function KqlIngestorComponent({ workloadClient, workspaceObjectId, kqlDatabaseDisplayName, kqlDatabaseItemId, kqlDatabaseIngestionUrl }: KqlIngestorComponentProps) {
     const sampleWorkloadBEUrl = process.env.WORKLOAD_BE_URL;
     const targetTable = "IotData";
 
@@ -25,7 +25,7 @@ export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, k
             if (ingestionType === "queued") {
                 await CallQueuedIngest(
                     sampleWorkloadBEUrl,
-                    kqlDatabaseIngestionUrl,
+                    workspaceObjectId,
                     kqlDatabaseItemId,
                     targetTable,
                     contentToIngest,
@@ -34,7 +34,7 @@ export function KqlIngestorComponent({ workloadClient, kqlDatabaseDisplayName, k
             } else if (ingestionType === "streaming") {
                 await CallStreamingIngest(
                     sampleWorkloadBEUrl,
-                    kqlDatabaseIngestionUrl,
+                    workspaceObjectId,
                     kqlDatabaseItemId,
                     targetTable,
                     contentToIngest,
