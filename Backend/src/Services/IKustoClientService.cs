@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,22 +39,22 @@ public interface IKustoClientService
     /// <summary>
     /// Ingests data as a stream into the Kusto database using a queued ingest client.
     /// </summary>
-    /// <param name="ingestionUrl">The ingestion url of the service e.g https://ingest-trd-uvbhpjmntkuc1b61qx.z1.kusto.fabric.microsoft.com</param>
+    /// <param name="ingestionUri">The validated ingestion URI resolved from Fabric for the authorized database.</param>
     /// <param name="stream">A stream of data to be ingested</param>
     /// <param name="ingestionProperties"> This Class contains additional information and properties for the ingestion request</param>
     /// <param name="token">The token to be used for authentication</param>
     /// <param name="sourceOptions">This Class contains additional information and properties for the source options</param>
     /// <returns>IKustoIngestionResult containing the results of the ingestion</returns>
-    Task<IKustoIngestionResult> QueuedIngestFromStreamAsync(string ingestionUrl, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null);
+    Task<IKustoIngestionResult> QueuedIngestFromStreamAsync(Uri ingestionUri, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null);
     
     /// <summary>
     /// Ingests data as a stream into the Kusto database using a stream ingest client.
     /// </summary>
-    /// <param name="ingestionUrl">The ingestion url of the service e.g https://ingest-trd-uvbhpjmntkuc1b61qx.z1.kusto.fabric.microsoft.com</param>
+    /// <param name="ingestionUri">The validated ingestion URI resolved from Fabric for the authorized database.</param>
     /// <param name="stream">A stream of data to be ingested</param>
     /// <param name="ingestionProperties"> This Class contains additional information and properties for the ingestion request</param>
     /// <param name="token">The token to be used for authentication</param>
     /// <param name="sourceOptions">This Class contains additional information and properties for the source options</param>
     /// <returns>IKustoIngestionResult containing the results of the ingestion</returns>
-    Task<IKustoIngestionResult> StreamIngestFromStreamAsync(string ingestionUrl, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null);
+    Task<IKustoIngestionResult> StreamIngestFromStreamAsync(Uri ingestionUri, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null);
 }

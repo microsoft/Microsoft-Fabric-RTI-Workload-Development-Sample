@@ -30,12 +30,14 @@ export interface ContextProps {
 }
 
 export interface KqlExplorerComponentProps extends PageProps {
+  workspaceObjectId: string;
   kqlDatabaseDisplayName: string;
   kqlDatabaseItemId: string,
   kqlDatabaseQueryUrl: string;
 }
 
 export interface KqlIngestorComponentProps extends PageProps {
+  workspaceObjectId: string;
   kqlDatabaseDisplayName: string;
   kqlDatabaseItemId: string,
   kqlDatabaseIngestionUrl: string;

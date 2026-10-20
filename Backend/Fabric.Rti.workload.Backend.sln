@@ -5,6 +5,8 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fabric.Rti.workload.Backend", "src\Fabric.Rti.workload.Backend.csproj", "{738D7811-3DBF-433E-9003-B5D62CCED684}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fabric.Rti.workload.Backend.Tests", "tests\Fabric.Rti.workload.Backend.Tests.csproj", "{435E8770-FD3E-42F5-AE34-CCCFE3623FBF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{738D7811-3DBF-433E-9003-B5D62CCED684}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{738D7811-3DBF-433E-9003-B5D62CCED684}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{738D7811-3DBF-433E-9003-B5D62CCED684}.Release|Any CPU.Build.0 = Release|Any CPU
+		{435E8770-FD3E-42F5-AE34-CCCFE3623FBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{435E8770-FD3E-42F5-AE34-CCCFE3623FBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{435E8770-FD3E-42F5-AE34-CCCFE3623FBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{435E8770-FD3E-42F5-AE34-CCCFE3623FBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

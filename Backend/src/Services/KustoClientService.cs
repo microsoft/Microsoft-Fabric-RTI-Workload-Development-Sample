@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,17 +48,17 @@ public class KustoClientService : IKustoClientService
             cancellationToken);
     }
 
-    public async Task<IKustoIngestionResult> QueuedIngestFromStreamAsync(string ingestionUrl, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null)
+    public async Task<IKustoIngestionResult> QueuedIngestFromStreamAsync(Uri ingestionUri, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null)
     {
-        var connectionStringBuilder = new KustoConnectionStringBuilder(ingestionUrl).WithAadUserTokenAuthentication(token);
+        var connectionStringBuilder = new KustoConnectionStringBuilder { DataSource = ingestionUri.AbsoluteUri }.WithAadUserTokenAuthentication(token);
         using var ingestClient = KustoIngestFactory.CreateQueuedIngestClient(connectionStringBuilder);
 
         return await ingestClient.IngestFromStreamAsync(stream, ingestionProperties);
     }
     
-    public async Task<IKustoIngestionResult> StreamIngestFromStreamAsync(string ingestionUrl, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null)
+    public async Task<IKustoIngestionResult> StreamIngestFromStreamAsync(Uri ingestionUri, Stream stream, KustoIngestionProperties ingestionProperties, string token, StreamSourceOptions sourceOptions = null)
     {
-        var connectionStringBuilder = new KustoConnectionStringBuilder(ingestionUrl).WithAadUserTokenAuthentication(token);
+        var connectionStringBuilder = new KustoConnectionStringBuilder { DataSource = ingestionUri.AbsoluteUri }.WithAadUserTokenAuthentication(token);
         using var ingestClient = KustoIngestFactory.CreateStreamingIngestClient(connectionStringBuilder);
 
         return await ingestClient.IngestFromStreamAsync(stream, ingestionProperties);

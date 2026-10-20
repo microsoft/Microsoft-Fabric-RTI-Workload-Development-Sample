@@ -4,13 +4,13 @@ import { callAuthAcquireAccessToken } from "./SampleWorkloadController";
 /**
  * Calls the CallExecuteQuery endpoint to perform a query on KQL database.
  * 
- * @param {string} kqlDatabaseQueryUrl - The database query url.
+ * @param {string} workspaceObjectId - The workspace containing the KQL database.
  * @param {string} kqlDatabaseItemId - The KQL database item id.
  * @param {string} query - The query to execute.
  * @param {WorkloadClientAPI} workloadClient - An instance of the WorkloadClientAPI.
  * @returns {Promise<object[]>} A Promise that resolves to an object containing the queries result.
  */
-export async function CallExecuteQuery(workloadBEUrl: string, kqlDatabaseQueryUrl: string, kqlDatabaseItemId: string, query: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
+export async function CallExecuteQuery(workloadBEUrl: string, workspaceObjectId: string, kqlDatabaseItemId: string, query: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
     try {
         const accessToken: AccessToken = await callAuthAcquireAccessToken(workloadClient);
         const response: Response = await fetch(`${workloadBEUrl}/KqlDatabases/query`, {
@@ -20,7 +20,7 @@ export async function CallExecuteQuery(workloadBEUrl: string, kqlDatabaseQueryUr
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                'KqlDatabaseQueryUrl': kqlDatabaseQueryUrl,
+                'WorkspaceId': workspaceObjectId,
                 'KqlDatabaseItemId': kqlDatabaseItemId,
                 'Query': query
             })
@@ -49,13 +49,13 @@ export async function CallExecuteQuery(workloadBEUrl: string, kqlDatabaseQueryUr
 /**
  * Calls the CallExecuteControlCommand endpoint to execute a KQL command on KQL database.
  * 
- * @param {string} kqlDatabaseQueryUrl - The database query url.
+ * @param {string} workspaceObjectId - The workspace containing the KQL database.
  * @param {string} kqlDatabaseItemId - The KQL database item id.
  * @param {string} command - The KQL command to execute.
  * @param {WorkloadClientAPI} workloadClient - An instance of the WorkloadClientAPI.
  * @returns {Promise<object[]>} A Promise that resolves to an object containing the queries result.
  */
-export async function CallExecuteControlCommand(workloadBEUrl: string, kqlDatabaseQueryUrl: string, kqlDatabaseItemId: string, command: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
+export async function CallExecuteControlCommand(workloadBEUrl: string, workspaceObjectId: string, kqlDatabaseItemId: string, command: string, workloadClient: WorkloadClientAPI) : Promise<object[]> {
     try {
         const accessToken: AccessToken = await callAuthAcquireAccessToken(workloadClient);
         const response: Response = await fetch(`${workloadBEUrl}/KqlDatabases/mgmt`, {
@@ -65,7 +65,7 @@ export async function CallExecuteControlCommand(workloadBEUrl: string, kqlDataba
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                'KqlDatabaseQueryUrl': kqlDatabaseQueryUrl,
+                'WorkspaceId': workspaceObjectId,
                 'KqlDatabaseItemId': kqlDatabaseItemId,
                 'Command': command
             })

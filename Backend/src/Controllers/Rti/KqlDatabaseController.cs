@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure;
 using Fabric.Rti.workload.Backend.Constants;
+using Fabric.Rti.workload.Backend.Contracts;
 using Fabric.Rti.workload.Backend.Contracts.RtiContracts;
 using Fabric.Rti.workload.Backend.Exceptions;
 using Fabric.Rti.workload.Backend.Services;
@@ -14,6 +16,7 @@ using Kusto.Ingest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Fabric.Api.KQLDatabase.Models;
 
 namespace Fabric.Rti.workload.Backend.Controllers.Rti;
 
@@ -26,44 +29,61 @@ public class KqlDatabaseController : ControllerBase
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAuthenticationService _authenticationService;
     private readonly IKustoClientService _kustoClientService;
+    private readonly IFabricApiClient _fabricApiClient;
 
     public KqlDatabaseController(
         ILogger<KqlDatabaseController> logger,
         IHttpContextAccessor httpContextAccessor,
         IAuthenticationService authenticationService,
-        IKustoClientService kustoClientService)
+        IKustoClientService kustoClientService,
+        IFabricApiClient fabricApiClient)
     {
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
         _authenticationService = authenticationService;
         _kustoClientService = kustoClientService;
+        _fabricApiClient = fabricApiClient;
     }
 
     [HttpPost("KqlDatabases/query")]
     public async Task<IActionResult> ExecuteKqlQuery([FromBody] KqlQueryRequest request)
     {
+        if (!ModelState.IsValid || request == null || request.WorkspaceId == Guid.Empty || request.KqlDatabaseItemId == Guid.Empty)
+        {
+            _logger.LogWarning("ExecuteKqlQuery: Missing or invalid workspace or KQL database ID.");
+            return BadRequest("Valid workspace and KQL database IDs are required.");
+        }
+
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
                 _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
-            var scopes = new[] { $"{request.KqlDatabaseQueryUrl}/.default" };
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var queryUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.QueryServiceUri);
+            var scopes = new[] { $"{queryUri.GetLeftPart(UriPartial.Authority)}/.default" };
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
 
             var clientRequestProperties = GenerateClientRequestProperties(token);
             var dataReader = await _kustoClientService.ExecuteQueryAsync(
-                request.KqlDatabaseQueryUrl, request.KqlDatabaseItemId, request.Query, clientRequestProperties, default);
+                queryUri.AbsoluteUri, request.KqlDatabaseItemId.ToString(), request.Query, clientRequestProperties, default);
 
             var stream = KustoJsonDataStream.GetReaderDataAsStream(dataReader);
             return Ok(stream);
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Authentication failed for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlQuery: Authentication failed for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Unauthorized();
+        }
+        catch (RequestFailedException ex) when (ex.Status == StatusCodes.Status401Unauthorized ||
+            ex.Status == StatusCodes.Status403Forbidden || ex.Status == StatusCodes.Status404NotFound)
+        {
+            _logger.LogWarning($"ExecuteKqlQuery: Database access failed for {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
+            return StatusCode(ex.Status);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Error executing KQL query for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlQuery: Error executing KQL query for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return BadRequest();
         }
     }
@@ -71,28 +91,42 @@ public class KqlDatabaseController : ControllerBase
     [HttpPost("KqlDatabases/mgmt")]
     public async Task<IActionResult> ExecuteKqlManagementCommand([FromBody] KqlManagementCommandRequest request)
     {
+        if (!ModelState.IsValid || request == null || request.WorkspaceId == Guid.Empty || request.KqlDatabaseItemId == Guid.Empty)
+        {
+            _logger.LogWarning("ExecuteKqlManagementCommand: Missing or invalid workspace or KQL database ID.");
+            return BadRequest("Valid workspace and KQL database IDs are required.");
+        }
+
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
                 _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
-            var scopes = new[] { $"{request.KqlDatabaseQueryUrl}/.default" };
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var queryUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.QueryServiceUri);
+            var scopes = new[] { $"{queryUri.GetLeftPart(UriPartial.Authority)}/.default" };
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
 
             var clientRequestProperties = GenerateClientRequestProperties(token);
             var dataReader = await _kustoClientService.ExecuteControlCommandAsync(
-                request.KqlDatabaseQueryUrl, request.KqlDatabaseItemId, request.Command, clientRequestProperties, default);
+                queryUri.AbsoluteUri, request.KqlDatabaseItemId.ToString(), request.Command, clientRequestProperties, default);
 
             var stream = KustoJsonDataStream.GetReaderDataAsStream(dataReader);
             return Ok(stream);
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Authentication failed for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlManagementCommand: Authentication failed for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Unauthorized();
+        }
+        catch (RequestFailedException ex) when (ex.Status == StatusCodes.Status401Unauthorized ||
+            ex.Status == StatusCodes.Status403Forbidden || ex.Status == StatusCodes.Status404NotFound)
+        {
+            _logger.LogWarning($"ExecuteKqlManagementCommand: Database access failed for {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
+            return StatusCode(ex.Status);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"ExecuteKqlQuery: Error executing KQL query for url {request.KqlDatabaseQueryUrl}. Error: {ex.Message}");
+            _logger.LogError($"ExecuteKqlManagementCommand: Error executing KQL command for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return BadRequest();
         }
     }
@@ -100,18 +134,26 @@ public class KqlDatabaseController : ControllerBase
     [HttpPost("KqlDatabases/streamingIngest")]
     public async Task<IActionResult> StreamingIngestToKqlDatabase([FromBody] KqlIngestRequest request)
     {
+        if (!ModelState.IsValid || request == null || request.WorkspaceId == Guid.Empty || request.KqlDatabaseItemId == Guid.Empty)
+        {
+            _logger.LogWarning("StreamingIngestToKqlDatabase: Missing or invalid workspace or KQL database ID.");
+            return BadRequest("Valid workspace and KQL database IDs are required.");
+        }
+
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-                _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
-            var scopes = new[] { $"{request.IngestionServiceUri}/.default" };
+                _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.KQLDatabaseReadWriteAll });
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var ingestionUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.IngestionServiceUri);
+            var scopes = new[] { $"{ingestionUri.GetLeftPart(UriPartial.Authority)}/.default" };
 
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
             var ingestionProperties = CreateStreamingIngestionProperties(request);
 
             await using var stream = await GetStreamFromStringAsync(request.Content);
             
-            var ingestionResult = await _kustoClientService.StreamIngestFromStreamAsync(request.IngestionServiceUri, stream, ingestionProperties, token);
+            var ingestionResult = await _kustoClientService.StreamIngestFromStreamAsync(ingestionUri, stream, ingestionProperties, token);
 
             if (ingestionResult != null)
             {
@@ -123,12 +165,18 @@ public class KqlDatabaseController : ControllerBase
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"StreamingIngestToKqlDatabase: Authentication failed for url {request.IngestionServiceUri}. Error: {ex.Message}");
+            _logger.LogError($"StreamingIngestToKqlDatabase: Authentication failed for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Unauthorized();
+        }
+        catch (RequestFailedException ex) when (ex.Status == StatusCodes.Status401Unauthorized ||
+            ex.Status == StatusCodes.Status403Forbidden || ex.Status == StatusCodes.Status404NotFound)
+        {
+            _logger.LogWarning($"StreamingIngestToKqlDatabase: Database access failed for {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
+            return StatusCode(ex.Status);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"StreamingIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} Error: {ex.Message}");
+            _logger.LogError($"StreamingIngestToKqlDatabase: Failed ingesting to database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Problem();
         }
     }
@@ -136,18 +184,26 @@ public class KqlDatabaseController : ControllerBase
     [HttpPost("KqlDatabases/queuedIngest")]
     public async Task<IActionResult> QueuedIngestToKqlDatabase([FromBody] KqlIngestRequest request)
     {
+        if (!ModelState.IsValid || request == null || request.WorkspaceId == Guid.Empty || request.KqlDatabaseItemId == Guid.Empty)
+        {
+            _logger.LogWarning("QueuedIngestToKqlDatabase: Missing or invalid workspace or KQL database ID.");
+            return BadRequest("Valid workspace and KQL database IDs are required.");
+        }
+
         try
         {
             var authorizationContext = await _authenticationService.AuthenticateDataPlaneCall(
-                _httpContextAccessor.HttpContext, allowedScopes: KqlDatabaseDataPlaneScopes);
-            var scopes = new[] { $"{request.IngestionServiceUri}/.default" };
+                _httpContextAccessor.HttpContext, allowedScopes: new[] { WorkloadScopes.KQLDatabaseReadWriteAll });
+            var kqlDatabase = await GetKqlDatabaseAsync(request.WorkspaceId, request.KqlDatabaseItemId, authorizationContext);
+            var ingestionUri = ValidateKqlDatabaseServiceUri(kqlDatabase?.Properties?.IngestionServiceUri);
+            var scopes = new[] { $"{ingestionUri.GetLeftPart(UriPartial.Authority)}/.default" };
 
             var token = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, scopes);
             var ingestionProperties = CreateQueuedIngestionProperties(request);
 
             await using var stream = await GetStreamFromStringAsync(request.Content);
             
-            var ingestionResult = await _kustoClientService.QueuedIngestFromStreamAsync(request.IngestionServiceUri, stream, ingestionProperties, token);
+            var ingestionResult = await _kustoClientService.QueuedIngestFromStreamAsync(ingestionUri, stream, ingestionProperties, token);
 
             if (ingestionResult != null)
             {
@@ -159,14 +215,41 @@ public class KqlDatabaseController : ControllerBase
         }
         catch (AuthenticationException ex)
         {
-            _logger.LogError($"QueuedIngestToKqlDatabase: Authentication failed for url {request.IngestionServiceUri}. Error: {ex.Message}");
+            _logger.LogError($"QueuedIngestToKqlDatabase: Authentication failed for database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Unauthorized();
+        }
+        catch (RequestFailedException ex) when (ex.Status == StatusCodes.Status401Unauthorized ||
+            ex.Status == StatusCodes.Status403Forbidden || ex.Status == StatusCodes.Status404NotFound)
+        {
+            _logger.LogWarning($"QueuedIngestToKqlDatabase: Database access failed for {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
+            return StatusCode(ex.Status);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"QueuedIngestToKqlDatabase: failed ingesting to {request.IngestionServiceUri} Error: {ex.Message}");
+            _logger.LogError($"QueuedIngestToKqlDatabase: Failed ingesting to database {request.KqlDatabaseItemId} in workspace {request.WorkspaceId}. Error: {ex.Message}");
             return Problem();
         }
+    }
+
+    private async Task<KQLDatabase> GetKqlDatabaseAsync(Guid workspaceId, Guid kqlDatabaseItemId, AuthorizationContext authorizationContext)
+    {
+        var fabricScopes = new[] { $"{EnvironmentConstants.FabricBackendResourceId}/{WorkloadScopes.KQLDatabaseReadAll}" };
+        var fabricToken = await _authenticationService.GetAccessTokenOnBehalfOf(authorizationContext, fabricScopes);
+        return await _fabricApiClient.GetKqlDatabaseAsync(workspaceId, kqlDatabaseItemId, fabricToken);
+    }
+
+    private static Uri ValidateKqlDatabaseServiceUri(string serviceUrl)
+    {
+        if (!Uri.TryCreate(serviceUrl, UriKind.Absolute, out var serviceUri) ||
+            serviceUri.Scheme != Uri.UriSchemeHttps || serviceUri.HostNameType != UriHostNameType.Dns ||
+            !serviceUri.Host.EndsWith(".kusto.fabric.microsoft.com", StringComparison.OrdinalIgnoreCase) ||
+            !serviceUri.IsDefaultPort || serviceUri.UserInfo.Length != 0 || serviceUri.AbsolutePath != "/" ||
+            serviceUri.Query.Length != 0 || serviceUri.Fragment.Length != 0)
+        {
+            throw new InvalidOperationException("Fabric returned an invalid KQL database service endpoint.");
+        }
+
+        return serviceUri;
     }
 
     private ClientRequestProperties GenerateClientRequestProperties(string token)
@@ -184,7 +267,7 @@ public class KqlDatabaseController : ControllerBase
     
     private KustoIngestionProperties CreateStreamingIngestionProperties(KqlIngestRequest request)
     {
-        var ingestProps = new KustoIngestionProperties(request.KqlDatabaseItemId, request.TableName)
+        var ingestProps = new KustoIngestionProperties(request.KqlDatabaseItemId.ToString(), request.TableName)
         {
             IngestionMapping =
             {
@@ -200,7 +283,7 @@ public class KqlDatabaseController : ControllerBase
     
     private KustoQueuedIngestionProperties CreateQueuedIngestionProperties(KqlIngestRequest request)
     {
-        var ingestProps = new KustoQueuedIngestionProperties(request.KqlDatabaseItemId, request.TableName)
+        var ingestProps = new KustoQueuedIngestionProperties(request.KqlDatabaseItemId.ToString(), request.TableName)
         {
             ReportLevel = IngestionReportLevel.FailuresAndSuccesses,
             ReportMethod = IngestionReportMethod.Queue,
